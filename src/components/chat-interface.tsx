@@ -23,11 +23,16 @@ import {
   Map as MapIcon,
   Eye,
   RefreshCw,
+  PlayCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { FAQItem } from "@/components/faq-item";
+import {
+  OnboardingTooltip,
+  useOnboarding,
+} from "@/components/onboarding-tooltip";
 
 interface ChatInterfaceProps {
   user: SupabaseUser | null;
@@ -47,6 +52,8 @@ const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export function ChatInterface({ user }: ChatInterfaceProps) {
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const { showOnboarding, completeOnboarding, skipOnboarding } =
+    useOnboarding();
 
   const handleStartChat = async () => {
     if (!user) {
@@ -84,6 +91,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
     },
   ];
 
+  const handleTryDemo = () => {
+    router.push("/demo");
+  };
+
   return (
     <div className="w-full max-w-4xl space-y-6 sm:space-y-8 pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-16 lg:pb-32 px-4 sm:px-6">
       {/* Header */}
@@ -97,9 +108,16 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
           Your open-source AI chat companion
         </p>
         {!user && (
-          <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 sm:px-4 py-2 border">
-            Sign in to start chatting with AI models
-          </p>
+          <div className="space-y-3">
+            <Button
+              onClick={handleTryDemo}
+              variant="outline"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-none"
+            >
+              <PlayCircle className="h-4 w-4 mr-2" />
+              Try Interactive Demo (No Sign-up Required)
+            </Button>
+          </div>
         )}
       </div>
 
@@ -461,6 +479,14 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
           </Link>
         </div>
       </div>
+
+      {/* Onboarding Tooltip */}
+      <OnboardingTooltip
+        isVisible={showOnboarding && !user}
+        onComplete={completeOnboarding}
+        onSkip={skipOnboarding}
+        steps={[]} // Use default steps
+      />
     </div>
   );
 }
