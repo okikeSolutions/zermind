@@ -14,6 +14,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/js/script.js",
+        destination: "https://datafa.st/js/script.js",
+      },
+      {
+        source: "/api/events",
+        destination: "https://datafa.st/api/events",
+      },
+    ];
+  },
   webpack: (config) => {
     // Suppress warnings for known Supabase realtime dependencies
     config.ignoreWarnings = [
