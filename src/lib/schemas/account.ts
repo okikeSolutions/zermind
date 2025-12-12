@@ -3,7 +3,7 @@ import { z } from "zod";
 // Account deletion request schema
 export const DeleteAccountSchema = z.object({
   confirmation: z.literal("DELETE MY ACCOUNT", {
-    errorMap: () => ({ message: "You must type 'DELETE MY ACCOUNT' to confirm" }),
+    message: "You must type 'DELETE MY ACCOUNT' to confirm",
   }),
 });
 
@@ -29,4 +29,4 @@ export const ExportDataResponseSchema = z.object({
 export type DeleteAccount = z.infer<typeof DeleteAccountSchema>;
 export type DeleteAccountResponse = z.infer<typeof DeleteAccountResponseSchema>;
 export type AccountErrorResponse = z.infer<typeof AccountErrorResponseSchema>;
-export type ExportDataResponse = z.infer<typeof ExportDataResponseSchema>; 
+export type ExportDataResponse = z.infer<typeof ExportDataResponseSchema>;

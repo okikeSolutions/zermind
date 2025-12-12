@@ -139,9 +139,9 @@ function BranchingForm({
                 {context.slice(-1).map((msg) => (
                   <div key={msg.id} className="flex items-start gap-2">
                     {msg.role === "user" ? (
-                      <User className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <User className="h-3 w-3 mt-0.5 shrink-0" />
                     ) : (
-                      <Bot className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <Bot className="h-3 w-3 mt-0.5 shrink-0" />
                     )}
                     <span className="text-xs leading-relaxed">
                       {msg.content.length > 60
@@ -167,38 +167,45 @@ function BranchingForm({
             <label className="text-xs text-muted-foreground">
               New branch messages:
             </label>
-            {messages.slice(context.length).map((message) => (
-              <Card
-                key={message.id}
-                className={`${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
-              >
-                <CardContent className="p-2">
-                  <div className="flex items-start space-x-2">
-                    <div className="flex-shrink-0 mt-0.5">
-                      {message.role === "user" ? (
-                        <User className="h-4 w-4" />
-                      ) : (
-                        <Bot className="h-4 w-4" />
-                      )}
+            {messages.slice(context.length).map((message) => {
+              const msg = message as unknown as { content?: string };
+              const messageContent =
+                typeof msg.content === "string"
+                  ? msg.content
+                  : String(msg.content || "");
+              return (
+                <Card
+                  key={message.id}
+                  className={`${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  }`}
+                >
+                  <CardContent className="p-2">
+                    <div className="flex items-start space-x-2">
+                      <div className="shrink-0 mt-0.5">
+                        {message.role === "user" ? (
+                          <User className="h-4 w-4" />
+                        ) : (
+                          <Bot className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-words">
+                        {messageContent}
+                      </div>
                     </div>
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                      {message.content}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
         {/* Error Display */}
         {error && (
           <div className="flex items-start space-x-2 text-destructive text-sm">
-            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             <span className="leading-relaxed">{error.message}</span>
           </div>
         )}
@@ -274,7 +281,7 @@ function BranchingForm({
                           onClick={stop}
                           size="icon"
                           variant="destructive"
-                          className="flex-shrink-0 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
+                          className="shrink-0 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
                         >
                           <StopCircle className="h-4 w-4" />
                         </Button>
@@ -283,7 +290,7 @@ function BranchingForm({
                           type="submit"
                           disabled={!form.watch("message")?.trim()}
                           size="icon"
-                          className="flex-shrink-0 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
+                          className="shrink-0 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
                         >
                           <Send className="h-4 w-4" />
                         </Button>

@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { type UsageStats } from '@/lib/schemas/usage';
 
 export async function logModelUsage(model: string, userId: string, chatId?: string) {

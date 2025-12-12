@@ -52,9 +52,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+const providers = [
+  "openrouter",
+  "openai",
+  "anthropic",
+  "meta",
+  "google",
+] as const;
+
 const addApiKeySchema = z.object({
-  provider: z.enum(["openrouter", "openai", "anthropic", "meta", "google"], {
-    required_error: "Please select a provider",
+  provider: z.enum(providers, {
+    message: "Please select a provider",
   }),
   keyName: z
     .string()

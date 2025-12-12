@@ -23,7 +23,7 @@ export const createCollaborationSessionSchema = z.object({
   chatId: z.string().min(1, "Chat ID is required"),
   role: participantRoleSchema.optional().default("collaborator"),
   maxParticipants: z.number().int().min(1).max(50).optional(),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
 });
 
 // Join collaboration session schema
@@ -36,7 +36,7 @@ export const joinCollaborationSessionSchema = z.object({
 export const updateCollaborationSessionSchema = z.object({
   sessionId: z.string().min(1, "Session ID is required"),
   maxParticipants: z.number().int().min(1).max(50).optional(),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
 });
 
 // Participant update schema
@@ -76,7 +76,7 @@ export const mindMapActionSchema = z.object({
   userName: z.string(),
   userColor: z.string(),
   timestamp: z.number(),
-  data: z.record(z.unknown()).optional(),
+  data: z.record(z.string(), z.unknown()).optional(),
 });
 
 // Collaborative user schema

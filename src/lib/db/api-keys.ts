@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { encryptApiKey, decryptApiKey, createApiKeyPreview } from '@/lib/crypto';
 import { 
   ApiKeySchema,

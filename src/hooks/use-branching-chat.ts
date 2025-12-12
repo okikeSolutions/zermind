@@ -34,28 +34,27 @@ export function useBranchingChat({
     status,
     error: aiError,
     stop,
-    reload,
-    append,
+    sendMessage: aiSendMessage,
   } = useChat({
-    api: "/api/chat",
     id: `${chatId}-branch-${parentNodeId}-${model}${
       branchName ? `-${branchName}` : ""
     }`,
-    initialMessages: initialContext.map((msg) => ({
+    messages: initialContext.map((msg) => ({
       id: msg.id,
       role: msg.role,
-      content: msg.content,
-      createdAt: msg.createdAt,
+      parts: [{ type: "text", text: msg.content }],
     })),
-    body: {
-      model,
-    },
-    onFinish: async (message) => {
+    onFinish: async ({ message }) => {
+      const messageContent = message.parts
+        .filter((part) => part.type === "text")
+        .map((part) => (part as { text: string }).text)
+        .join("");
+
       const formattedMessage: Message = {
         id: message.id,
         role: message.role as "user" | "assistant",
-        content: message.content,
-        createdAt: message.createdAt || new Date(),
+        content: messageContent,
+        createdAt: new Date(),
         model,
         attachments: [],
         xPosition: 0,
@@ -108,8 +107,7 @@ export function useBranchingChat({
     const formattedMessages = initialContext.map((msg) => ({
       id: msg.id,
       role: msg.role,
-      content: msg.content,
-      createdAt: msg.createdAt,
+      parts: [{ type: "text" as const, text: msg.content }],
     }));
     setMessages(formattedMessages);
   }, [initialContext, setMessages]);
@@ -146,11 +144,18 @@ export function useBranchingChat({
           },
         });
 
-        // Send message to AI
-        await append({
-          role: "user",
-          content: content.trim(),
-        });
+        // Send message using sendMessage from useChat
+        aiSendMessage(
+          {
+            role: "user",
+            parts: [{ type: "text", text: content.trim() }],
+          },
+          {
+            body: {
+              model,
+            },
+          }
+        );
 
         setInput("");
       } catch (error) {
@@ -169,7 +174,8 @@ export function useBranchingChat({
       chatId,
       parentNodeId,
       branchName,
-      append,
+      aiSendMessage,
+      model,
       onError,
     ]
   );
@@ -200,6 +206,5 @@ export function useBranchingChat({
     handleInputChange,
     handleSubmit,
     stop,
-    reload,
   };
 }
