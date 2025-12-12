@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
-import { CollaborationSession, SessionParticipant } from "@prisma/client";
+import { CollaborationSession, SessionParticipant } from "../../../prisma/generated/prisma/client";
+
 
 // Create or join a collaboration session
 export async function createOrJoinCollaborationSession(

@@ -6,7 +6,7 @@ import {
   type ChatListItem,
   type Attachment,
 } from "@/lib/schemas/chat";
-import { JsonValue } from "@prisma/client/runtime/client";
+import { JsonValue } from "@openrouter/ai-sdk-provider";
 
 import { randomBytes } from "crypto";
 
