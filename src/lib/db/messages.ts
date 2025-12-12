@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
-import { Message, NodeType } from "@prisma/client";
+import { Message, NodeType } from "../../../prisma/generated/prisma/client";
+
 
 // Enhanced message creation with mind map positioning
 export async function createMessageWithPosition(data: {
