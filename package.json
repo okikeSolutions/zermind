@@ -8,7 +8,7 @@
     "dev": "bun generate:db && next dev",
     "build": "bun generate:db && next build",
     "start": "bun prisma:migrate && next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "generate:db": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
@@ -64,7 +64,6 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^25.0.1",
     "@types/react": "^19.2.7",
