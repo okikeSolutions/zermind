@@ -56,7 +56,7 @@ export async function POST(
     }
 
     const userParticipant = result.session.participants.find(
-      (p) => p.userId === user.id
+      (p: { userId: string }) => p.userId === user.id
     );
 
     return NextResponse.json({

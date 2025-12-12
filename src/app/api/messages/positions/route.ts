@@ -44,7 +44,7 @@ export async function PATCH(request: NextRequest) {
     // Handle Zod validation errors
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
+        { error: "Invalid request data", details: error.message },
         { status: 400 }
       );
     }

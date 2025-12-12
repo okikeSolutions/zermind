@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import {
   ChatWithMessagesSchema,
   ChatListItemSchema,
@@ -6,7 +6,7 @@ import {
   type ChatListItem,
   type Attachment,
 } from "@/lib/schemas/chat";
-import type { JsonValue } from "@prisma/client/runtime/library";
+import { JsonValue } from "@prisma/client/runtime/client";
 
 import { randomBytes } from "crypto";
 

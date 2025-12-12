@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { CollaborationSession, SessionParticipant } from "@prisma/client";
 
 // Create or join a collaboration session

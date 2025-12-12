@@ -181,7 +181,6 @@ export async function POST(req: NextRequest) {
           experimental_attachments: msg.experimental_attachments,
         }),
       })),
-      maxTokens,
       temperature,
       onError: (event) => {
         console.error("Streaming error:", event.error);
@@ -189,7 +188,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Return the streaming response with additional headers
-    return result.toDataStreamResponse({
+    return result.toTextStreamResponse({
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "POST",
@@ -205,7 +204,7 @@ export async function POST(req: NextRequest) {
       return new Response(
         JSON.stringify({
           error: "Invalid request format",
-          details: error.errors,
+          details: error.message,
         }),
         {
           status: 400,

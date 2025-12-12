@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { Message, NodeType } from "@prisma/client";
 
 // Enhanced message creation with mind map positioning

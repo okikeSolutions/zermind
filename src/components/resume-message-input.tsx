@@ -137,9 +137,9 @@ export function ResumeMessageInput({
                 {context.slice(-2).map((msg) => (
                   <div key={msg.id} className="flex items-start gap-2">
                     {msg.role === "user" ? (
-                      <User className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <User className="h-3 w-3 mt-0.5 shrink-0" />
                     ) : (
-                      <Bot className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <Bot className="h-3 w-3 mt-0.5 shrink-0" />
                     )}
                     <span className="text-xs leading-relaxed">
                       {msg.content.length > 50
@@ -162,38 +162,43 @@ export function ResumeMessageInput({
         {/* Recent Messages from Branch */}
         {messages.length > context.length && (
           <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
-            {messages.slice(context.length).map((message) => (
-              <Card
-                key={message.id}
-                className={`${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground ml-4 sm:ml-8"
-                    : "bg-muted mr-4 sm:mr-8"
-                }`}
-              >
-                <CardContent className="p-2 sm:p-2">
-                  <div className="flex items-start space-x-2">
-                    <div className="flex-shrink-0 mt-0.5">
-                      {message.role === "user" ? (
-                        <User className="h-3 w-3" />
-                      ) : (
-                        <Bot className="h-3 w-3" />
-                      )}
+            {messages.slice(context.length).map((message) => {
+              const msg = message as unknown as { content?: string };
+              const messageContent =
+                typeof msg.content === "string" ? msg.content : String(msg.content || "");
+              return (
+                <Card
+                  key={message.id}
+                  className={`${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground ml-4 sm:ml-8"
+                      : "bg-muted mr-4 sm:mr-8"
+                  }`}
+                >
+                  <CardContent className="p-2 sm:p-2">
+                    <div className="flex items-start space-x-2">
+                      <div className="shrink-0 mt-0.5">
+                        {message.role === "user" ? (
+                          <User className="h-3 w-3" />
+                        ) : (
+                          <Bot className="h-3 w-3" />
+                        )}
+                      </div>
+                      <div className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-words">
+                        {messageContent}
+                      </div>
                     </div>
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                      {message.content}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
         {/* Error Display */}
         {error && (
           <div className="flex items-start space-x-2 text-destructive text-sm">
-            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             <span className="leading-relaxed">{error.message}</span>
           </div>
         )}
@@ -252,7 +257,7 @@ export function ResumeMessageInput({
                   onClick={stop}
                   size="icon"
                   variant="destructive"
-                  className="flex-shrink-0 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
+                  className="shrink-0 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
                 >
                   <StopCircle className="h-4 w-4" />
                 </Button>
@@ -261,7 +266,7 @@ export function ResumeMessageInput({
                   type="submit"
                   disabled={!form.watch("message")?.trim()}
                   size="icon"
-                  className="flex-shrink-0 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
+                  className="shrink-0 min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
