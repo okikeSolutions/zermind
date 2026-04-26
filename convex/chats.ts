@@ -32,13 +32,43 @@ async function requireOwnedChat(ctx: Parameters<typeof requireUserId>[0], chatId
   return { chat, userId };
 }
 
+function extractAttachments(message?: { content?: unknown }) {
+  if (!message || !Array.isArray(message.content)) return [];
+  return message.content.flatMap((part, index) => {
+    if (typeof part !== "object" || part === null || !("type" in part)) return [];
+    const typedPart = part as {
+      type: string;
+      image?: string;
+      data?: string;
+      mediaType?: string;
+      mimeType?: string;
+      filename?: string;
+    };
+    if (typedPart.type !== "image" && typedPart.type !== "file") return [];
+    const url = typedPart.type === "image" ? typedPart.image : typedPart.data;
+    if (!url) return [];
+    const mimeType = typedPart.mediaType ?? typedPart.mimeType ?? "application/octet-stream";
+    const attachmentType: "image" | "document" = typedPart.type === "image" ? "image" : "document";
+    return [
+      {
+        id: `${typedPart.type}-${index}`,
+        name: typedPart.filename ?? (typedPart.type === "image" ? "Image" : "File"),
+        mimeType,
+        size: 0,
+        url,
+        type: attachmentType,
+      },
+    ];
+  });
+}
+
 function toUiAgentMessage(
   chatId: Id<"chats">,
   messageDoc: {
     _id: string;
     _creationTime: number;
     status: string;
-    message?: { role: string };
+    message?: { role: string; content?: unknown };
     text?: string;
     model?: string;
     error?: string;
@@ -66,7 +96,7 @@ function toUiAgentMessage(
     role,
     content: messageDoc.text ?? messageDoc.error ?? "",
     model: role === "assistant" ? messageDoc.model : undefined,
-    attachments: [],
+    attachments: extractAttachments(messageDoc.message),
     xPosition: node?.xPosition ?? 0,
     yPosition: node?.yPosition ?? 0,
     nodeType: node?.nodeType ?? "conversation",
@@ -238,9 +268,13 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     const { chat } = await requireOwnedChat(ctx, args.chatId);
     const agentThreadId = chat.agentThreadId;
-    const [nodes, sessions, participants, invitations] = await Promise.all([
+    const [nodes, files, sessions, participants, invitations] = await Promise.all([
       ctx.db
         .query("zermindNodes")
+        .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId))
+        .take(1000),
+      ctx.db
+        .query("fileAttachments")
         .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId))
         .take(1000),
       ctx.db
@@ -258,6 +292,8 @@ export const remove = mutation({
     ]);
     await Promise.all([
       ...nodes.map((node) => ctx.db.delete(node._id)),
+      ...files.map((file) => ctx.storage.delete(file.storageId)),
+      ...files.map((file) => ctx.db.delete(file._id)),
       ...participants.map((participant) => ctx.db.delete(participant._id)),
       ...sessions.map((session) => ctx.db.delete(session._id)),
       ...invitations.map((invitation) => ctx.db.delete(invitation._id)),

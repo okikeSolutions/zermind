@@ -6,9 +6,8 @@ export const AttachmentSchema = z.object({
   name: z.string(),
   mimeType: z.string(),
   size: z.number(),
-  url: z.string().refine((url) => url.startsWith("data:"), {
-    message: "URL must be a data URL starting with 'data:'",
-  }), // Data URL for direct processing (no server storage)
+  url: z.string(),
+  storageId: z.string().optional(),
   type: z.enum(["image", "document"]),
 });
 

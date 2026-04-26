@@ -18,6 +18,7 @@ import type * as auth from "../auth.js";
 import type * as chats from "../chats.js";
 import type * as collaboration from "../collaboration.js";
 import type * as feedback from "../feedback.js";
+import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_modelProvider from "../lib/modelProvider.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   chats: typeof chats;
   collaboration: typeof collaboration;
   feedback: typeof feedback;
+  files: typeof files;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/modelProvider": typeof lib_modelProvider;

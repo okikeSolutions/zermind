@@ -40,6 +40,10 @@ export function useChat({
           prompt: content,
           model,
           temperature,
+          attachments: _attachments.map((attachment) => ({
+            ...attachment,
+            storageId: attachment.storageId as Id<"_storage"> | undefined,
+          })),
         });
       } catch (unknownError) {
         const nextError =

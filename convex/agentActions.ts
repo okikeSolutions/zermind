@@ -1,5 +1,6 @@
 "use node";
 
+import type { ModelMessage } from "ai";
 import { ConvexError, v } from "convex/values";
 import { action, type ActionCtx } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -22,6 +23,19 @@ export const send = action({
     temperature: v.optional(v.number()),
     parentAgentMessageId: v.optional(v.string()),
     branchName: v.optional(v.string()),
+    attachments: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          name: v.string(),
+          mimeType: v.string(),
+          size: v.number(),
+          url: v.string(),
+          storageId: v.optional(v.id("_storage")),
+          type: v.union(v.literal("image"), v.literal("document")),
+        }),
+      ),
+    ),
   },
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
@@ -37,11 +51,38 @@ export const send = action({
 
     const languageModel = await resolveLanguageModel(ctx, userId, args.model);
 
+    const content: ModelMessage[] = [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: args.prompt },
+          ...(await Promise.all(
+            (args.attachments ?? []).map(async (attachment) => {
+              const url = attachment.storageId
+                ? await ctx.storage.getUrl(attachment.storageId)
+                : attachment.url;
+              if (!url) {
+                throw new ConvexError({ code: "NOT_FOUND", message: "Attachment not found" });
+              }
+              return attachment.type === "image"
+                ? { type: "image" as const, image: url, mediaType: attachment.mimeType }
+                : {
+                    type: "file" as const,
+                    data: url,
+                    mediaType: attachment.mimeType,
+                    filename: attachment.name,
+                  };
+            }),
+          )),
+        ],
+      },
+    ];
+
     const result = await zermindAgent.streamText(
       ctx,
       { userId, threadId: chat.agentThreadId },
       {
-        prompt: args.prompt,
+        prompt: content,
         model: languageModel,
         temperature: args.temperature ?? 0.7,
       },

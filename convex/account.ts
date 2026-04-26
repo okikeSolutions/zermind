@@ -144,7 +144,7 @@ export const deleteMyData = mutation({
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
 
-    const [chats, apiKeys, usageLogs, feedback, userParticipations, sentInvitations] =
+    const [chats, apiKeys, usageLogs, feedback, userParticipations, sentInvitations, userFiles] =
       await Promise.all([
         ctx.db
           .query("chats")
@@ -170,43 +170,57 @@ export const deleteMyData = mutation({
           .query("collaborationInvitations")
           .withIndex("by_inviterId", (q) => q.eq("inviterId", userId))
           .take(1000),
+        ctx.db
+          .query("fileAttachments")
+          .withIndex("by_userId", (q) => q.eq("userId", userId))
+          .take(1000),
       ]);
 
-    const [nodeGroups, sessionGroups, participantGroups, invitationGroups] = await Promise.all([
-      Promise.all(
-        chats.map((chat) =>
-          ctx.db
-            .query("zermindNodes")
-            .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
-            .take(1000),
+    const [nodeGroups, fileGroups, sessionGroups, participantGroups, invitationGroups] =
+      await Promise.all([
+        Promise.all(
+          chats.map((chat) =>
+            ctx.db
+              .query("zermindNodes")
+              .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
+              .take(1000),
+          ),
         ),
-      ),
-      Promise.all(
-        chats.map((chat) =>
-          ctx.db
-            .query("collaborationSessions")
-            .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
-            .take(1000),
+        Promise.all(
+          chats.map((chat) =>
+            ctx.db
+              .query("fileAttachments")
+              .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
+              .take(1000),
+          ),
         ),
-      ),
-      Promise.all(
-        chats.map((chat) =>
-          ctx.db
-            .query("sessionParticipants")
-            .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
-            .take(1000),
+        Promise.all(
+          chats.map((chat) =>
+            ctx.db
+              .query("collaborationSessions")
+              .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
+              .take(1000),
+          ),
         ),
-      ),
-      Promise.all(
-        chats.map((chat) =>
-          ctx.db
-            .query("collaborationInvitations")
-            .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
-            .take(1000),
+        Promise.all(
+          chats.map((chat) =>
+            ctx.db
+              .query("sessionParticipants")
+              .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
+              .take(1000),
+          ),
         ),
-      ),
-    ]);
+        Promise.all(
+          chats.map((chat) =>
+            ctx.db
+              .query("collaborationInvitations")
+              .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
+              .take(1000),
+          ),
+        ),
+      ]);
     const messages = nodeGroups.flat();
+    const files = fileGroups.flat();
     const sessions = sessionGroups.flat();
     const participants = participantGroups.flat();
     const invitations = invitationGroups.flat();
@@ -215,9 +229,13 @@ export const deleteMyData = mutation({
       [...participants, ...userParticipations].map((item) => item._id),
     );
     const invitationIds = new Set([...invitations, ...sentInvitations].map((item) => item._id));
+    const fileIds = new Set([...files, ...userFiles].map((item) => item._id));
+    const storageIds = new Set([...files, ...userFiles].map((item) => item.storageId));
 
     await Promise.all([
       ...messages.map((message) => ctx.db.delete(message._id)),
+      ...Array.from(storageIds).map((storageId) => ctx.storage.delete(storageId)),
+      ...Array.from(fileIds).map((fileId) => ctx.db.delete(fileId)),
       ...Array.from(participantIds).map((participantId) => ctx.db.delete(participantId)),
       ...sessions.map((session) => ctx.db.delete(session._id)),
       ...Array.from(invitationIds).map((invitationId) => ctx.db.delete(invitationId)),

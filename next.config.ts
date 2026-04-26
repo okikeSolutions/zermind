@@ -6,16 +6,6 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   outputFileTracingRoot: path.join(__dirname),
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        port: "",
-        pathname: "/storage/v1/object/**",
-      },
-    ],
-  },
   async rewrites() {
     return [
       {

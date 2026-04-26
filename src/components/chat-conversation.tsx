@@ -88,7 +88,7 @@ export function ChatConversation({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // File attachments hook
-  const fileAttachments = useFileAttachments({ model: selectedModel });
+  const fileAttachments = useFileAttachments({ model: selectedModel, chatId });
 
   const updateChatTitleMutation = useUpdateChatTitle();
 
@@ -173,7 +173,7 @@ export function ChatConversation({
       let processedAttachments: Attachment[] = [];
       if (!isDemo && fileAttachments.pendingFiles.length > 0) {
         try {
-          processedAttachments = await fileAttachments.processFilesDirectly();
+          processedAttachments = await fileAttachments.uploadFilesToStorage();
         } catch (error) {
           console.error("Failed to process files:", error);
           throw new Error("Failed to process attachments. Please try again.");

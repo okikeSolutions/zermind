@@ -1,88 +1,149 @@
-# Welcome to your Convex functions directory!
+# Zermind Convex Backend
 
-Write your Convex functions here.
-See https://docs.convex.dev/functions for more.
+This directory contains the Convex backend for Zermind.
 
-A query function that takes two arguments looks like:
+## Components
 
-```ts
-// convex/myFunctions.ts
-import { query } from "./_generated/server";
-import { v } from "convex/values";
+Registered in `convex/convex.config.ts`:
 
-export const myQueryFunction = query({
-  // Validators for arguments.
-  args: {
-    first: v.number(),
-    second: v.string(),
-  },
-
-  // Function implementation.
-  handler: async (ctx, args) => {
-    // Read the database as many times as you need here.
-    // See https://docs.convex.dev/database/reading-data.
-    const documents = await ctx.db.query("tablename").collect();
-
-    // Arguments passed from the client are properties of the args object.
-    console.log(args.first, args.second);
-
-    // Write arbitrary JavaScript here: filter, aggregate, build derived data,
-    // remove non-public properties, or create new objects.
-    return documents;
-  },
-});
+```txt
+@convex-dev/agent        persistent AI threads/messages/streaming
+@convex-dev/better-auth  auth integration
+@convex-dev/presence     collaboration presence/cursors
+@convex-dev/rate-limiter available for app-level rate limiting
 ```
 
-Using this query function in a React component looks like:
+`@convex-dev/persistent-text-streaming` is intentionally not used. Core chat streaming is handled by Convex Agent via `streamText(..., { saveStreamDeltas: true })`.
 
-```ts
-const data = useQuery(api.myFunctions.myQueryFunction, {
-  first: 10,
-  second: "hello",
-});
+## Main modules
+
+```txt
+convex/auth.ts              Better Auth setup and current-user query
+convex/http.ts              Better Auth HTTP route registration
+convex/schema.ts            app schema
+convex/agent.ts             Zermind Agent instance
+convex/agentActions.ts      Agent send action
+convex/agentChat.ts         Agent-backed chat helpers/queries
+convex/chats.ts             chat CRUD/share queries, Agent-thread-backed reads
+convex/files.ts             Convex file storage upload URL, metadata, URL, delete functions
+convex/zermindNodes.ts      mind-map node metadata and position updates
+convex/collaboration.ts     collaboration sessions, participants, invites
+convex/presence.ts          presence component wrapper
+convex/apiKeys.ts           public/internal API key metadata functions
+convex/apiKeyActions.ts     Node actions for BYOK encryption/decryption
+convex/usage.ts             usage logging/statistics
+convex/feedback.ts          feedback submission
+convex/account.ts           account stats/export/delete
+convex/lib/auth.ts          Convex auth helpers
+convex/lib/modelProvider.ts model/provider resolution and BYOK lookup
 ```
 
-A mutation function looks like:
+## Data model summary
 
-```ts
-// convex/myFunctions.ts
-import { mutation } from "./_generated/server";
-import { v } from "convex/values";
+```txt
+chats
+  app-level chat metadata
+  agentThreadId links to Convex Agent thread
 
-export const myMutationFunction = mutation({
-  // Validators for arguments.
-  args: {
-    first: v.string(),
-    second: v.string(),
-  },
+zermindNodes
+  app-owned mind-map metadata
+  agentMessageId links to Convex Agent message
 
-  // Function implementation.
-  handler: async (ctx, args) => {
-    // Insert or modify documents in the database here.
-    // Mutations can also read from the database like queries.
-    // See https://docs.convex.dev/database/writing-data.
-    const message = { body: args.first, author: args.second };
-    const id = await ctx.db.insert("messages", message);
+fileAttachments
+  Convex file storage references and attachment metadata
+  storageId links to the Convex _storage system table
 
-    // Optionally, return a value from your mutation.
-    return await ctx.db.get("messages", id);
-  },
-});
+apiKeys
+  encrypted BYOK provider keys
+
+usageLogs
+  model usage events
+
+collaborationSessions / sessionParticipants / collaborationInvitations
+  collaboration state
+
+feedback
+  user feedback
+
+conversationTemplates
+  reusable conversation/mind-map templates
 ```
 
-Using this mutation function in a React component looks like:
+Convex Agent owns the actual AI thread/message store. The app does not maintain a separate canonical `messages` table. Uploaded files live in Convex file storage and are referenced from `fileAttachments` and Agent message parts.
+
+## Auth rule
+
+Convex functions should derive the user from server-side auth:
 
 ```ts
-const mutation = useMutation(api.myFunctions.myMutationFunction);
-function handleButtonPress() {
-  // fire and forget, the most common way to use mutations
-  mutation({ first: "Hello!", second: "me" });
-  // OR
-  // use the result once the mutation has completed
-  mutation({ first: "Hello!", second: "me" }).then((result) => console.log(result));
-}
+const userId = await requireUserId(ctx);
 ```
 
-Use the Convex CLI to push your functions to a deployment. See everything
-the Convex CLI can do by running `npx convex -h` in your project root
-directory. To learn more, launch the docs with `npx convex docs`.
+Do not accept `userId` from the client for authorization.
+
+## AI send flow
+
+```txt
+client
+  → api.agentActions.send
+  → require authenticated user
+  → load chat and verify access
+  → resolve provider/BYOK/fallback model
+  → convert uploaded attachment storage IDs into AI SDK image/file parts
+  → zermindAgent.streamText(..., { saveStreamDeltas: true })
+  → create zermindNodes metadata for saved Agent messages
+  → log usage
+```
+
+## File attachment flow
+
+Zermind uses Convex file storage for chat attachments. Supabase Storage is not used.
+
+```txt
+client
+  → api.files.generateUploadUrl
+  → POST file bytes to the generated Convex upload URL
+  → api.files.saveUploadedFile
+  → receive attachment metadata with storageId and serving URL
+  → api.agentActions.send with attachment storage IDs
+```
+
+Important rules:
+
+- `api.files.generateUploadUrl` requires an authenticated Convex user.
+- `api.files.saveUploadedFile` stores app metadata in `fileAttachments` after the upload succeeds.
+- Files are served with `ctx.storage.getUrl(storageId)`.
+- Chat deletion and account deletion remove related storage objects and `fileAttachments` rows.
+- Individual files can be deleted with `api.files.remove`.
+- Storage IDs should be validated with `v.id("_storage")` in Convex functions.
+
+## Environment variables
+
+Set runtime secrets in Convex:
+
+```bash
+bunx convex env set OPENROUTER_API_KEY "sk-or-v1-..."
+bunx convex env set API_KEY_ENCRYPTION_SECRET "$(openssl rand -base64 32)"
+bunx convex env set SITE_URL "http://localhost:3000"
+```
+
+OAuth, if enabled:
+
+```bash
+bunx convex env set GOOGLE_CLIENT_ID "..."
+bunx convex env set GOOGLE_CLIENT_SECRET "..."
+bunx convex env set GITHUB_CLIENT_ID "..."
+bunx convex env set GITHUB_CLIENT_SECRET "..."
+```
+
+## Development commands
+
+```bash
+bunx convex dev
+bunx convex codegen
+bunx tsc --noEmit
+bun run lint
+bun run fmt:check
+```
+
+Generated files under `convex/_generated` are not formatted by Oxfmt.

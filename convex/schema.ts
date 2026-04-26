@@ -23,6 +23,7 @@ export const attachment = v.object({
   mimeType: v.string(),
   size: v.number(),
   url: v.string(),
+  storageId: v.optional(v.id("_storage")),
   type: v.union(v.literal("image"), v.literal("document")),
 });
 
@@ -64,6 +65,20 @@ export default defineSchema({
     .index("by_chatId_and_createdAt", ["chatId", "createdAt"])
     .index("by_agentMessageId", ["agentMessageId"])
     .index("by_parentAgentMessageId", ["parentAgentMessageId"]),
+
+  fileAttachments: defineTable({
+    userId: v.string(),
+    chatId: v.optional(v.id("chats")),
+    storageId: v.id("_storage"),
+    name: v.string(),
+    mimeType: v.string(),
+    size: v.number(),
+    type: v.union(v.literal("image"), v.literal("document")),
+    createdAt: v.number(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_chatId", ["chatId"])
+    .index("by_storageId", ["storageId"]),
 
   apiKeys: defineTable({
     userId: v.string(),
