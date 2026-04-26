@@ -1,13 +1,17 @@
+import { listMessages } from "@convex-dev/agent";
 import { ConvexError, v } from "convex/values";
+import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
+import { type Doc, type Id } from "./_generated/dataModel";
+import { chatMode } from "./schema";
+import { zermindAgent } from "./agent";
 import { requireUserId } from "./lib/auth";
-import { type Id } from "./_generated/dataModel";
-import { attachment, chatMode, messageRole, nodeType } from "./schema";
 
 const chatDoc = v.object({
   _id: v.id("chats"),
   _creationTime: v.number(),
   userId: v.string(),
+  agentThreadId: v.string(),
   title: v.optional(v.string()),
   shareId: v.optional(v.string()),
   mode: chatMode,
@@ -15,60 +19,6 @@ const chatDoc = v.object({
   templateId: v.optional(v.id("conversationTemplates")),
   createdAt: v.number(),
   updatedAt: v.number(),
-});
-
-const messagePreview = v.object({
-  content: v.string(),
-  createdAt: v.number(),
-  attachments: v.array(attachment),
-});
-
-const chatListItem = v.object({
-  _id: v.id("chats"),
-  _creationTime: v.number(),
-  userId: v.string(),
-  title: v.optional(v.string()),
-  shareId: v.optional(v.string()),
-  mode: chatMode,
-  isCollaborative: v.boolean(),
-  templateId: v.optional(v.id("conversationTemplates")),
-  createdAt: v.number(),
-  updatedAt: v.number(),
-  messages: v.array(messagePreview),
-});
-
-const messageDoc = v.object({
-  _id: v.id("messages"),
-  _creationTime: v.number(),
-  chatId: v.id("chats"),
-  parentId: v.optional(v.id("messages")),
-  branchName: v.optional(v.string()),
-  role: messageRole,
-  content: v.string(),
-  model: v.optional(v.string()),
-  attachments: v.array(attachment),
-  xPosition: v.number(),
-  yPosition: v.number(),
-  nodeType,
-  isCollapsed: v.boolean(),
-  isLocked: v.boolean(),
-  lastEditedBy: v.optional(v.string()),
-  editedAt: v.optional(v.number()),
-  createdAt: v.number(),
-});
-
-const chatWithMessages = v.object({
-  _id: v.id("chats"),
-  _creationTime: v.number(),
-  userId: v.string(),
-  title: v.optional(v.string()),
-  shareId: v.optional(v.string()),
-  mode: chatMode,
-  isCollaborative: v.boolean(),
-  templateId: v.optional(v.id("conversationTemplates")),
-  createdAt: v.number(),
-  updatedAt: v.number(),
-  messages: v.array(messageDoc),
 });
 
 async function requireOwnedChat(ctx: Parameters<typeof requireUserId>[0], chatId: Id<"chats">) {
@@ -76,18 +26,62 @@ async function requireOwnedChat(ctx: Parameters<typeof requireUserId>[0], chatId
   const chat = await ctx.db.get(chatId);
 
   if (!chat || chat.userId !== userId) {
-    throw new ConvexError({
-      code: "NOT_FOUND",
-      message: "Chat not found",
-    });
+    throw new ConvexError({ code: "NOT_FOUND", message: "Chat not found" });
   }
 
   return { chat, userId };
 }
 
+function toUiAgentMessage(
+  chatId: Id<"chats">,
+  messageDoc: {
+    _id: string;
+    _creationTime: number;
+    status: string;
+    message?: { role: string };
+    text?: string;
+    model?: string;
+    error?: string;
+  },
+  node?: {
+    parentAgentMessageId?: string;
+    branchName?: string;
+    xPosition: number;
+    yPosition: number;
+    nodeType: "conversation" | "branching_point" | "insight";
+    isCollapsed: boolean;
+    isLocked: boolean;
+    lastEditedBy?: string;
+    editedAt?: number;
+    createdAt: number;
+  },
+) {
+  const role = messageDoc.message?.role === "user" ? "user" : "assistant";
+  return {
+    _id: messageDoc._id,
+    _creationTime: messageDoc._creationTime,
+    chatId,
+    parentId: node?.parentAgentMessageId,
+    branchName: node?.branchName,
+    role,
+    content: messageDoc.text ?? messageDoc.error ?? "",
+    model: role === "assistant" ? messageDoc.model : undefined,
+    attachments: [],
+    xPosition: node?.xPosition ?? 0,
+    yPosition: node?.yPosition ?? 0,
+    nodeType: node?.nodeType ?? "conversation",
+    isCollapsed: node?.isCollapsed ?? false,
+    isLocked: node?.isLocked ?? false,
+    lastEditedBy: node?.lastEditedBy,
+    editedAt: node?.editedAt,
+    createdAt: node?.createdAt ?? messageDoc._creationTime,
+    status: messageDoc.status,
+  };
+}
+
 export const listMine = query({
   args: {},
-  returns: v.array(chatListItem),
+  returns: v.any(),
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
     const chats = await ctx.db
@@ -98,18 +92,17 @@ export const listMine = query({
 
     return await Promise.all(
       chats.map(async (chat) => {
-        const latestMessages = await ctx.db
-          .query("messages")
-          .withIndex("by_chatId_and_createdAt", (q) => q.eq("chatId", chat._id))
-          .order("desc")
-          .take(1);
-
+        const latest = await listMessages(ctx, components.agent, {
+          threadId: chat.agentThreadId,
+          paginationOpts: { numItems: 1, cursor: null },
+          excludeToolMessages: true,
+        });
         return {
           ...chat,
-          messages: latestMessages.map((message) => ({
-            content: message.content,
-            createdAt: message.createdAt,
-            attachments: message.attachments,
+          messages: latest.page.map((message) => ({
+            content: message.text ?? "",
+            createdAt: message._creationTime,
+            attachments: [],
           })),
         };
       }),
@@ -123,25 +116,46 @@ export const get = query({
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const chat = await ctx.db.get(args.chatId);
-
-    if (!chat || chat.userId !== userId) {
-      return null;
-    }
-
+    if (!chat || chat.userId !== userId) return null;
     return chat;
   },
 });
 
+async function chatWithAgentMessages(
+  ctx: Parameters<typeof requireUserId>[0],
+  chat: Doc<"chats">,
+  chatId: Id<"chats">,
+) {
+  const [paginated, nodes] = await Promise.all([
+    listMessages(ctx, components.agent, {
+      threadId: chat.agentThreadId,
+      paginationOpts: { numItems: 500, cursor: null },
+      excludeToolMessages: true,
+    }),
+    ctx.db
+      .query("zermindNodes")
+      .withIndex("by_chatId", (q) => q.eq("chatId", chatId))
+      .take(1000),
+  ]);
+  const nodesByMessageId = new Map(nodes.map((node) => [node.agentMessageId, node]));
+
+  return {
+    ...chat,
+    messages: paginated.page
+      .filter(
+        (message) => message.message?.role === "user" || message.message?.role === "assistant",
+      )
+      .map((message) => toUiAgentMessage(chatId, message, nodesByMessageId.get(message._id))),
+  };
+}
+
 export const getWithMessages = query({
   args: { chatId: v.id("chats") },
-  returns: v.union(chatWithMessages, v.null()),
+  returns: v.any(),
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const chat = await ctx.db.get(args.chatId);
-
-    if (!chat) {
-      return null;
-    }
+    if (!chat) return null;
 
     if (chat.userId !== userId) {
       const cutoff = Date.now() - 5 * 60 * 1000;
@@ -152,41 +166,47 @@ export const getWithMessages = query({
         )
         .order("desc")
         .first();
-
       if (!session) return null;
-
       const participant = await ctx.db
         .query("sessionParticipants")
         .withIndex("by_sessionId_and_userId", (q) =>
           q.eq("sessionId", session._id).eq("userId", userId),
         )
         .first();
-
       if (!participant) return null;
     }
 
-    const messages = await ctx.db
-      .query("messages")
-      .withIndex("by_chatId_and_createdAt", (q) => q.eq("chatId", args.chatId))
-      .order("asc")
-      .take(500);
+    return await chatWithAgentMessages(ctx, chat, args.chatId);
+  },
+});
 
-    return { ...chat, messages };
+export const getShared = query({
+  args: { shareId: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const chat = await ctx.db
+      .query("chats")
+      .withIndex("by_shareId", (q) => q.eq("shareId", args.shareId))
+      .first();
+    if (!chat) return null;
+    return await chatWithAgentMessages(ctx, chat, chat._id);
   },
 });
 
 export const create = mutation({
-  args: {
-    title: v.optional(v.string()),
-    mode: v.optional(chatMode),
-  },
+  args: { title: v.optional(v.string()), mode: v.optional(chatMode) },
   returns: chatDoc,
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const now = Date.now();
+    const { threadId } = await zermindAgent.createThread(ctx, {
+      userId,
+      title: args.title ?? "Untitled Chat",
+    });
 
     const chatId = await ctx.db.insert("chats", {
       userId,
+      agentThreadId: threadId,
       title: args.title,
       mode: args.mode ?? "chat",
       isCollaborative: false,
@@ -195,31 +215,19 @@ export const create = mutation({
     });
 
     const chat = await ctx.db.get(chatId);
-    if (!chat) {
-      throw new ConvexError({ code: "INTERNAL_ERROR", message: "Chat not created" });
-    }
+    if (!chat) throw new ConvexError({ code: "INTERNAL_ERROR", message: "Chat not created" });
     return chat;
   },
 });
 
 export const updateTitle = mutation({
-  args: {
-    chatId: v.id("chats"),
-    title: v.string(),
-  },
+  args: { chatId: v.id("chats"), title: v.string() },
   returns: chatDoc,
   handler: async (ctx, args) => {
     await requireOwnedChat(ctx, args.chatId);
-
-    await ctx.db.patch(args.chatId, {
-      title: args.title,
-      updatedAt: Date.now(),
-    });
-
+    await ctx.db.patch(args.chatId, { title: args.title, updatedAt: Date.now() });
     const chat = await ctx.db.get(args.chatId);
-    if (!chat) {
-      throw new ConvexError({ code: "NOT_FOUND", message: "Chat not found" });
-    }
+    if (!chat) throw new ConvexError({ code: "NOT_FOUND", message: "Chat not found" });
     return chat;
   },
 });
@@ -228,11 +236,11 @@ export const remove = mutation({
   args: { chatId: v.id("chats") },
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
-    await requireOwnedChat(ctx, args.chatId);
-
-    const [messages, sessions, participants, invitations] = await Promise.all([
+    const { chat } = await requireOwnedChat(ctx, args.chatId);
+    const agentThreadId = chat.agentThreadId;
+    const [nodes, sessions, participants, invitations] = await Promise.all([
       ctx.db
-        .query("messages")
+        .query("zermindNodes")
         .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId))
         .take(1000),
       ctx.db
@@ -248,15 +256,14 @@ export const remove = mutation({
         .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId))
         .take(1000),
     ]);
-
     await Promise.all([
-      ...messages.map((message) => ctx.db.delete(message._id)),
+      ...nodes.map((node) => ctx.db.delete(node._id)),
       ...participants.map((participant) => ctx.db.delete(participant._id)),
       ...sessions.map((session) => ctx.db.delete(session._id)),
       ...invitations.map((invitation) => ctx.db.delete(invitation._id)),
     ]);
     await ctx.db.delete(args.chatId);
-
+    await zermindAgent.deleteThreadAsync(ctx, { threadId: agentThreadId });
     return { success: true };
   },
 });
@@ -267,12 +274,7 @@ export const generateShareLink = mutation({
   handler: async (ctx, args) => {
     await requireOwnedChat(ctx, args.chatId);
     const shareId = crypto.randomUUID();
-
-    await ctx.db.patch(args.chatId, {
-      shareId,
-      updatedAt: Date.now(),
-    });
-
+    await ctx.db.patch(args.chatId, { shareId, updatedAt: Date.now() });
     return { shareId };
   },
 });
@@ -282,10 +284,7 @@ export const removeShareLink = mutation({
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
     await requireOwnedChat(ctx, args.chatId);
-    await ctx.db.patch(args.chatId, {
-      shareId: undefined,
-      updatedAt: Date.now(),
-    });
+    await ctx.db.patch(args.chatId, { shareId: undefined, updatedAt: Date.now() });
     return { success: true };
   },
 });

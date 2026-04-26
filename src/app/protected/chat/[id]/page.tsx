@@ -32,7 +32,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
         chatId={id}
         initialMessages={chatData.messages.map((msg) => ({
           id: msg._id,
-          role: msg.role,
+          role: msg.role === "user" ? "user" : "assistant",
           content: msg.content,
           model: msg.model || undefined,
           parentId: msg.parentId || undefined,

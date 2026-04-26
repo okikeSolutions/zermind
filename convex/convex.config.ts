@@ -1,7 +1,6 @@
 import { defineApp } from "convex/server";
 import agent from "@convex-dev/agent/convex.config";
 import betterAuth from "@convex-dev/better-auth/convex.config";
-import persistentTextStreaming from "@convex-dev/persistent-text-streaming/convex.config";
 import presence from "@convex-dev/presence/convex.config";
 import rateLimiter from "@convex-dev/rate-limiter/convex.config";
 
@@ -22,14 +21,6 @@ app.use(agent);
  * and multi-factor authentication while managing sessions and accounts through Convex's database.
  */
 app.use(betterAuth);
-
-/**
- * This component combines HTTP streaming with database persistence to deliver real-time text updates
- * while storing content permanently. It provides a React hook that streams text from HTTP actions while
- * simultaneously persisting chunks to the database at sentence boundaries. Developers get low-latency
- * streaming for the original client plus durable storage accessible by other users or after reconnection.
- */
-app.use(persistentTextStreaming);
 
 /**
  * This component provides real-time user presence tracking for rooms or spaces in your application.

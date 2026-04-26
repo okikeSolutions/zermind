@@ -52,7 +52,7 @@ export default async function CollaborationPage({ params }: CollaborationPagePro
           initialMessages={chat.messages.map((msg) => ({
             id: msg._id,
             content: msg.content,
-            role: msg.role,
+            role: msg.role === "user" ? "user" : "assistant",
             model: msg.model || undefined,
             parentId: msg.parentId || undefined,
             branchName: msg.branchName || undefined,

@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { useQueryClient } from "@tanstack/react-query";
 import { ChatConversation } from "@/components/chat-conversation";
 import { MindMapView } from "@/components/mind-map/mind-map-view";
 import { ResumeMessageInput } from "@/components/resume-message-input";
@@ -18,8 +17,6 @@ import { Brain, MessageSquare, X } from "lucide-react";
 import { CollaborationButton } from "@/components/collaboration/collaboration-button";
 import { RealtimeCursors, CollaborationPresence } from "@/components/mind-map/realtime-cursors";
 import { useRealtimeCollaboration } from "@/hooks/use-realtime-collaboration";
-import { chatKeys } from "@/hooks/use-chats-query";
-import { conversationContextKeys } from "@/hooks/use-conversation-context";
 
 interface Message {
   id: string;
@@ -55,7 +52,7 @@ interface DualModeChatProps {
 }
 
 // Error handler for collaboration features
-function handleCollaborationError(error: Error, errorInfo: unknown) {
+function handleCollaborationError(error: unknown, errorInfo: unknown) {
   // Log the error for debugging purposes
   console.warn("Collaboration Error Boundary caught an error:", error, errorInfo);
 
@@ -77,7 +74,6 @@ export function DualModeChat({
 }: DualModeChatProps) {
   const { mode } = useChatModeStore();
   const { user } = useAuthUser();
-  const queryClient = useQueryClient();
   const [resumeFromNodeId, setResumeFromNodeId] = useState<string | null>(null);
   const [createBranchFromNodeId, setCreateBranchFromNodeId] = useState<string | null>(null);
   const [createMultiModelFromNodeId, setCreateMultiModelFromNodeId] = useState<string | null>(null);
@@ -153,62 +149,17 @@ export function DualModeChat({
     console.log("Creating multi-model branch from node:", parentNodeId);
   }, []);
 
-  // Handle successful message sent in resume mode
   const handleResumeMessageSent = useCallback(() => {
-    // Invalidate all relevant queries to refresh the mind map
-    queryClient.invalidateQueries({
-      queryKey: chatKeys.details(),
-      predicate: (query) => query.queryKey.includes(chatId),
-    });
+    console.log("Resume message sent successfully");
+  }, []);
 
-    // Invalidate conversation context queries
-    queryClient.invalidateQueries({
-      queryKey: conversationContextKeys.all,
-    });
-
-    // Update chat list to show latest message
-    queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
-
-    console.log("Resume message sent successfully - queries invalidated");
-  }, [queryClient, chatId]);
-
-  // Handle successful branch creation
   const handleBranchCreated = useCallback(() => {
-    // Invalidate all relevant queries to refresh the mind map
-    queryClient.invalidateQueries({
-      queryKey: chatKeys.details(),
-      predicate: (query) => query.queryKey.includes(chatId),
-    });
+    console.log("Branch created successfully");
+  }, []);
 
-    // Invalidate conversation context queries
-    queryClient.invalidateQueries({
-      queryKey: conversationContextKeys.all,
-    });
-
-    // Update chat list to show latest message
-    queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
-
-    console.log("Branch created successfully - queries invalidated");
-  }, [queryClient, chatId]);
-
-  // Handle successful multi-model branch creation
   const handleMultiModelBranchCreated = useCallback(() => {
-    // Invalidate all relevant queries to refresh the mind map
-    queryClient.invalidateQueries({
-      queryKey: chatKeys.details(),
-      predicate: (query) => query.queryKey.includes(chatId),
-    });
-
-    // Invalidate conversation context queries
-    queryClient.invalidateQueries({
-      queryKey: conversationContextKeys.all,
-    });
-
-    // Update chat list to show latest message
-    queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
-
-    console.log("Multi-model branch created successfully - queries invalidated");
-  }, [queryClient, chatId]);
+    console.log("Multi-model branch created successfully");
+  }, []);
 
   // Clear all active actions
   const clearAllActions = useCallback(() => {

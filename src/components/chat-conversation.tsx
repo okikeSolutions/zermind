@@ -41,7 +41,7 @@ import { cn } from "@/lib/utils";
 import { type Message, type Attachment } from "@/lib/schemas/chat";
 import { useChat } from "@/hooks/use-chat";
 import { ModelSelector } from "@/components/model-selector";
-import { useSaveMessage, useUpdateChatTitle } from "@/hooks/use-chats-query";
+import { useUpdateChatTitle } from "@/hooks/use-chats-query";
 import { generateChatTitle, shouldUpdateChatTitle } from "@/lib/utils/chat-utils";
 import { MessageAttachment } from "@/components/message-attachment";
 import { useFileAttachments } from "@/hooks/use-file-attachments";
@@ -90,8 +90,6 @@ export function ChatConversation({
   // File attachments hook
   const fileAttachments = useFileAttachments({ model: selectedModel });
 
-  // TanStack Query mutations
-  const saveMessageMutation = useSaveMessage();
   const updateChatTitleMutation = useUpdateChatTitle();
 
   // Message form setup
@@ -106,34 +104,6 @@ export function ChatConversation({
     chatId,
     initialMessages,
     model: selectedModel,
-    onFinish: (message) => {
-      // Skip database operations in demo mode
-      if (isDemo) {
-        console.log("Demo: Message finished:", message);
-        return;
-      }
-
-      try {
-        // Save assistant message to database
-        saveMessageMutation.mutate({
-          chatId,
-          message: {
-            role: message.role,
-            content: message.content,
-            model: message.model,
-            attachments: [], // Assistant messages don't have attachments
-            xPosition: 0,
-            yPosition: 0,
-            nodeType: "conversation",
-            isCollapsed: false,
-            isLocked: false,
-          },
-        });
-        console.log("Message finished:", message);
-      } catch (error) {
-        console.error("Failed to save assistant message:", error);
-      }
-    },
     onError: (error) => {
       console.error("Chat error:", error);
     },
@@ -200,62 +170,22 @@ export function ChatConversation({
 
       const shouldUpdateTitle = isFirstMessage && shouldUpdateChatTitle(chatTitle || null);
 
-      // Skip database operations in demo mode
-      if (!isDemo) {
-        // Save user message to database FIRST with current timestamp
-        // This ensures proper chronological ordering
+      let processedAttachments: Attachment[] = [];
+      if (!isDemo && fileAttachments.pendingFiles.length > 0) {
         try {
-          // Process files (either upload to storage or process directly based on privacy preference)
-          let processedAttachments: Attachment[] = [];
-          if (fileAttachments.pendingFiles.length > 0) {
-            try {
-              // For privacy, process files directly without storing in Supabase
-              // This converts files to base64 and includes them in the message content
-              processedAttachments = await fileAttachments.processFilesDirectly();
-            } catch (error) {
-              console.error("Failed to process files:", error);
-              throw new Error("Failed to process attachments. Please try again.");
-            }
-          }
-
-          await saveMessageMutation.mutateAsync({
-            chatId,
-            message: {
-              role: "user",
-              content: userMessage,
-              model: null, // User messages don't have a model
-              attachments: processedAttachments,
-              xPosition: 0,
-              yPosition: 0,
-              nodeType: "conversation",
-              isCollapsed: false,
-              isLocked: false,
-            },
-          });
-
-          // Reset form and send message to AI with attachments
-          messageForm.reset();
-          try {
-            // Send message with attachments to AI
-            await sendMessage(userMessage, processedAttachments);
-            // Files are already cleared by the processFilesDirectly function
-          } catch (error) {
-            console.error("Failed to send message to AI:", error);
-            throw new Error("Failed to get AI response. Please try again.");
-          }
+          processedAttachments = await fileAttachments.processFilesDirectly();
         } catch (error) {
-          console.error("Failed to save user message:", error);
-          throw new Error("Failed to save your message. Please try again.");
+          console.error("Failed to process files:", error);
+          throw new Error("Failed to process attachments. Please try again.");
         }
-      } else {
-        // Demo mode - just send message to AI without database operations
-        messageForm.reset();
-        try {
-          await sendMessage(userMessage, []);
-        } catch (error) {
-          console.error("Failed to send message to AI:", error);
-          throw new Error("Failed to get AI response. Please try again.");
-        }
+      }
+
+      messageForm.reset();
+      try {
+        await sendMessage(userMessage, processedAttachments);
+      } catch (error) {
+        console.error("Failed to send message to AI:", error);
+        throw new Error("Failed to get AI response. Please try again.");
       }
 
       // Update chat title if this is the first user message (skip in demo mode)

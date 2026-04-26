@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { requireUserId } from "./lib/auth";
 
 export const log = mutation({
@@ -14,6 +14,26 @@ export const log = mutation({
       userId,
       model: args.model,
       chatId: args.chatId,
+      createdAt: Date.now(),
+    });
+    return null;
+  },
+});
+
+export const logInternal = internalMutation({
+  args: {
+    userId: v.string(),
+    model: v.string(),
+    chatId: v.optional(v.id("chats")),
+    agentThreadId: v.optional(v.string()),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.insert("usageLogs", {
+      userId: args.userId,
+      model: args.model,
+      chatId: args.chatId,
+      agentThreadId: args.agentThreadId,
       createdAt: Date.now(),
     });
     return null;

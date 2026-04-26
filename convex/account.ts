@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { zermindAgent } from "./agent";
 import { requireUserId } from "./lib/auth";
 
 export const stats = query({
@@ -29,15 +30,15 @@ export const stats = query({
         .take(1000),
     ]);
 
-    const messageGroups = await Promise.all(
+    const nodeGroups = await Promise.all(
       chats.map((chat) =>
         ctx.db
-          .query("messages")
+          .query("zermindNodes")
           .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
           .take(1000),
       ),
     );
-    const messages = messageGroups.flat();
+    const messages = nodeGroups.flat();
 
     const oldestChat = chats.reduce<number | null>((oldest, chat) => {
       return oldest === null || chat.createdAt < oldest ? chat.createdAt : oldest;
@@ -83,7 +84,7 @@ export const exportMine = query({
     const chatsWithMessages = await Promise.all(
       chats.map(async (chat) => {
         const messages = await ctx.db
-          .query("messages")
+          .query("zermindNodes")
           .withIndex("by_chatId_and_createdAt", (q) => q.eq("chatId", chat._id))
           .order("asc")
           .take(1000);
@@ -95,12 +96,9 @@ export const exportMine = query({
           createdAt: new Date(chat.createdAt).toISOString(),
           updatedAt: new Date(chat.updatedAt).toISOString(),
           messages: messages.map((message) => ({
-            id: message._id,
-            role: message.role,
-            content: message.content,
-            model: message.model ?? null,
+            id: message.agentMessageId,
             createdAt: new Date(message.createdAt).toISOString(),
-            parentId: message.parentId ?? null,
+            parentId: message.parentAgentMessageId ?? null,
             branchName: message.branchName ?? null,
           })),
         };
@@ -174,11 +172,11 @@ export const deleteMyData = mutation({
           .take(1000),
       ]);
 
-    const [messageGroups, sessionGroups, participantGroups, invitationGroups] = await Promise.all([
+    const [nodeGroups, sessionGroups, participantGroups, invitationGroups] = await Promise.all([
       Promise.all(
         chats.map((chat) =>
           ctx.db
-            .query("messages")
+            .query("zermindNodes")
             .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
             .take(1000),
         ),
@@ -208,7 +206,7 @@ export const deleteMyData = mutation({
         ),
       ),
     ]);
-    const messages = messageGroups.flat();
+    const messages = nodeGroups.flat();
     const sessions = sessionGroups.flat();
     const participants = participantGroups.flat();
     const invitations = invitationGroups.flat();
@@ -228,6 +226,10 @@ export const deleteMyData = mutation({
       ...usageLogs.map((log) => ctx.db.delete(log._id)),
       ...feedback.map((item) => ctx.db.delete(item._id)),
     ]);
+
+    for (const chat of chats) {
+      await zermindAgent.deleteThreadAsync(ctx, { threadId: chat.agentThreadId });
+    }
 
     return {
       success: true,

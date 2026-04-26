@@ -1,4 +1,5 @@
-import { getSharedChat } from "@/lib/db/chats";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../../../../convex/_generated/api";
 import { ChatConversation } from "@/components/chat-conversation";
 import { Badge } from "@/components/ui/badge";
 import { Share, MessageSquare, AlertCircle } from "lucide-react";
@@ -9,6 +10,39 @@ interface SharePageProps {
   params: Promise<{
     shareId: string;
   }>;
+}
+
+type SharedMessage = {
+  _id: string;
+  role: string;
+  content: string;
+  model?: string;
+  parentId?: string;
+  branchName?: string;
+  attachments?: Array<{
+    id: string;
+    name: string;
+    mimeType: string;
+    size: number;
+    url: string;
+    type: "image" | "document";
+  }>;
+  xPosition: number;
+  yPosition: number;
+  nodeType: "conversation" | "branching_point" | "insight";
+  isCollapsed: boolean;
+  isLocked: boolean;
+  lastEditedBy?: string;
+  editedAt?: number;
+  createdAt: number;
+};
+
+function convexClient() {
+  return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+}
+
+async function getSharedChat(shareId: string) {
+  return await convexClient().query(api.chats.getShared, { shareId });
 }
 
 export async function generateMetadata({ params }: SharePageProps): Promise<Metadata> {
@@ -30,11 +64,8 @@ export async function generateMetadata({ params }: SharePageProps): Promise<Meta
 
 export default async function SharePage({ params }: SharePageProps) {
   const { shareId } = await params;
-
-  // Fetch shared chat data from database (no authentication required)
   const chatData = await getSharedChat(shareId);
 
-  // If chat doesn't exist or isn't shared, show not found
   if (!chatData) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -55,7 +86,6 @@ export default async function SharePage({ params }: SharePageProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Share Header */}
       <div className="border-b p-4 bg-background/50 backdrop-blur">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -72,17 +102,29 @@ export default async function SharePage({ params }: SharePageProps) {
         </div>
       </div>
 
-      {/* Chat Interface in Read-Only Mode */}
       <div className="flex-1 overflow-hidden">
         <ChatConversation
-          chatId={chatData.id}
-          initialMessages={chatData.messages.map((msg) => ({
-            ...msg,
-            role: msg.role as "user" | "assistant",
+          chatId={chatData._id}
+          initialMessages={chatData.messages.map((msg: SharedMessage) => ({
+            id: msg._id,
+            role: msg.role === "user" ? "user" : "assistant",
+            content: msg.content,
+            model: msg.model || undefined,
+            parentId: msg.parentId || undefined,
+            branchName: msg.branchName || undefined,
+            attachments: msg.attachments || [],
+            xPosition: msg.xPosition,
+            yPosition: msg.yPosition,
+            nodeType: msg.nodeType,
+            isCollapsed: msg.isCollapsed,
+            isLocked: msg.isLocked,
+            lastEditedBy: msg.lastEditedBy || undefined,
+            editedAt: msg.editedAt ? new Date(msg.editedAt) : undefined,
+            createdAt: new Date(msg.createdAt),
           }))}
-          userId="" // Empty string for shared view
+          userId=""
           chatTitle={chatData.title || undefined}
-          isSharedView={true} // New prop to indicate read-only mode
+          isSharedView={true}
         />
       </div>
     </div>

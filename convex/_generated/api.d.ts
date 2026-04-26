@@ -9,6 +9,9 @@
  */
 
 import type * as account from "../account.js";
+import type * as agent from "../agent.js";
+import type * as agentActions from "../agentActions.js";
+import type * as agentChat from "../agentChat.js";
 import type * as apiKeyActions from "../apiKeyActions.js";
 import type * as apiKeys from "../apiKeys.js";
 import type * as auth from "../auth.js";
@@ -17,9 +20,10 @@ import type * as collaboration from "../collaboration.js";
 import type * as feedback from "../feedback.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
-import type * as messages from "../messages.js";
+import type * as lib_modelProvider from "../lib/modelProvider.js";
 import type * as presence from "../presence.js";
 import type * as usage from "../usage.js";
+import type * as zermindNodes from "../zermindNodes.js";
 
 import type {
   ApiFromModules,
@@ -29,6 +33,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   account: typeof account;
+  agent: typeof agent;
+  agentActions: typeof agentActions;
+  agentChat: typeof agentChat;
   apiKeyActions: typeof apiKeyActions;
   apiKeys: typeof apiKeys;
   auth: typeof auth;
@@ -37,9 +44,10 @@ declare const fullApi: ApiFromModules<{
   feedback: typeof feedback;
   http: typeof http;
   "lib/auth": typeof lib_auth;
-  messages: typeof messages;
+  "lib/modelProvider": typeof lib_modelProvider;
   presence: typeof presence;
   usage: typeof usage;
+  zermindNodes: typeof zermindNodes;
 }>;
 
 /**
@@ -71,7 +79,6 @@ export declare const internal: FilterApi<
 export declare const components: {
   agent: import("@convex-dev/agent/_generated/component.js").ComponentApi<"agent">;
   betterAuth: import("@convex-dev/better-auth/_generated/component.js").ComponentApi<"betterAuth">;
-  persistentTextStreaming: import("@convex-dev/persistent-text-streaming/_generated/component.js").ComponentApi<"persistentTextStreaming">;
   presence: import("@convex-dev/presence/_generated/component.js").ComponentApi<"presence">;
   rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
 };

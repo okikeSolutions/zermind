@@ -29,6 +29,7 @@ export const attachment = v.object({
 export default defineSchema({
   chats: defineTable({
     userId: v.string(),
+    agentThreadId: v.string(),
     title: v.optional(v.string()),
     shareId: v.optional(v.string()),
     mode: chatMode,
@@ -39,18 +40,17 @@ export default defineSchema({
   })
     .index("by_userId", ["userId"])
     .index("by_userId_and_updatedAt", ["userId", "updatedAt"])
+    .index("by_agentThreadId", ["agentThreadId"])
     .index("by_shareId", ["shareId"])
     .index("by_mode", ["mode"])
     .index("by_templateId", ["templateId"]),
 
-  messages: defineTable({
+  zermindNodes: defineTable({
     chatId: v.id("chats"),
-    parentId: v.optional(v.id("messages")),
+    agentThreadId: v.string(),
+    agentMessageId: v.string(),
+    parentAgentMessageId: v.optional(v.string()),
     branchName: v.optional(v.string()),
-    role: messageRole,
-    content: v.string(),
-    model: v.optional(v.string()),
-    attachments: v.array(attachment),
     xPosition: v.number(),
     yPosition: v.number(),
     nodeType,
@@ -62,10 +62,8 @@ export default defineSchema({
   })
     .index("by_chatId", ["chatId"])
     .index("by_chatId_and_createdAt", ["chatId", "createdAt"])
-    .index("by_parentId", ["parentId"])
-    .index("by_model", ["model"])
-    .index("by_nodeType", ["nodeType"])
-    .index("by_isLocked", ["isLocked"]),
+    .index("by_agentMessageId", ["agentMessageId"])
+    .index("by_parentAgentMessageId", ["parentAgentMessageId"]),
 
   apiKeys: defineTable({
     userId: v.string(),
@@ -93,13 +91,15 @@ export default defineSchema({
     userId: v.string(),
     model: v.string(),
     chatId: v.optional(v.id("chats")),
+    agentThreadId: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_userId", ["userId"])
     .index("by_model", ["model"])
     .index("by_createdAt", ["createdAt"])
     .index("by_userId_and_createdAt", ["userId", "createdAt"])
-    .index("by_userId_and_model", ["userId", "model"]),
+    .index("by_userId_and_model", ["userId", "model"])
+    .index("by_chatId", ["chatId"]),
 
   feedback: defineTable({
     userId: v.string(),

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { QueryProvider } from "@/providers/query-provider";
 import { ConvexClientProvider } from "./convex-client-provider";
 import { getToken } from "@/lib/auth-server";
 import { Toaster } from "sonner";
@@ -44,18 +43,16 @@ export default async function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ConvexClientProvider initialToken={initialToken}>
-          <QueryProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-              <CookieBanner />
-              <Toaster />
-            </ThemeProvider>
-          </QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <CookieBanner />
+            <Toaster />
+          </ThemeProvider>
         </ConvexClientProvider>
       </body>
     </html>

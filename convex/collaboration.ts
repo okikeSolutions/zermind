@@ -1,7 +1,9 @@
+import { listMessages } from "@convex-dev/agent";
 import { ConvexError, v } from "convex/values";
+import { components } from "./_generated/api";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { type Id } from "./_generated/dataModel";
-import { attachment, chatMode, collaborationRole, messageRole, nodeType } from "./schema";
+import { collaborationRole } from "./schema";
 import { requireUserId } from "./lib/auth";
 
 const ACTIVE_SESSION_MS = 5 * 60 * 1000;
@@ -15,40 +17,6 @@ const sessionInfo = v.object({
   participantCount: v.number(),
   isParticipant: v.boolean(),
   userRole: v.optional(collaborationRole),
-});
-
-const messageDoc = v.object({
-  _id: v.id("messages"),
-  _creationTime: v.number(),
-  chatId: v.id("chats"),
-  parentId: v.optional(v.id("messages")),
-  branchName: v.optional(v.string()),
-  role: messageRole,
-  content: v.string(),
-  model: v.optional(v.string()),
-  attachments: v.array(attachment),
-  xPosition: v.number(),
-  yPosition: v.number(),
-  nodeType,
-  isCollapsed: v.boolean(),
-  isLocked: v.boolean(),
-  lastEditedBy: v.optional(v.string()),
-  editedAt: v.optional(v.number()),
-  createdAt: v.number(),
-});
-
-const collaborationChat = v.object({
-  _id: v.id("chats"),
-  _creationTime: v.number(),
-  userId: v.string(),
-  title: v.optional(v.string()),
-  shareId: v.optional(v.string()),
-  mode: chatMode,
-  isCollaborative: v.boolean(),
-  templateId: v.optional(v.id("conversationTemplates")),
-  createdAt: v.number(),
-  updatedAt: v.number(),
-  messages: v.array(messageDoc),
 });
 
 async function getActiveSession(ctx: QueryCtx | MutationCtx, chatId: Id<"chats">) {
@@ -317,15 +285,7 @@ export const invite = mutation({
 
 export const joinAndGetChat = mutation({
   args: { chatId: v.id("chats") },
-  returns: v.union(
-    v.object({
-      chat: collaborationChat,
-      session: sessionInfo,
-      userId: v.string(),
-      userRole: collaborationRole,
-    }),
-    v.null(),
-  ),
+  returns: v.any(),
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const chat = await ctx.db.get(args.chatId);
@@ -359,11 +319,45 @@ export const joinAndGetChat = mutation({
       isOwner ? "owner" : "collaborator",
     );
 
-    const messages = await ctx.db
-      .query("messages")
-      .withIndex("by_chatId_and_createdAt", (q) => q.eq("chatId", args.chatId))
-      .order("asc")
-      .take(500);
+    const [paginated, nodes] = await Promise.all([
+      listMessages(ctx, components.agent, {
+        threadId: chat.agentThreadId,
+        paginationOpts: { numItems: 500, cursor: null },
+        excludeToolMessages: true,
+      }),
+      ctx.db
+        .query("zermindNodes")
+        .withIndex("by_chatId", (q) => q.eq("chatId", args.chatId))
+        .take(1000),
+    ]);
+    const nodesByMessageId = new Map(nodes.map((node) => [node.agentMessageId, node]));
+    const messages = paginated.page
+      .filter(
+        (message) => message.message?.role === "user" || message.message?.role === "assistant",
+      )
+      .map((message) => {
+        const node = nodesByMessageId.get(message._id);
+        const role = message.message?.role === "user" ? "user" : "assistant";
+        return {
+          _id: message._id,
+          _creationTime: message._creationTime,
+          chatId: args.chatId,
+          parentId: node?.parentAgentMessageId,
+          branchName: node?.branchName,
+          role,
+          content: message.text ?? message.error ?? "",
+          model: role === "assistant" ? message.model : undefined,
+          attachments: [],
+          xPosition: node?.xPosition ?? 0,
+          yPosition: node?.yPosition ?? 0,
+          nodeType: node?.nodeType ?? "conversation",
+          isCollapsed: node?.isCollapsed ?? false,
+          isLocked: node?.isLocked ?? false,
+          lastEditedBy: node?.lastEditedBy,
+          editedAt: node?.editedAt,
+          createdAt: node?.createdAt ?? message._creationTime,
+        };
+      });
 
     const sessionData = await formatSession(ctx, session, userId);
     return {

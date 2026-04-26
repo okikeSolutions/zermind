@@ -3,7 +3,6 @@
 import { useCallback, useRef, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
 
 interface PositionUpdate {
   id: string;
@@ -12,7 +11,7 @@ interface PositionUpdate {
 }
 
 export function useNodePositions() {
-  const updatePositions = useMutation(api.messages.updatePositions);
+  const updatePositions = useMutation(api.zermindNodes.updatePositions);
   const pendingPositionUpdates = useRef<Map<string, { x: number; y: number }>>(new Map());
   const positionUpdateTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -21,7 +20,7 @@ export function useNodePositions() {
       try {
         return await updatePositions({
           updates: updates.map((update) => ({
-            id: update.id as Id<"messages">,
+            agentMessageId: update.id,
             xPosition: update.xPosition,
             yPosition: update.yPosition,
           })),

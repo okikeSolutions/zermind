@@ -52,13 +52,13 @@ function toDate(timestamp: number) {
 }
 
 function toUiMessage(message: {
-  _id: Id<"messages">;
-  role: "user" | "assistant";
+  _id: string;
+  role: string;
   content: string;
   createdAt: number;
   model?: string;
   attachments: Message["attachments"];
-  parentId?: Id<"messages">;
+  parentId?: string;
   branchName?: string;
   xPosition: number;
   yPosition: number;
@@ -70,7 +70,7 @@ function toUiMessage(message: {
 }): Message {
   return {
     id: message._id,
-    role: message.role,
+    role: message.role === "user" ? "user" : "assistant",
     content: message.content,
     createdAt: toDate(message.createdAt),
     model: message.model,
@@ -189,31 +189,6 @@ export function useDeleteChat() {
   return useMutationCompat(async (chatId: string) => {
     return await removeChat({ chatId: chatId as Id<"chats"> });
   });
-}
-
-export function useSaveMessage() {
-  const createMessage = useConvexMutation(api.messages.create);
-
-  return useMutationCompat(
-    async ({ chatId, message }: { chatId: string; message: Omit<Message, "id" | "createdAt"> }) => {
-      const savedMessage = await createMessage({
-        chatId: chatId as Id<"chats">,
-        role: message.role,
-        content: message.content,
-        model: message.model ?? undefined,
-        attachments: message.attachments ?? [],
-        parentId: message.parentId as Id<"messages"> | undefined,
-        branchName: message.branchName ?? undefined,
-        xPosition: message.xPosition ?? 0,
-        yPosition: message.yPosition ?? 0,
-        nodeType: message.nodeType ?? "conversation",
-        isCollapsed: message.isCollapsed ?? false,
-        isLocked: message.isLocked ?? false,
-      });
-
-      return toUiMessage(savedMessage);
-    },
-  );
 }
 
 export function useGenerateShareLink() {
