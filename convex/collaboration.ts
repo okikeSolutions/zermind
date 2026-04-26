@@ -5,6 +5,7 @@ import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/s
 import { type Id } from "./_generated/dataModel";
 import { collaborationRole } from "./schema";
 import { requireUserId } from "./lib/auth";
+import { rateLimiter } from "./rateLimits";
 
 const ACTIVE_SESSION_MS = 5 * 60 * 1000;
 const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -120,6 +121,8 @@ export const start = mutation({
   returns: sessionInfo,
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "collaborationStart", { key: userId, throws: true });
+
     const chat = await ctx.db.get(args.chatId);
     if (!chat || chat.userId !== userId) {
       throw new ConvexError({ code: "NOT_FOUND", message: "Chat not found" });
@@ -154,6 +157,8 @@ export const join = mutation({
   returns: sessionInfo,
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "collaborationJoin", { key: userId, throws: true });
+
     const chat = await ctx.db.get(args.chatId);
     if (!chat) {
       throw new ConvexError({ code: "NOT_FOUND", message: "Chat not found" });
@@ -259,6 +264,8 @@ export const invite = mutation({
   returns: v.object({ success: v.boolean(), invitationId: v.id("collaborationInvitations") }),
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "collaborationInvite", { key: userId, throws: true });
+
     const chat = await ctx.db.get(args.chatId);
     if (!chat || chat.userId !== userId) {
       throw new ConvexError({
@@ -288,6 +295,8 @@ export const joinAndGetChat = mutation({
   returns: v.any(),
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "collaborationJoin", { key: userId, throws: true });
+
     const chat = await ctx.db.get(args.chatId);
     if (!chat) return null;
 

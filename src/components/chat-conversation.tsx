@@ -37,15 +37,15 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import { type Message, type Attachment } from "@/lib/schemas/chat";
 import { useChat } from "@/hooks/use-chat";
 import { ModelSelector } from "@/components/model-selector";
 import { useUpdateChatTitle } from "@/hooks/use-chats-query";
 import { generateChatTitle, shouldUpdateChatTitle } from "@/lib/utils/chat-utils";
 import { MessageAttachment } from "@/components/message-attachment";
+import { Dropzone, DropzoneEmptyState } from "@/components/dropzone";
 import { useFileAttachments } from "@/hooks/use-file-attachments";
-import { formatBytes } from "@/components/dropzone";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -85,7 +85,6 @@ export function ChatConversation({
   const [selectedModel, setSelectedModel] = useState(initialModel);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // File attachments hook
   const fileAttachments = useFileAttachments({ model: selectedModel, chatId });
@@ -122,37 +121,25 @@ export function ChatConversation({
     scrollToBottom();
   }, [messages]);
 
-  // File selection handlers
   const handleFileSelect = useCallback(
     (type: "image" | "document") => {
-      if (!fileInputRef.current) return;
+      const input = document.querySelector<HTMLInputElement>("[data-chat-file-input]");
+      if (!input) return;
 
-      if (type === "image") {
-        fileInputRef.current.accept = fileAttachments.allowedMimeTypes
-          .filter((mime) => mime.startsWith("image/"))
-          .join(",");
-      } else {
-        fileInputRef.current.accept = fileAttachments.allowedMimeTypes
-          .filter((mime) => !mime.startsWith("image/"))
-          .join(",");
-      }
-
-      fileInputRef.current.click();
+      input.accept = fileAttachments.allowedMimeTypes
+        .filter((mime) =>
+          type === "image" ? mime.startsWith("image/") : !mime.startsWith("image/"),
+        )
+        .join(",");
+      input.click();
     },
     [fileAttachments.allowedMimeTypes],
   );
 
-  const handleFileInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || []);
-      if (files.length > 0) {
-        fileAttachments.addFiles(files);
-      }
-      // Reset input
-      e.target.value = "";
-    },
-    [fileAttachments],
-  );
+  const dropzoneFiles = fileAttachments.pendingFiles.map((file) => ({
+    ...file,
+    errors: [] as Array<{ code: string; message: string }>,
+  }));
 
   const handleSendMessage = async (data: MessageFormData) => {
     if (!data.message.trim() || isLoading) return;
@@ -242,15 +229,6 @@ export function ChatConversation({
       onDragOver={fileAttachments.supportsAttachments ? fileAttachments.handleDragOver : undefined}
       onDrop={fileAttachments.supportsAttachments ? fileAttachments.handleDrop : undefined}
     >
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        className="hidden"
-        onChange={handleFileInputChange}
-      />
-
       {/* Drag Drop Dialog */}
       <Dialog
         open={fileAttachments.isDragOver && fileAttachments.supportsAttachments}
@@ -490,6 +468,41 @@ export function ChatConversation({
               </Tooltip>
             </TooltipProvider>
           </div>
+
+          {fileAttachments.supportsAttachments && (
+            <Dropzone
+              files={dropzoneFiles}
+              setFiles={() => undefined}
+              onUpload={async () => undefined}
+              loading={fileAttachments.isUploading}
+              successes={[]}
+              errors={
+                fileAttachments.uploadError
+                  ? [{ name: "attachments", message: fileAttachments.uploadError.message }]
+                  : []
+              }
+              maxFileSize={
+                Math.max(
+                  fileAttachments.modelCapabilities.maxImageSize ?? 0,
+                  fileAttachments.modelCapabilities.maxDocumentSize ?? 0,
+                ) *
+                1024 *
+                1024
+              }
+              maxFiles={10}
+              isSuccess={false}
+              accept={fileAttachments.allowedMimeTypes.reduce(
+                (acc, mimeType) => ({ ...acc, [mimeType]: [] }),
+                {},
+              )}
+              disabled={isLoading || fileAttachments.isUploading}
+              onFilesAccepted={fileAttachments.addFiles}
+              inputProps={{ "data-chat-file-input": true }}
+              className="p-3 sm:p-4 [&_input]:hidden"
+            >
+              <DropzoneEmptyState />
+            </Dropzone>
+          )}
 
           {/* Pending Files */}
           {fileAttachments.pendingFiles.length > 0 && (

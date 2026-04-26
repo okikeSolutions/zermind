@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, File, Loader2, Upload, X } from "lucide-react";
 import { createContext, type PropsWithChildren, useCallback, useContext } from "react";
+import { useDropzone, type Accept, type FileRejection } from "react-dropzone";
 import Image from "next/image";
 
 export const formatBytes = (
@@ -20,7 +21,7 @@ export const formatBytes = (
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-interface FileWithErrors extends File {
+export interface FileWithErrors extends File {
   preview?: string;
   errors: Array<{ code: string; message: string }>;
 }
@@ -37,33 +38,77 @@ type DropzoneContextType = {
   isSuccess: boolean;
   isDragActive: boolean;
   isDragReject: boolean;
-  inputRef: React.RefObject<HTMLInputElement>;
+  openFileDialog?: () => void;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 };
 
 const DropzoneContext = createContext<DropzoneContextType | undefined>(undefined);
 
-type DropzoneProps = DropzoneContextType & {
+type DropzoneProps = Omit<DropzoneContextType, "isDragActive" | "isDragReject" | "inputRef"> & {
   className?: string;
-  getRootProps: (props?: object) => object;
-  getInputProps: () => object;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement> & Record<string, unknown>;
+  accept?: Accept;
+  disabled?: boolean;
+  onFilesAccepted?: (files: File[]) => void;
+  maxFileSize: number;
+  maxFiles: number;
 };
 
 const Dropzone = ({
   className,
   children,
-  getRootProps,
-  getInputProps,
+  accept,
+  disabled,
+  onFilesAccepted,
+  inputProps,
   ...restProps
 }: PropsWithChildren<DropzoneProps>) => {
+  const { getRootProps, getInputProps, inputRef, isDragActive, isDragReject, open } = useDropzone({
+    accept,
+    disabled,
+    multiple: restProps.maxFiles !== 1,
+    maxFiles: restProps.maxFiles,
+    maxSize: restProps.maxFileSize,
+    noClick: true,
+    onDrop: (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+      const rejectedFiles = fileRejections.map((rejection) =>
+        Object.assign(rejection.file, {
+          preview: rejection.file.type.startsWith("image/")
+            ? URL.createObjectURL(rejection.file)
+            : undefined,
+          errors: rejection.errors.map((error) => ({
+            code: error.code,
+            message: error.message,
+          })),
+        }),
+      );
+
+      if (rejectedFiles.length > 0) {
+        restProps.setFiles([...restProps.files, ...rejectedFiles]);
+      }
+      if (acceptedFiles.length > 0) {
+        onFilesAccepted?.(acceptedFiles);
+      }
+    },
+  });
+
   const isSuccess = restProps.isSuccess;
-  const isActive = restProps.isDragActive;
+  const isActive = isDragActive;
   const isInvalid =
-    (restProps.isDragActive && restProps.isDragReject) ||
+    (isDragActive && isDragReject) ||
     (restProps.errors.length > 0 && !restProps.isSuccess) ||
     restProps.files.some((file) => file.errors.length !== 0);
 
   return (
-    <DropzoneContext.Provider value={{ ...restProps }}>
+    <DropzoneContext.Provider
+      value={{
+        ...restProps,
+        isDragActive,
+        isDragReject,
+        inputRef,
+        openFileDialog: open,
+      }}
+    >
       <div
         {...getRootProps({
           className: cn(
@@ -75,7 +120,7 @@ const Dropzone = ({
           ),
         })}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps(inputProps)} />
         {children}
       </div>
     </DropzoneContext.Provider>
@@ -211,7 +256,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
 };
 
 const DropzoneEmptyState = ({ className }: { className?: string }) => {
-  const { maxFiles, maxFileSize, inputRef, isSuccess } = useDropzoneContext();
+  const { maxFiles, maxFileSize, inputRef, openFileDialog, isSuccess } = useDropzoneContext();
 
   if (isSuccess) {
     return null;
@@ -229,7 +274,7 @@ const DropzoneEmptyState = ({ className }: { className?: string }) => {
           Drag and drop or{" "}
           <button
             type="button"
-            onClick={() => inputRef.current?.click()}
+            onClick={() => openFileDialog?.() ?? inputRef?.current?.click()}
             className="underline cursor-pointer transition hover:text-foreground"
           >
             select {maxFiles === 1 ? `file` : "files"}

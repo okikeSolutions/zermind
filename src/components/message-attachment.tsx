@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Image as ImageIcon, FileText, ExternalLink, Download, Eye, Paperclip } from "lucide-react";
-import { formatBytes } from "@/components/dropzone";
-import { cn } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import NextImage from "next/image";
 import { useState, useEffect, useCallback, useRef } from "react";
 

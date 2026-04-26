@@ -6,6 +6,7 @@ import { type Doc, type Id } from "./_generated/dataModel";
 import { chatMode } from "./schema";
 import { zermindAgent } from "./agent";
 import { requireUserId } from "./lib/auth";
+import { rateLimiter } from "./rateLimits";
 
 const chatDoc = v.object({
   _id: v.id("chats"),
@@ -228,6 +229,8 @@ export const create = mutation({
   returns: chatDoc,
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "chatCreate", { key: userId, throws: true });
+
     const now = Date.now();
     const { threadId } = await zermindAgent.createThread(ctx, {
       userId,
@@ -308,7 +311,9 @@ export const generateShareLink = mutation({
   args: { chatId: v.id("chats") },
   returns: v.object({ shareId: v.string() }),
   handler: async (ctx, args) => {
-    await requireOwnedChat(ctx, args.chatId);
+    const { userId } = await requireOwnedChat(ctx, args.chatId);
+    await rateLimiter.limit(ctx, "shareLinkGenerate", { key: userId, throws: true });
+
     const shareId = crypto.randomUUID();
     await ctx.db.patch(args.chatId, { shareId, updatedAt: Date.now() });
     return { shareId };

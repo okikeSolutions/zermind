@@ -49,19 +49,16 @@ export function useAccountStats() {
 }
 
 export function useExportData() {
-  const exportData = useQuery(api.account.exportMine, {});
+  const exportData = useMutation(api.account.exportMine);
   const [isPending, setIsPending] = useState(false);
 
   const mutateAsync = useCallback(async (): Promise<void> => {
     setIsPending(true);
     try {
-      if (!exportData) {
-        throw new Error("Data export is still loading. Please try again in a moment.");
-      }
-
+      const data = await exportData({});
       const timestamp = new Date().toISOString().split("T")[0];
       const filename = `zermind-data-export-${timestamp}.json`;
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
         type: "application/json",
       });
       const url = window.URL.createObjectURL(blob);

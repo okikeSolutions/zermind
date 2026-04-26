@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import { requireUserId } from "./lib/auth";
+import { rateLimiter } from "./rateLimits";
 
 const feedbackType = v.union(
   v.literal("bug"),
@@ -33,6 +34,8 @@ export const create = mutation({
   returns: feedbackDoc,
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "feedbackCreate", { key: userId, throws: true });
+
     const now = Date.now();
     const id = await ctx.db.insert("feedback", {
       userId,

@@ -131,6 +131,8 @@ export const create = action({
   }),
   handler: async (ctx, args): Promise<PublicApiKey> => {
     const userId = await requireUserId(ctx);
+    await ctx.runMutation(internal.rateLimits.limitApiKeyCreate, { userId });
+
     const apiKey = args.apiKey.trim();
 
     if (!validateApiKeyFormat(apiKey, args.provider)) {

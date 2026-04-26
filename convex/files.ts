@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireUserId } from "./lib/auth";
+import { rateLimiter } from "./rateLimits";
 
 const fileType = v.union(v.literal("image"), v.literal("document"));
 
@@ -8,7 +9,9 @@ export const generateUploadUrl = mutation({
   args: {},
   returns: v.string(),
   handler: async (ctx) => {
-    await requireUserId(ctx);
+    const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "fileUploadUrlBurst", { key: userId, throws: true });
+    await rateLimiter.limit(ctx, "fileUploadUrlHourly", { key: userId, throws: true });
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -33,6 +36,7 @@ export const saveUploadedFile = mutation({
   }),
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "fileSaveHourly", { key: userId, throws: true });
 
     if (args.chatId) {
       const chat = await ctx.db.get(args.chatId);

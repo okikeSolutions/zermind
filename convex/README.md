@@ -10,7 +10,7 @@ Registered in `convex/convex.config.ts`:
 @convex-dev/agent        persistent AI threads/messages/streaming
 @convex-dev/better-auth  auth integration
 @convex-dev/presence     collaboration presence/cursors
-@convex-dev/rate-limiter available for app-level rate limiting
+@convex-dev/rate-limiter app-level limits for AI, uploads, sharing, invites, feedback
 ```
 
 `@convex-dev/persistent-text-streaming` is intentionally not used. Core chat streaming is handled by Convex Agent via `streamText(..., { saveStreamDeltas: true })`.
@@ -34,6 +34,7 @@ convex/apiKeyActions.ts     Node actions for BYOK encryption/decryption
 convex/usage.ts             usage logging/statistics
 convex/feedback.ts          feedback submission
 convex/account.ts           account stats/export/delete
+convex/rateLimits.ts        centralized Convex component rate limits
 convex/lib/auth.ts          Convex auth helpers
 convex/lib/modelProvider.ts model/provider resolution and BYOK lookup
 ```
@@ -94,6 +95,28 @@ client
   → create zermindNodes metadata for saved Agent messages
   → log usage
 ```
+
+## Rate limiting
+
+Application-level rate limits are defined in `convex/rateLimits.ts` using `@convex-dev/rate-limiter`.
+
+Currently limited operations:
+
+```txt
+api.agentActions.send       AI request burst/hourly limits
+api.files.generateUploadUrl upload URL burst/hourly limits
+api.files.saveUploadedFile  uploaded file metadata write limit
+api.feedback.create         feedback spam protection
+api.collaboration.start     collaboration session creation limit
+api.collaboration.join      collaboration join limit
+api.collaboration.invite    invite spam protection
+api.chats.create            chat creation limit
+api.chats.generateShareLink share-link generation limit
+api.apiKeyActions.create    BYOK creation limit
+api.account.exportMine      account export daily limit
+```
+
+Actions use internal mutations for rate-limit consumption because the rate limiter is mutation/transaction based. Normal reactive read queries and high-frequency presence updates are intentionally not rate-limited here.
 
 ## File attachment flow
 

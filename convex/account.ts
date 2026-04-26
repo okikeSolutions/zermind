@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { zermindAgent } from "./agent";
 import { requireUserId } from "./lib/auth";
+import { rateLimiter } from "./rateLimits";
 
 export const stats = query({
   args: {},
@@ -58,11 +59,12 @@ export const stats = query({
   },
 });
 
-export const exportMine = query({
+export const exportMine = mutation({
   args: {},
   returns: v.any(),
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
+    await rateLimiter.limit(ctx, "accountExport", { key: userId, throws: true });
 
     const [chats, apiKeys, usageLogs] = await Promise.all([
       ctx.db

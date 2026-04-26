@@ -23,6 +23,7 @@ import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_modelProvider from "../lib/modelProvider.js";
 import type * as presence from "../presence.js";
+import type * as rateLimits from "../rateLimits.js";
 import type * as usage from "../usage.js";
 import type * as zermindNodes from "../zermindNodes.js";
 
@@ -48,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/modelProvider": typeof lib_modelProvider;
   presence: typeof presence;
+  rateLimits: typeof rateLimits;
   usage: typeof usage;
   zermindNodes: typeof zermindNodes;
 }>;

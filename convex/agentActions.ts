@@ -40,6 +40,8 @@ export const send = action({
   returns: v.object({ success: v.boolean() }),
   handler: async (ctx, args) => {
     const userId = await requireActionUserId(ctx);
+    await ctx.runMutation(internal.rateLimits.limitAiSend, { userId });
+
     const chat = await ctx.runQuery(internal.agentChat.getForSend, {
       chatId: args.chatId,
       userId,
