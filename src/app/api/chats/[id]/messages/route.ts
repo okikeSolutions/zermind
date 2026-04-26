@@ -10,10 +10,7 @@ const CreateBranchingMessageSchema = CreateMessageSchema.extend({
   branchName: z.string().optional(),
 });
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = await createClient();
 
@@ -45,7 +42,7 @@ export async function POST(
           validatedData.content,
           validatedData.model || undefined,
           validatedData.branchName || undefined,
-          validatedData.attachments || []
+          validatedData.attachments || [],
         )
       : await addMessage(
           chatId,
@@ -53,7 +50,7 @@ export async function POST(
           validatedData.content,
           validatedData.model || undefined,
           undefined, // parentId
-          validatedData.attachments || []
+          validatedData.attachments || [],
         );
 
     return NextResponse.json({

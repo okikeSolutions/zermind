@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart3, Activity, Calendar } from "lucide-react";
 import { useUsageStats } from "@/hooks/use-usage";
@@ -48,10 +42,7 @@ export default function UsagePage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-muted-foreground">
-              <p>
-                Error loading usage statistics:{" "}
-                {error?.message || "Unknown error"}
-              </p>
+              <p>Error loading usage statistics: {error?.message || "Unknown error"}</p>
             </div>
           </CardContent>
         </Card>
@@ -77,9 +68,7 @@ export default function UsagePage() {
     );
   }
 
-  const modelEntries = Object.entries(stats.modelUsage).sort(
-    ([, a], [, b]) => b - a
-  );
+  const modelEntries = Object.entries(stats.modelUsage).sort(([, a], [, b]) => b - a);
   const dailyEntries = Object.entries(stats.dailyUsage)
     .sort(([a], [b]) => b.localeCompare(a))
     .slice(0, 7); // Last 7 days
@@ -118,16 +107,12 @@ export default function UsagePage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Requests
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalRequests}</div>
-            <p className="text-xs text-muted-foreground">
-              All-time chat requests
-            </p>
+            <p className="text-xs text-muted-foreground">All-time chat requests</p>
           </CardContent>
         </Card>
 
@@ -144,9 +129,7 @@ export default function UsagePage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Recent Activity
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -161,9 +144,7 @@ export default function UsagePage() {
         <Card>
           <CardHeader>
             <CardTitle>Model Usage</CardTitle>
-            <CardDescription>
-              AI models you&apos;ve used and request counts
-            </CardDescription>
+            <CardDescription>AI models you&apos;ve used and request counts</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -178,9 +159,7 @@ export default function UsagePage() {
                     <div key={model} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {formatModelName(model)}
-                          </span>
+                          <span className="font-medium">{formatModelName(model)}</span>
                           <Badge variant="secondary" className="text-xs">
                             {getModelProvider(model)}
                           </Badge>
@@ -207,9 +186,7 @@ export default function UsagePage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Daily request counts over the last week
-            </CardDescription>
+            <CardDescription>Daily request counts over the last week</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -225,9 +202,7 @@ export default function UsagePage() {
                     <div key={date} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{formatDate(date)}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {count} requests
-                        </span>
+                        <span className="text-sm text-muted-foreground">{count} requests</span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div

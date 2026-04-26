@@ -1,8 +1,10 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { RealtimeChannel } from "@supabase/supabase-js";
+"use client";
 
-// Types for collaboration
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import usePresence from "@convex-dev/presence/react";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+
 export interface CollaborativeUser {
   id: string;
   name: string;
@@ -42,321 +44,162 @@ export interface UseRealtimeCollaborationProps {
   onPresenceChange?: (users: CollaborativeUser[]) => void;
 }
 
-// Color palette for different users
 const USER_COLORS = [
-  "#3B82F6", // Blue
-  "#EF4444", // Red
-  "#10B981", // Emerald
-  "#F59E0B", // Amber
-  "#8B5CF6", // Violet
-  "#EC4899", // Pink
-  "#06B6D4", // Cyan
-  "#84CC16", // Lime
+  "#3B82F6",
+  "#EF4444",
+  "#10B981",
+  "#F59E0B",
+  "#8B5CF6",
+  "#EC4899",
+  "#06B6D4",
+  "#84CC16",
 ];
 
-const EVENT_ACTION_TYPE = "mind_map_action";
-const EVENT_USER_JOIN_TYPE = "user_join";
-const EVENT_USER_LEAVE_TYPE = "user_leave";
+type PresenceData = {
+  name?: string;
+  email?: string;
+  color?: string;
+  cursor?: { x: number; y: number };
+  selectedNodeId?: string | null;
+  updatedAt?: number;
+};
+
+function colorForUser(userId: string) {
+  let hash = 0;
+  for (let index = 0; index < userId.length; index += 1) {
+    hash = (hash * 31 + userId.charCodeAt(index)) >>> 0;
+  }
+  return USER_COLORS[hash % USER_COLORS.length];
+}
+
+function isPresenceData(value: unknown): value is PresenceData {
+  return typeof value === "object" && value !== null;
+}
 
 export function useRealtimeCollaboration({
   chatId,
   userId,
   userName,
+  userEmail,
   onAction,
   onPresenceChange,
 }: UseRealtimeCollaborationProps) {
-  const [isConnected, setIsConnected] = useState(false);
-  const [collaborativeUsers, setCollaborativeUsers] = useState<
-    CollaborativeUser[]
-  >([]);
-  const [userColor, setUserColor] = useState<string>("#3B82F6");
-  const [shouldAnnounceJoin, setShouldAnnounceJoin] = useState(false);
+  const roomId = chatId ? `chat-collaboration:${chatId}` : "";
+  const userColor = useMemo(() => colorForUser(userId || userName), [userId, userName]);
+  const updatePresenceData = useMutation(api.presence.updateData);
+  const presenceState = usePresence(api.presence, roomId, userId || "anonymous");
 
-  const supabase = useMemo(() => createClient(), []);
-  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+  const latestDataRef = useRef<PresenceData>({
+    name: userName,
+    email: userEmail,
+    color: userColor,
+  });
 
-  // Use refs for stable callback references
-  const onActionRef = useRef(onAction);
   const onPresenceChangeRef = useRef(onPresenceChange);
-
-  // Use refs for stable values to avoid dependency issues
-  const userColorRef = useRef(userColor);
-  const isConnectedRef = useRef(isConnected);
-  const announceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Update refs when callbacks change
-  useEffect(() => {
-    onActionRef.current = onAction;
-  }, [onAction]);
+  const onActionRef = useRef(onAction);
 
   useEffect(() => {
     onPresenceChangeRef.current = onPresenceChange;
   }, [onPresenceChange]);
 
-  // Update refs when state changes
   useEffect(() => {
-    userColorRef.current = userColor;
-  }, [userColor]);
+    onActionRef.current = onAction;
+  }, [onAction]);
+
+  const writePresenceData = useCallback(
+    async (data: PresenceData) => {
+      if (!roomId || !userId) return;
+      latestDataRef.current = {
+        ...latestDataRef.current,
+        ...data,
+        name: userName,
+        email: userEmail,
+        color: userColor,
+        updatedAt: Date.now(),
+      };
+
+      try {
+        await updatePresenceData({
+          roomId,
+          userId,
+          data: latestDataRef.current,
+        });
+      } catch (error) {
+        console.warn("Failed to update collaboration presence:", error);
+      }
+    },
+    [roomId, updatePresenceData, userColor, userEmail, userId, userName],
+  );
 
   useEffect(() => {
-    isConnectedRef.current = isConnected;
-  }, [isConnected]);
+    if (!roomId || !userId) return;
+    void writePresenceData({});
+  }, [roomId, userId, writePresenceData]);
 
-  // Handle user join announcement after color assignment
+  const collaborativeUsers = useMemo<CollaborativeUser[]>(() => {
+    return (presenceState ?? [])
+      .filter((presence) => presence.userId !== userId && presence.online)
+      .map((presence) => {
+        const data = isPresenceData(presence.data) ? presence.data : {};
+        return {
+          id: presence.userId,
+          name: data.name || presence.name || presence.userId,
+          email: data.email,
+          cursor: data.cursor,
+          color: data.color || colorForUser(presence.userId),
+          online_at: data.updatedAt
+            ? new Date(data.updatedAt).toISOString()
+            : new Date(presence.lastDisconnected || 0).toISOString(),
+        };
+      });
+  }, [presenceState, userId]);
+
   useEffect(() => {
-    if (!shouldAnnounceJoin || !channel || !isConnected || !userColor) return;
+    onPresenceChangeRef.current?.(collaborativeUsers);
+  }, [collaborativeUsers]);
 
-    // Clear any existing timeout
-    if (announceTimeoutRef.current) {
-      clearTimeout(announceTimeoutRef.current);
-    }
+  const broadcastAction = useCallback(
+    async (action: Omit<MindMapAction, "userId" | "userName" | "userColor" | "timestamp">) => {
+      if (action.type === "cursor_move" && action.position) {
+        await writePresenceData({ cursor: action.position });
+        return;
+      }
 
-    // Announce user join after a small delay
-    announceTimeoutRef.current = setTimeout(async () => {
-      const joinAction: MindMapAction = {
-        type: "user_join",
+      if (action.type === "node_select") {
+        await writePresenceData({ selectedNodeId: action.nodeId ?? null });
+        return;
+      }
+
+      // Persistent collaboration state now flows through Convex mutations/queries.
+      // This compatibility callback keeps old call sites safe until richer
+      // collaboration events are modeled explicitly in Convex.
+      onActionRef.current?.({
+        ...action,
         userId,
         userName,
         userColor,
         timestamp: Date.now(),
-      };
-
-      try {
-        await channel.send({
-          type: "broadcast",
-          event: EVENT_USER_JOIN_TYPE,
-          payload: joinAction,
-        });
-        setShouldAnnounceJoin(false);
-      } catch (error) {
-        console.warn("Failed to announce user join:", error);
-      }
-    }, 100);
-
-    return () => {
-      if (announceTimeoutRef.current) {
-        clearTimeout(announceTimeoutRef.current);
-        announceTimeoutRef.current = null;
-      }
-    };
-  }, [shouldAnnounceJoin, channel, isConnected, userColor, userId, userName]);
-
-  // Broadcast an action to other users
-  const broadcastAction = useCallback(
-    async (
-      action: Omit<
-        MindMapAction,
-        "userId" | "userName" | "userColor" | "timestamp"
-      >
-    ) => {
-      if (!channel || !isConnectedRef.current) return;
-
-      const fullAction: MindMapAction = {
-        ...action,
-        userId,
-        userName,
-        userColor: userColorRef.current,
-        timestamp: Date.now(),
-      };
-
-      try {
-        await channel.send({
-          type: "broadcast",
-          event: EVENT_ACTION_TYPE,
-          payload: fullAction,
-        });
-      } catch (error) {
-        console.warn("Failed to broadcast action:", error);
-      }
-    },
-    [channel, userId, userName] // Only include stable dependencies
-  );
-
-  // Update cursor position
-  const updateCursorPosition = useCallback(
-    (x: number, y: number) => {
-      broadcastAction({
-        type: "cursor_move",
-        position: { x, y },
       });
     },
-    [broadcastAction]
+    [userColor, userId, userName, writePresenceData],
   );
 
-  // Update selected node
+  const updateCursorPosition = useCallback(
+    (x: number, y: number) => {
+      void writePresenceData({ cursor: { x, y } });
+    },
+    [writePresenceData],
+  );
+
   const updateSelectedNode = useCallback(
     (nodeId: string | null) => {
-      if (nodeId) {
-        broadcastAction({
-          type: "node_select",
-          nodeId,
-        });
-      }
+      void writePresenceData({ selectedNodeId: nodeId });
     },
-    [broadcastAction]
+    [writePresenceData],
   );
 
-  // Initialize collaboration channel
-  useEffect(() => {
-    if (!chatId || !userId) return;
-
-    const roomName = `chat-collaboration:${chatId}`;
-    const newChannel = supabase.channel(roomName);
-
-    // Handle mind map actions
-    newChannel.on("broadcast", { event: EVENT_ACTION_TYPE }, ({ payload }) => {
-      const action = payload as MindMapAction;
-
-      // Ignore actions from ourselves
-      if (action.userId === userId) return;
-
-      onActionRef.current?.(action);
-    });
-
-    // Handle user joins
-    newChannel.on(
-      "broadcast",
-      { event: EVENT_USER_JOIN_TYPE },
-      ({ payload }) => {
-        const action = payload as MindMapAction;
-
-        if (action.userId === userId) return;
-
-        // Add user to collaborative users list
-        const newUser: CollaborativeUser = {
-          id: action.userId,
-          name: action.userName,
-          color: action.userColor,
-          online_at: new Date(action.timestamp).toISOString(),
-        };
-
-        setCollaborativeUsers((current) => {
-          const filtered = current.filter((u) => u.id !== action.userId);
-          const updated = [...filtered, newUser];
-          onPresenceChangeRef.current?.(updated);
-          return updated;
-        });
-      }
-    );
-
-    // Handle user leaves
-    newChannel.on(
-      "broadcast",
-      { event: EVENT_USER_LEAVE_TYPE },
-      ({ payload }) => {
-        const action = payload as MindMapAction;
-
-        if (action.userId === userId) return;
-
-        setCollaborativeUsers((current) => {
-          const updated = current.filter((u) => u.id !== action.userId);
-          onPresenceChangeRef.current?.(updated);
-          return updated;
-        });
-      }
-    );
-
-    // Subscribe to the channel
-    newChannel.subscribe(async (status) => {
-      if (status === "SUBSCRIBED") {
-        setIsConnected(true);
-        console.log("Realtime collaboration connected to:", roomName);
-
-        // Assign a color for this user synchronously
-        setCollaborativeUsers((currentUsers) => {
-          const availableColors = USER_COLORS.filter(
-            (color) => !currentUsers.some((user) => user.color === color)
-          );
-          const assignedColor =
-            availableColors[0] ||
-            USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)];
-
-          // Set the user color and trigger announcement
-          setUserColor(assignedColor);
-          setShouldAnnounceJoin(true);
-
-          return currentUsers; // Don't change users here
-        });
-      } else if (status === "CHANNEL_ERROR") {
-        setIsConnected(false);
-        console.error("Realtime channel error");
-      } else if (status === "TIMED_OUT") {
-        setIsConnected(false);
-        console.error("Realtime connection timed out");
-      } else if (status === "CLOSED") {
-        setIsConnected(false);
-        console.log("Realtime channel closed");
-      } else {
-        setIsConnected(false);
-        console.log("Realtime collaboration status:", status);
-      }
-    });
-
-    setChannel(newChannel);
-
-    // Cleanup on unmount
-    return () => {
-      // Clear any pending announcement timeout
-      if (announceTimeoutRef.current) {
-        clearTimeout(announceTimeoutRef.current);
-        announceTimeoutRef.current = null;
-      }
-
-      // Announce user leave before cleanup
-      if (newChannel && isConnectedRef.current) {
-        const leaveAction: MindMapAction = {
-          type: "user_leave",
-          userId,
-          userName,
-          userColor: userColorRef.current,
-          timestamp: Date.now(),
-        };
-
-        // Use sendBeacon for reliable delivery during page unload
-        if (typeof navigator !== "undefined" && navigator.sendBeacon) {
-          try {
-            const beaconData = JSON.stringify({
-              chatId,
-              action: leaveAction,
-            });
-            navigator.sendBeacon("/api/collaboration/beacon", beaconData);
-          } catch (error) {
-            console.warn("Failed to send user leave beacon:", error);
-            // Fallback to channel send if beacon fails
-            newChannel
-              .send({
-                type: "broadcast",
-                event: EVENT_USER_LEAVE_TYPE,
-                payload: leaveAction,
-              })
-              .catch((error) => {
-                console.warn("Failed to announce user leave:", error);
-              });
-          }
-        } else {
-          // Fallback for environments without sendBeacon
-          newChannel
-            .send({
-              type: "broadcast",
-              event: EVENT_USER_LEAVE_TYPE,
-              payload: leaveAction,
-            })
-            .catch((error) => {
-              console.warn("Failed to announce user leave:", error);
-            });
-        }
-      }
-
-      supabase.removeChannel(newChannel);
-      setChannel(null);
-      setIsConnected(false);
-      setCollaborativeUsers([]);
-      setShouldAnnounceJoin(false);
-    };
-  }, [chatId, supabase, userId, userName]); // Only include truly stable dependencies
-
   return {
-    isConnected,
+    isConnected: !!roomId && !!userId && presenceState !== undefined,
     collaborativeUsers,
     userColor,
     broadcastAction,

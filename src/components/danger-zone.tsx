@@ -29,11 +29,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import {
-  useDeleteAccount,
-  useExportData,
-  useAccountStats,
-} from "@/hooks/use-account";
+import { useDeleteAccount, useExportData, useAccountStats } from "@/hooks/use-account";
 
 const DELETE_CONFIRMATION_TEXT = "DELETE MY ACCOUNT";
 
@@ -70,9 +66,7 @@ export function DangerZone({ className }: DangerZoneProps) {
       toast.success("Data export started! Your download should begin shortly.");
       setIsExportDialogOpen(false);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to export data"
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to export data");
     }
   };
 
@@ -94,9 +88,7 @@ export function DangerZone({ className }: DangerZoneProps) {
       setIsDeleteDialogOpen(false);
       // The useDeleteAccount hook handles redirection
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete account"
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to delete account");
     }
   };
 
@@ -116,9 +108,8 @@ export function DangerZone({ className }: DangerZoneProps) {
         <Alert className="border-destructive/50 bg-destructive/10">
           <Shield className="h-4 w-4" />
           <AlertDescription className="text-sm">
-            <strong>Think carefully!</strong> Actions in this section are
-            permanent and cannot be undone. We recommend exporting your data
-            before making any irreversible changes.
+            <strong>Think carefully!</strong> Actions in this section are permanent and cannot be
+            undone. We recommend exporting your data before making any irreversible changes.
           </AlertDescription>
         </Alert>
 
@@ -168,44 +159,32 @@ export function DangerZone({ className }: DangerZoneProps) {
         <div className="space-y-2 sm:space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="space-y-1">
-              <h4 className="font-medium text-sm sm:text-base">
-                Export Your Data
-              </h4>
+              <h4 className="font-medium text-sm sm:text-base">Export Your Data</h4>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 Download a copy of all your data before deletion
               </p>
             </div>
-            <Dialog
-              open={isExportDialogOpen}
-              onOpenChange={setIsExportDialogOpen}
-            >
+            <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
               <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full sm:w-auto"
-                >
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
                 </Button>
               </DialogTrigger>
               <DialogContent className="mx-4 max-w-md sm:max-w-lg">
                 <DialogHeader>
-                  <DialogTitle className="text-lg sm:text-xl">
-                    Export Your Data
-                  </DialogTitle>
+                  <DialogTitle className="text-lg sm:text-xl">Export Your Data</DialogTitle>
                   <DialogDescription className="text-sm">
-                    This will download a JSON file containing all your chats,
-                    messages, API key metadata (not the actual keys), and usage
-                    statistics.
+                    This will download a JSON file containing all your chats, messages, API key
+                    metadata (not the actual keys), and usage statistics.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3 sm:space-y-4">
                   <Alert>
                     <Download className="h-4 w-4" />
                     <AlertDescription className="text-sm">
-                      The exported file will be named with today&apos;s date and
-                      can be used to backup your data or import it elsewhere.
+                      The exported file will be named with today&apos;s date and can be used to
+                      backup your data or import it elsewhere.
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -222,9 +201,7 @@ export function DangerZone({ className }: DangerZoneProps) {
                     disabled={exportDataMutation.isPending}
                     className="w-full sm:w-auto"
                   >
-                    {exportDataMutation.isPending
-                      ? "Exporting..."
-                      : "Download Export"}
+                    {exportDataMutation.isPending ? "Exporting..." : "Download Export"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -236,23 +213,14 @@ export function DangerZone({ className }: DangerZoneProps) {
         <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-destructive/20">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="space-y-1">
-              <h4 className="font-medium text-destructive text-sm sm:text-base">
-                Delete Account
-              </h4>
+              <h4 className="font-medium text-destructive text-sm sm:text-base">Delete Account</h4>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 Permanently delete your account and all associated data
               </p>
             </div>
-            <Dialog
-              open={isDeleteDialogOpen}
-              onOpenChange={setIsDeleteDialogOpen}
-            >
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
               <DialogTrigger asChild>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="w-full sm:w-auto"
-                >
+                <Button variant="destructive" size="sm" className="w-full sm:w-auto">
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete Account
                 </Button>
@@ -263,8 +231,8 @@ export function DangerZone({ className }: DangerZoneProps) {
                     Delete Account
                   </DialogTitle>
                   <DialogDescription className="text-sm">
-                    This action cannot be undone. This will permanently delete
-                    your account and remove all your data from our servers.
+                    This action cannot be undone. This will permanently delete your account and
+                    remove all your data from our servers.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -325,14 +293,11 @@ export function DangerZone({ className }: DangerZoneProps) {
                         disabled={
                           deleteAccountMutation.isPending ||
                           !deleteForm.watch("confirmation") ||
-                          deleteForm.watch("confirmation") !==
-                            DELETE_CONFIRMATION_TEXT
+                          deleteForm.watch("confirmation") !== DELETE_CONFIRMATION_TEXT
                         }
                         className="w-full sm:w-auto"
                       >
-                        {deleteAccountMutation.isPending
-                          ? "Deleting..."
-                          : "Delete My Account"}
+                        {deleteAccountMutation.isPending ? "Deleting..." : "Delete My Account"}
                       </Button>
                     </DialogFooter>
                   </form>

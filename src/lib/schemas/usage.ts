@@ -55,4 +55,4 @@ export type ModelUsageEntry = z.infer<typeof ModelUsageEntrySchema>;
 export type DailyUsageEntry = z.infer<typeof DailyUsageEntrySchema>;
 export type GetUsageStatsResponse = z.infer<typeof GetUsageStatsResponseSchema>;
 export type CreateUsageLogResponse = z.infer<typeof CreateUsageLogResponseSchema>;
-export type UsageErrorResponse = z.infer<typeof UsageErrorResponseSchema>; 
+export type UsageErrorResponse = z.infer<typeof UsageErrorResponseSchema>;

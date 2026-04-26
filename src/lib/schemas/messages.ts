@@ -2,11 +2,7 @@ import { z } from "zod";
 import { AttachmentSchema } from "./chat";
 
 // Node type enum for mind map
-export const nodeTypeSchema = z.enum([
-  "conversation",
-  "branching_point",
-  "insight",
-]);
+export const nodeTypeSchema = z.enum(["conversation", "branching_point", "insight"]);
 
 // Message position schema
 export const messagePositionSchema = z.object({
@@ -42,7 +38,7 @@ export const batchUpdatePositionsSchema = z.object({
         id: z.string().min(1),
         xPosition: z.number(),
         yPosition: z.number(),
-      })
+      }),
     )
     .min(1, "At least one update is required"),
 });
@@ -80,9 +76,7 @@ export const conversationPathSchema = z.object({
 // Delete message tree schema
 export const deleteMessageTreeSchema = z.object({
   messageId: z.string().min(1, "Message ID is required"),
-  confirmDelete: z
-    .boolean()
-    .refine((val) => val === true, "Confirmation required"),
+  confirmDelete: z.boolean().refine((val) => val === true, "Confirmation required"),
 });
 
 // Mind map message schema (full message with metadata)
@@ -115,7 +109,7 @@ export const conversationTreeSchema = z.object({
       source: z.string(),
       target: z.string(),
       type: z.string().optional(),
-    })
+    }),
   ),
   rootNodeId: z.string().optional(),
 });
@@ -131,9 +125,7 @@ export const messageLockSchema = z.object({
 export const multiModelBranchingSchema = z.object({
   parentId: z.string().min(1, "Parent message ID is required"),
   prompt: z.string().min(1, "Prompt is required"),
-  models: z
-    .array(z.string())
-    .min(2, "At least 2 models required for comparison"),
+  models: z.array(z.string()).min(2, "At least 2 models required for comparison"),
   branchName: z.string().max(100).optional(),
   layout: z.enum(["horizontal", "vertical", "radial"]).default("horizontal"),
 });
@@ -164,9 +156,7 @@ export const messageExportSchema = z.object({
 // Auto-layout schema
 export const autoLayoutSchema = z.object({
   chatId: z.string().min(1, "Chat ID is required"),
-  algorithm: z
-    .enum(["hierarchical", "force-directed", "radial", "tree"])
-    .default("hierarchical"),
+  algorithm: z.enum(["hierarchical", "force-directed", "radial", "tree"]).default("hierarchical"),
   spacing: z.object({
     x: z.number().min(50).default(300),
     y: z.number().min(50).default(150),
@@ -177,9 +167,7 @@ export const autoLayoutSchema = z.object({
 // Export types
 export type NodeType = z.infer<typeof nodeTypeSchema>;
 export type MessagePosition = z.infer<typeof messagePositionSchema>;
-export type CreateMessageWithPosition = z.infer<
-  typeof createMessageWithPositionSchema
->;
+export type CreateMessageWithPosition = z.infer<typeof createMessageWithPositionSchema>;
 export type UpdateMessagePosition = z.infer<typeof updateMessagePositionSchema>;
 export type BatchUpdatePositions = z.infer<typeof batchUpdatePositionsSchema>;
 export type CreateBranchingPoint = z.infer<typeof createBranchingPointSchema>;

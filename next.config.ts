@@ -32,23 +32,23 @@ const nextConfig: NextConfig = {
     const securityHeaders = [
       {
         // Apply security headers to all routes
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           // Note: Access-Control-Allow-Origin is handled dynamically in proxy.ts middleware
           // to properly support multiple allowed origins per CORS specification
-          { key: 'Access-Control-Allow-Methods', value: 'GET,DELETE,PATCH,POST,PUT' },
+          { key: "Access-Control-Allow-Methods", value: "GET,DELETE,PATCH,POST,PUT" },
           // Prevent clickjacking attacks
-          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: "X-Frame-Options", value: "DENY" },
           // Prevent MIME type sniffing
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: "X-Content-Type-Options", value: "nosniff" },
           // Enable browser XSS protection
-          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: "X-XSS-Protection", value: "1; mode=block" },
           // Control referrer information
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           // Permissions Policy to restrict browser features (comprehensive restrictions)
           {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
           },
         ],
       },

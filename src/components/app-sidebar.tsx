@@ -34,23 +34,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { createClient } from "@/lib/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { ThemeSwitcher } from "./theme-switcher";
 import { FeedbackDialog } from "./feedback-dialog";
-import {
-  useUserChats,
-  useCreateChat,
-  useDeleteChat,
-} from "@/hooks/use-chats-query";
+import { useUserChats, useCreateChat, useDeleteChat } from "@/hooks/use-chats-query";
 import { useChatModeStore } from "@/lib/store/chat-mode-store";
 import { useAuthUser } from "@/hooks/use-auth";
 import Link from "next/link";
@@ -81,16 +71,13 @@ export function AppSidebar() {
   const isMindMode = mode === "mind";
 
   // React Query hooks
-  const { data: chatSessions = [], isLoading } = useUserChats(
-    user?.id || undefined
-  );
+  const { data: chatSessions = [], isLoading } = useUserChats(user?.id || undefined);
   const createChatMutation = useCreateChat();
   const deleteChatMutation = useDeleteChat();
 
   const logout = async () => {
     try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      await authClient.signOut();
       router.push("/auth/login");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -130,9 +117,7 @@ export function AppSidebar() {
 
   const formatDate = (date: Date) => {
     const now = new Date();
-    const diffDays = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
@@ -142,13 +127,10 @@ export function AppSidebar() {
 
   const getChatDisplayInfo = (chat: (typeof chatSessions)[0]) => {
     const rawTitle = chat.title || "New Chat";
-    const title =
-      rawTitle.length > 15 ? rawTitle.substring(0, 15) + "..." : rawTitle;
+    const title = rawTitle.length > 15 ? rawTitle.substring(0, 15) + "..." : rawTitle;
     const lastMessage = chat.messages[0]?.content || "No messages yet";
     const truncatedMessage =
-      lastMessage.length > 20
-        ? lastMessage.substring(0, 20) + "..."
-        : lastMessage;
+      lastMessage.length > 20 ? lastMessage.substring(0, 20) + "..." : lastMessage;
 
     return { title, lastMessage: truncatedMessage };
   };
@@ -158,12 +140,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b">
         <div className="p-3 sm:p-4">
           <div className=" border rounded-lg p-1.5 sm:p-2">
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="hover:bg-transparent"
-            >
+            <Button asChild variant="ghost" size="sm" className="hover:bg-transparent">
               <Link href="/protected" className="flex items-center space-x-2">
                 <span className="font-bold text-lg bg-primary bg-clip-text text-transparent">
                   Zermind
@@ -189,9 +166,7 @@ export function AppSidebar() {
         <ScrollArea className="flex-1">
           {/* Navigation */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs sm:text-sm">
-              Navigation
-            </SidebarGroupLabel>
+            <SidebarGroupLabel className="text-xs sm:text-sm">Navigation</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {navigationItems.map((item) => (
@@ -210,9 +185,7 @@ export function AppSidebar() {
 
           {/* Chat Sessions */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs sm:text-sm">
-              Recent Chats
-            </SidebarGroupLabel>
+            <SidebarGroupLabel className="text-xs sm:text-sm">Recent Chats</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {isLoading ? (
@@ -241,15 +214,10 @@ export function AppSidebar() {
                           asChild
                           className="h-auto min-h-[2.5rem] sm:min-h-[3rem] py-2"
                         >
-                          <Link
-                            href={`/protected/chat/${chat.id}`}
-                            className="flex-1 m-2"
-                          >
+                          <Link href={`/protected/chat/${chat.id}`} className="flex-1 m-2">
                             <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
                             <div className="flex-1 overflow-hidden min-w-0">
-                              <div className="truncate font-medium text-sm">
-                                {title}
-                              </div>
+                              <div className="truncate font-medium text-sm">{title}</div>
                               <div className="text-xs text-muted-foreground">
                                 {formatDate(chat.updatedAt)}
                               </div>
@@ -305,9 +273,7 @@ export function AppSidebar() {
                 </div>
                 <Switch
                   checked={isMindMode}
-                  onCheckedChange={(checked) =>
-                    setMode(checked ? "mind" : "chat")
-                  }
+                  onCheckedChange={(checked) => setMode(checked ? "mind" : "chat")}
                   className="data-[state=checked]:bg-purple-500"
                 />
               </div>
@@ -343,9 +309,7 @@ export function AppSidebar() {
                   </div>
                   <Switch
                     checked={isMindMode}
-                    onCheckedChange={(checked) =>
-                      setMode(checked ? "mind" : "chat")
-                    }
+                    onCheckedChange={(checked) => setMode(checked ? "mind" : "chat")}
                     className="data-[state=checked]:bg-purple-500"
                   />
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -372,15 +336,9 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <div className="mb-2">
               <FeedbackDialog>
-                <Button
-                  variant="outline"
-                  className="w-full h-9 sm:h-10 px-2 sm:px-3"
-                  size="sm"
-                >
+                <Button variant="outline" className="w-full h-9 sm:h-10 px-2 sm:px-3" size="sm">
                   <MessageSquare className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm ml-1.5 sm:ml-2 truncate">
-                    Feedback
-                  </span>
+                  <span className="text-sm ml-1.5 sm:ml-2 truncate">Feedback</span>
                 </Button>
               </FeedbackDialog>
             </div>

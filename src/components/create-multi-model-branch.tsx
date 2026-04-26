@@ -81,10 +81,7 @@ const multiModelFormSchema = z.object({
     .refine((val) => !val || val.length >= 3, {
       message: "Branch name must be at least 3 characters if provided",
     }),
-  message: z
-    .string()
-    .min(1, "Message cannot be empty")
-    .max(4000, "Message is too long"),
+  message: z.string().min(1, "Message cannot be empty").max(4000, "Message is too long"),
   selectedModels: z
     .array(z.string())
     .min(2, "Please select at least 2 models for comparison")
@@ -133,14 +130,12 @@ function useMultiBranchingChats({
         if (model) {
           setModelStatuses((prev) => {
             const updatedStatuses = prev.map((status) =>
-              status.model === model
-                ? { ...status, status: "success" as const }
-                : status
+              status.model === model ? { ...status, status: "success" as const } : status,
             );
 
             // Check if all models are done using the updated statuses
             const allDone = updatedStatuses.every(
-              (s) => s.status === "success" || s.status === "error"
+              (s) => s.status === "success" || s.status === "error",
             );
             if (allDone) {
               setTimeout(() => onBranchCreated?.(), 0);
@@ -157,12 +152,12 @@ function useMultiBranchingChats({
             const updatedStatuses = prev.map((status) =>
               status.model === model
                 ? { ...status, status: "error" as const, error: error.message }
-                : status
+                : status,
             );
 
             // Check if all models are done using the updated statuses
             const allDone = updatedStatuses.every(
-              (s) => s.status === "success" || s.status === "error"
+              (s) => s.status === "success" || s.status === "error",
             );
             if (allDone) {
               setTimeout(() => onBranchCreated?.(), 0);
@@ -178,9 +173,7 @@ function useMultiBranchingChats({
         parentNodeId,
         initialContext,
         model,
-        branchName:
-          branchName ||
-          `${getProviderDisplayName(getProviderFromModel(model))} Response`,
+        branchName: branchName || `${getProviderDisplayName(getProviderFromModel(model))} Response`,
         onFinish: handleFinish,
         onError: handleError,
       };
@@ -193,7 +186,7 @@ function useMultiBranchingChats({
       branchName,
       setModelStatuses,
       onBranchCreated,
-    ]
+    ],
   );
 
   // Create fixed number of hook instances (max 4 models)
@@ -208,15 +201,9 @@ function useMultiBranchingChats({
     return chats.slice(0, selectedModels.length);
   }, [chat1, chat2, chat3, chat4, selectedModels]);
 
-  const isAnyLoading = useMemo(
-    () => activeChats.some((chat) => chat.isLoading),
-    [activeChats]
-  );
+  const isAnyLoading = useMemo(() => activeChats.some((chat) => chat.isLoading), [activeChats]);
 
-  const hasAnyError = useMemo(
-    () => activeChats.some((chat) => chat.error),
-    [activeChats]
-  );
+  const hasAnyError = useMemo(() => activeChats.some((chat) => chat.error), [activeChats]);
 
   const sendMessageToAll = useCallback(
     async (message: string) => {
@@ -229,10 +216,8 @@ function useMultiBranchingChats({
           ) {
             setModelStatuses((prev) =>
               prev.map((status) =>
-                status.model === model
-                  ? { ...status, status: "loading" }
-                  : status
-              )
+                status.model === model ? { ...status, status: "loading" } : status,
+              ),
             );
 
             return activeChats[index].sendMessage(message);
@@ -242,7 +227,7 @@ function useMultiBranchingChats({
 
       return Promise.allSettled(promises);
     },
-    [selectedModels, activeChats, setModelStatuses]
+    [selectedModels, activeChats, setModelStatuses],
   );
 
   const stopAll = useCallback(() => {
@@ -303,7 +288,7 @@ export function CreateMultiModelBranch({
       data.selectedModels.map((model) => ({
         model,
         status: "loading",
-      }))
+      })),
     );
 
     try {
@@ -369,9 +354,7 @@ export function CreateMultiModelBranch({
         {/* Context Preview */}
         {context.length > 0 && (
           <div className="space-y-2">
-            <label className="text-xs text-muted-foreground font-medium">
-              Branching from:
-            </label>
+            <label className="text-xs text-muted-foreground font-medium">Branching from:</label>
             <div className="bg-muted rounded-md p-2 max-h-20 overflow-y-auto">
               <div className="text-xs text-muted-foreground space-y-1">
                 {context.slice(-1).map((msg) => (
@@ -382,9 +365,7 @@ export function CreateMultiModelBranch({
                       <Bot className="h-3 w-3 mt-0.5 flex-shrink-0" />
                     )}
                     <span className="text-xs leading-relaxed">
-                      {msg.content.length > 60
-                        ? msg.content.substring(0, 60) + "..."
-                        : msg.content}
+                      {msg.content.length > 60 ? msg.content.substring(0, 60) + "..." : msg.content}
                     </span>
                   </div>
                 ))}
@@ -395,10 +376,7 @@ export function CreateMultiModelBranch({
 
         {/* Multi-Model Form */}
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleMultiModelSubmit)}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(handleMultiModelSubmit)} className="space-y-4">
             {/* Branch Name */}
             <FormField
               control={form.control}
@@ -444,15 +422,12 @@ export function CreateMultiModelBranch({
                                 field.onChange([...currentSelection, model.id]);
                               }
                             } else {
-                              field.onChange(
-                                currentSelection.filter((m) => m !== model.id)
-                              );
+                              field.onChange(currentSelection.filter((m) => m !== model.id));
                             }
                           }}
                           disabled={
                             isAnyLoading ||
-                            (!field.value.includes(model.id) &&
-                              field.value.length >= 4)
+                            (!field.value.includes(model.id) && field.value.length >= 4)
                           }
                         />
                         <label
@@ -460,17 +435,13 @@ export function CreateMultiModelBranch({
                           className="flex-1 flex items-center justify-between cursor-pointer"
                         >
                           <div>
-                            <span className="text-sm font-medium">
-                              {model.name}
-                            </span>
+                            <span className="text-sm font-medium">{model.name}</span>
                             <span className="text-xs text-muted-foreground ml-2">
                               by {model.provider}
                             </span>
                           </div>
                           <Badge
-                            variant={
-                              model.tier === "premium" ? "default" : "secondary"
-                            }
+                            variant={model.tier === "premium" ? "default" : "secondary"}
                             className="text-xs"
                           >
                             {model.tier}
@@ -507,9 +478,7 @@ export function CreateMultiModelBranch({
                         {status.status === "success" && (
                           <CheckCircle className="h-3 w-3 text-green-500" />
                         )}
-                        {status.status === "error" && (
-                          <XCircle className="h-3 w-3 text-red-500" />
-                        )}
+                        {status.status === "error" && <XCircle className="h-3 w-3 text-red-500" />}
                       </div>
                     </div>
                   ))}
@@ -583,8 +552,7 @@ export function CreateMultiModelBranch({
             />
 
             <p className="text-xs text-muted-foreground text-center">
-              This will create separate branches for each selected model&apos;s
-              response
+              This will create separate branches for each selected model&apos;s response
             </p>
           </form>
         </Form>
@@ -596,15 +564,10 @@ export function CreateMultiModelBranch({
               .filter((chat) => chat.error)
               .map((chat, index) => {
                 const modelId = form.watch("selectedModels")[index];
-                const modelName = modelId
-                  ? getModelDisplayName(modelId)
-                  : `Model ${index + 1}`;
+                const modelName = modelId ? getModelDisplayName(modelId) : `Model ${index + 1}`;
 
                 return (
-                  <div
-                    key={index}
-                    className="flex items-start space-x-2 text-destructive text-sm"
-                  >
+                  <div key={index} className="flex items-start space-x-2 text-destructive text-sm">
                     <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     <div className="flex flex-col">
                       <span className="font-medium">{modelName}:</span>

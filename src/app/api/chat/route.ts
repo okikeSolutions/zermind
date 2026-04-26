@@ -5,9 +5,8 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { logModelUsage } from "@/lib/usage-logger";
-import { createClient } from "@/lib/supabase/server";
-import { getActiveApiKey } from "@/lib/db/api-keys";
+import { fetchAuthAction, fetchAuthMutation, fetchAuthQuery } from "@/lib/auth-server";
+import { api } from "../../../../convex/_generated/api";
 import { type Provider } from "@/lib/schemas/api-keys";
 
 // Attachment schema for AI SDK experimental_attachments
@@ -23,11 +22,8 @@ const ChatRequestSchema = z.object({
     z.object({
       role: z.enum(["user", "assistant", "system"]),
       content: z.string(),
-      experimental_attachments: z
-        .array(AISDKAttachmentSchema)
-        .optional()
-        .default([]),
-    })
+      experimental_attachments: z.array(AISDKAttachmentSchema).optional().default([]),
+    }),
   ),
   model: z.string().optional().default("openai/gpt-4o-mini"),
   maxTokens: z.number().optional().default(1000),
@@ -54,14 +50,16 @@ function getProviderFromModel(model: string): Provider {
 }
 
 // Helper function to create the appropriate AI provider
-async function createAIProvider(model: string, userId: string) {
+async function createAIProvider(model: string, isAuthenticated: boolean) {
   const provider = getProviderFromModel(model);
 
-  // Try to get user's API key first
+  // Try to get user's API key first.
   let userApiKey: string | null = null;
-  if (userId !== "anonymous") {
+  if (isAuthenticated) {
     try {
-      userApiKey = await getActiveApiKey(userId, provider);
+      userApiKey = await fetchAuthAction(api.apiKeyActions.getActiveForProvider, {
+        provider,
+      });
     } catch (error) {
       console.error(`Error fetching user API key for ${provider}:`, error);
     }
@@ -106,7 +104,7 @@ async function createAIProvider(model: string, userId: string) {
   const openrouterKey = process.env.OPENROUTER_API_KEY;
   if (!openrouterKey) {
     throw new Error(
-      "OpenRouter API key not configured. Please add your own API key in settings or configure OPENROUTER_API_KEY environment variable."
+      "OpenRouter API key not configured. Please add your own API key in settings or configure OPENROUTER_API_KEY environment variable.",
     );
   }
 
@@ -143,22 +141,19 @@ export async function POST(req: NextRequest) {
   try {
     // Parse and validate request body
     const body = await req.json();
-    const { messages, model, maxTokens, temperature } =
-      ChatRequestSchema.parse(body);
+    const { messages, model, temperature } = ChatRequestSchema.parse(body);
 
-    // Get user for authentication and API key lookup
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const userId = user?.id || "anonymous";
+    // Get user for authentication and API key lookup.
+    // This route is temporary while the AI streaming path is migrated to Convex actions.
+    const user = await fetchAuthQuery(api.auth.getCurrentUser);
+    const isAuthenticated = !!user;
 
     // Create appropriate AI provider (with BYOK support)
     const {
       provider,
       model: providerModel,
       usingUserKey,
-    } = await createAIProvider(model, userId);
+    } = await createAIProvider(model, isAuthenticated);
 
     console.log("Provider setup:", {
       originalModel: model,
@@ -167,8 +162,14 @@ export async function POST(req: NextRequest) {
       provider: usingUserKey ? getProviderFromModel(model) : "openrouter",
     });
 
-    // Log model usage (no user data is logged, only model and user ID)
-    await logModelUsage(model, userId);
+    // Log model usage (no user data is logged, only model name).
+    if (isAuthenticated) {
+      try {
+        await fetchAuthMutation(api.usage.log, { model });
+      } catch (error) {
+        console.warn("Failed to log model usage:", error);
+      }
+    }
 
     // Stream response using Vercel AI SDK
     // The AI SDK will automatically handle experimental_attachments from the frontend
@@ -209,22 +210,19 @@ export async function POST(req: NextRequest) {
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
     // Handle other errors
     return new Response(
       JSON.stringify({
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to process chat request",
+        error: error instanceof Error ? error.message : "Failed to process chat request",
       }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }

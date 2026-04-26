@@ -38,14 +38,12 @@ export function useFileAttachments({ model }: UseFileAttachmentsOptions) {
 
       const maxSize = getMaxFileSize(model, file.type);
       if (file.size > maxSize) {
-        return `File is too large. Maximum size is ${Math.round(
-          maxSize / (1024 * 1024)
-        )}MB`;
+        return `File is too large. Maximum size is ${Math.round(maxSize / (1024 * 1024))}MB`;
       }
 
       return null;
     },
-    [supportsAttachments, allowedMimeTypes, model]
+    [supportsAttachments, allowedMimeTypes, model],
   );
 
   const addFiles = useCallback(
@@ -76,7 +74,7 @@ export function useFileAttachments({ model }: UseFileAttachmentsOptions) {
         alert(errors.join("\n"));
       }
     },
-    [validateFile]
+    [validateFile],
   );
 
   const removeFile = useCallback((fileId: string) => {
@@ -134,17 +132,14 @@ export function useFileAttachments({ model }: UseFileAttachmentsOptions) {
           let compressedData = canvas.toDataURL("image/jpeg", quality);
 
           // Reduce quality until under size limit
-          while (
-            compressedData.length > maxSizeKB * 1024 * 1.37 &&
-            quality > 0.1
-          ) {
+          while (compressedData.length > maxSizeKB * 1024 * 1.37 && quality > 0.1) {
             // 1.37 factor for base64 overhead
             quality -= 0.05;
             compressedData = canvas.toDataURL("image/jpeg", quality);
           }
 
           console.log(
-            `Image compressed: ${dataUrl.length} -> ${compressedData.length} bytes (quality: ${quality})`
+            `Image compressed: ${dataUrl.length} -> ${compressedData.length} bytes (quality: ${quality})`,
           );
           resolve(compressedData);
         };
@@ -154,7 +149,7 @@ export function useFileAttachments({ model }: UseFileAttachmentsOptions) {
         img.src = dataUrl;
       });
     },
-    []
+    [],
   );
 
   // Process files directly without uploading to storage (for privacy)
@@ -244,7 +239,7 @@ export function useFileAttachments({ model }: UseFileAttachmentsOptions) {
         addFiles(files);
       }
     },
-    [addFiles]
+    [addFiles],
   );
 
   return {

@@ -1,13 +1,7 @@
 import { z } from "zod";
 
 // Supported AI providers enum
-export const ProviderEnum = z.enum([
-  "openrouter", 
-  "openai", 
-  "anthropic",
-  "meta",
-  "google"
-]);
+export const ProviderEnum = z.enum(["openrouter", "openai", "anthropic", "meta", "google"]);
 
 // Base API key schema (for database operations)
 export const ApiKeySchema = z.object({
@@ -25,11 +19,13 @@ export const ApiKeySchema = z.object({
 // API key creation schema (for frontend forms)
 export const CreateApiKeySchema = z.object({
   provider: ProviderEnum,
-  apiKey: z.string()
+  apiKey: z
+    .string()
     .min(1, "API key is required")
     .regex(/^[A-Za-z0-9_-]+$/, "API key contains invalid characters")
     .max(500, "API key is too long"),
-  keyName: z.string()
+  keyName: z
+    .string()
     .min(1, "Key name is required")
     .max(50, "Key name is too long")
     .regex(/^[A-Za-z0-9\s_-]+$/, "Key name contains invalid characters"),
@@ -37,7 +33,8 @@ export const CreateApiKeySchema = z.object({
 
 // API key update schema
 export const UpdateApiKeySchema = z.object({
-  keyName: z.string()
+  keyName: z
+    .string()
     .min(1, "Key name is required")
     .max(50, "Key name is too long")
     .regex(/^[A-Za-z0-9\s_-]+$/, "Key name contains invalid characters")
@@ -100,4 +97,4 @@ export type CreateApiKeyResponse = z.infer<typeof CreateApiKeyResponseSchema>;
 export type UpdateApiKeyResponse = z.infer<typeof UpdateApiKeyResponseSchema>;
 export type DeleteApiKeyResponse = z.infer<typeof DeleteApiKeyResponseSchema>;
 export type ValidateApiKeyResponse = z.infer<typeof ValidateApiKeyResponseSchema>;
-export type ApiKeyErrorResponse = z.infer<typeof ApiKeyErrorResponseSchema>; 
+export type ApiKeyErrorResponse = z.infer<typeof ApiKeyErrorResponseSchema>;

@@ -35,16 +35,10 @@ export async function POST(request: NextRequest) {
 
     // Handle validation errors
     if (error instanceof ZodError) {
-      return NextResponse.json(
-        { error: "Invalid input data" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid input data" }, { status: 400 });
     }
 
     // Handle other errors
-    return NextResponse.json(
-      { error: "Failed to submit feedback" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to submit feedback" }, { status: 500 });
   }
 }

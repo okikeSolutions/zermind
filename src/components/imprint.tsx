@@ -35,9 +35,7 @@ export default function Imprint() {
 
         <Card className="overflow-hidden shadow-lg border-none">
           <CardHeader className="bg-primary text-neutral-50">
-            <CardTitle className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Imprint
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold tracking-tight sm:text-4xl">Imprint</CardTitle>
           </CardHeader>
           <CardContent className="p-6 sm:p-10">
             <div className="grid gap-6 sm:grid-cols-2">
@@ -50,11 +48,7 @@ export default function Imprint() {
                   "Business Purpose: IT-Services",
                 ]}
               />
-              <InfoSection
-                icon={User}
-                title="Owner"
-                content={["Ugochukwu Uwakwe"]}
-              />
+              <InfoSection icon={User} title="Owner" content={["Ugochukwu Uwakwe"]} />
               <InfoSection
                 icon={Briefcase}
                 title="Registration"
@@ -66,16 +60,9 @@ export default function Imprint() {
               <InfoSection
                 icon={MapPin}
                 title="Location"
-                content={[
-                  "Company Headquarters: 3002 Purkersdorf",
-                  "Address: Wiener Straße 2/23",
-                ]}
+                content={["Company Headquarters: 3002 Purkersdorf", "Address: Wiener Straße 2/23"]}
               />
-              <InfoSection
-                icon={Phone}
-                title="Contact"
-                content={["Phone: +43 660 768 52 25"]}
-              />
+              <InfoSection icon={Phone} title="Contact" content={["Phone: +43 660 768 52 25"]} />
               <InfoSection
                 icon={Mail}
                 title="Email"
@@ -112,23 +99,20 @@ export default function Imprint() {
               <InfoSection
                 icon={AlertCircle}
                 title="Authority"
-                content={[
-                  "Trade Authority: District Administration St. Pölten",
-                ]}
+                content={["Trade Authority: District Administration St. Pölten"]}
               />
             </div>
             <div className="mt-8 border-t pt-6 text-sm text-primary">
               <p>
-                Consumers have the possibility to address complaints to the
-                EU&apos;s online dispute resolution platform:{" "}
+                Consumers have the possibility to address complaints to the EU&apos;s online dispute
+                resolution platform:{" "}
                 <a
                   href="https://ec.europa.eu/odr"
                   className="text-primary hover:text-primary/80 transition-colors"
                 >
                   www.ec.europa.eu/odr
                 </a>
-                . You can also address any complaints to the email address
-                provided above.
+                . You can also address any complaints to the email address provided above.
               </p>
             </div>
           </CardContent>

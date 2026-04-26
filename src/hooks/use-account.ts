@@ -1,48 +1,69 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createClient } from "@/lib/supabase/client";
-import { 
-  DeleteAccount, 
-  DeleteAccountResponse, 
-  AccountErrorResponse 
-} from "@/lib/schemas/account";
+"use client";
 
-// Query keys for account operations
+import { useCallback, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { authClient } from "@/lib/auth-client";
+import { api } from "../../convex/_generated/api";
+import { DeleteAccount, DeleteAccountResponse } from "@/lib/schemas/account";
+
 export const accountKeys = {
-  all: ['account'] as const,
-  stats: () => [...accountKeys.all, 'stats'] as const,
+  all: ["account"] as const,
+  stats: () => [...accountKeys.all, "stats"] as const,
 };
 
-// Hook to get user account statistics (for showing what will be deleted)
-export function useAccountStats() {
-  return useQuery({
-    queryKey: accountKeys.stats(),
-    queryFn: async () => {
-      const response = await fetch("/api/user/account/stats");
-      if (!response.ok) {
-        throw new Error("Failed to fetch account statistics");
+type MutationFn<Args, Result> = (args: Args) => Promise<Result>;
+
+function useMutationCompat<Args, Result>(mutationFn: MutationFn<Args, Result>) {
+  const [isPending, setIsPending] = useState(false);
+
+  const mutateAsync = useCallback(
+    async (args: Args) => {
+      setIsPending(true);
+      try {
+        return await mutationFn(args);
+      } finally {
+        setIsPending(false);
       }
-      return response.json();
     },
-  });
+    [mutationFn],
+  );
+
+  const mutate = useCallback(
+    (args: Args) => {
+      void mutateAsync(args);
+    },
+    [mutateAsync],
+  );
+
+  return { mutate, mutateAsync, isPending };
 }
 
-// Hook to export user data
+export function useAccountStats() {
+  const stats = useQuery(api.account.stats, {});
+
+  return {
+    data: stats,
+    isLoading: stats === undefined,
+    error: null as Error | null,
+  };
+}
+
 export function useExportData() {
-  return useMutation({
-    mutationFn: async (): Promise<void> => {
-      const response = await fetch("/api/user/account/export");
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to export data");
+  const exportData = useQuery(api.account.exportMine, {});
+  const [isPending, setIsPending] = useState(false);
+
+  const mutateAsync = useCallback(async (): Promise<void> => {
+    setIsPending(true);
+    try {
+      if (!exportData) {
+        throw new Error("Data export is still loading. Please try again in a moment.");
       }
 
-      // Get the filename from the response headers
-      const contentDisposition = response.headers.get("content-disposition");
-      const filename = contentDisposition?.match(/filename="([^"]+)"/)?.[1] || "data-export.json";
-      
-      // Create blob and download
-      const blob = await response.blob();
+      const timestamp = new Date().toISOString().split("T")[0];
+      const filename = `zermind-data-export-${timestamp}.json`;
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: "application/json",
+      });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -51,49 +72,31 @@ export function useExportData() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+    } finally {
+      setIsPending(false);
+    }
+  }, [exportData]);
+
+  return {
+    mutate: () => {
+      void mutateAsync();
     },
-  });
+    mutateAsync,
+    isPending,
+  };
 }
 
-// Hook to delete user account
 export function useDeleteAccount() {
-  const queryClient = useQueryClient();
+  const deleteMyData = useMutation(api.account.deleteMyData);
 
-  return useMutation({
-    mutationFn: async (data: DeleteAccount): Promise<DeleteAccountResponse> => {
-      const response = await fetch("/api/user/account/delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+  return useMutationCompat(async (data: DeleteAccount): Promise<DeleteAccountResponse> => {
+    const result = await deleteMyData({ confirmation: data.confirmation });
+    await authClient.signOut();
 
-      const result = await response.json();
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
 
-      if (!response.ok) {
-        const error = result as AccountErrorResponse;
-        throw new Error(error.error || "Failed to delete account");
-      }
-
-      return result as DeleteAccountResponse;
-    },
-    onSuccess: async () => {
-      // Clear all queries since the user account is being deleted
-      queryClient.clear();
-      
-      // Sign out the user (this should already be done by the API, but let's be safe)
-      try {
-        const supabase = createClient();
-        await supabase.auth.signOut();
-      } catch (error) {
-        console.error("Error signing out after account deletion:", error);
-      }
-
-      // Redirect to home page after successful deletion
-      if (typeof window !== 'undefined') {
-        window.location.href = '/';
-      }
-    },
+    return result;
   });
-} 
+}

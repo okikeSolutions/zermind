@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { deleteChat, getChatWithMessages, updateChatTitle } from "@/lib/db/chats";
-import { 
-  DeleteChatResponseSchema, 
-  ErrorResponseSchema, 
+import {
+  DeleteChatResponseSchema,
+  ErrorResponseSchema,
   ChatWithMessagesSchema,
-  UpdateChatSchema 
+  UpdateChatSchema,
 } from "@/lib/schemas/chat";
 
 interface RouteParams {
@@ -41,8 +41,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching chat:", error);
-    const errorResponse = ErrorResponseSchema.parse({ 
-      error: "Failed to fetch chat" 
+    const errorResponse = ErrorResponseSchema.parse({
+      error: "Failed to fetch chat",
     });
     return NextResponse.json(errorResponse, { status: 500 });
   }
@@ -78,8 +78,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error deleting chat:", error);
-    const errorResponse = ErrorResponseSchema.parse({ 
-      error: "Failed to delete chat" 
+    const errorResponse = ErrorResponseSchema.parse({
+      error: "Failed to delete chat",
     });
     return NextResponse.json(errorResponse, { status: 500 });
   }
@@ -121,17 +121,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error("Error updating chat:", error);
-    
+
     // Handle Zod validation errors
     if (error instanceof Error && error.name === "ZodError") {
-      const errorResponse = ErrorResponseSchema.parse({ 
-        error: "Invalid request data" 
+      const errorResponse = ErrorResponseSchema.parse({
+        error: "Invalid request data",
       });
       return NextResponse.json(errorResponse, { status: 400 });
     }
-    
-    const errorResponse = ErrorResponseSchema.parse({ 
-      error: "Failed to update chat" 
+
+    const errorResponse = ErrorResponseSchema.parse({
+      error: "Failed to update chat",
     });
     return NextResponse.json(errorResponse, { status: 500 });
   }

@@ -25,9 +25,9 @@ export async function GET() {
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching user chats:", error);
-    
-    const errorResponse = ErrorResponseSchema.parse({ 
-      error: "Failed to fetch chats" 
+
+    const errorResponse = ErrorResponseSchema.parse({
+      error: "Failed to fetch chats",
     });
     return NextResponse.json(errorResponse, { status: 500 });
   }

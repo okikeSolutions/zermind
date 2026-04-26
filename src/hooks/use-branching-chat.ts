@@ -36,9 +36,7 @@ export function useBranchingChat({
     stop,
     sendMessage: aiSendMessage,
   } = useChat({
-    id: `${chatId}-branch-${parentNodeId}-${model}${
-      branchName ? `-${branchName}` : ""
-    }`,
+    id: `${chatId}-branch-${parentNodeId}-${model}${branchName ? `-${branchName}` : ""}`,
     messages: initialContext.map((msg) => ({
       id: msg.id,
       role: msg.role,
@@ -86,8 +84,7 @@ export function useBranchingChat({
         onFinish?.(formattedMessage);
       } catch (error) {
         console.error("Failed to save assistant message:", error);
-        const errorMessage =
-          error instanceof Error ? error : new Error("Failed to save message");
+        const errorMessage = error instanceof Error ? error : new Error("Failed to save message");
         setError(errorMessage);
         onError?.(errorMessage);
       } finally {
@@ -114,13 +111,7 @@ export function useBranchingChat({
 
   const sendMessage = useCallback(
     async (content: string) => {
-      if (
-        !content.trim() ||
-        isLoading ||
-        status === "submitted" ||
-        status === "streaming"
-      )
-        return;
+      if (!content.trim() || isLoading || status === "submitted" || status === "streaming") return;
 
       setIsLoading(true);
       setError(null);
@@ -154,14 +145,13 @@ export function useBranchingChat({
             body: {
               model,
             },
-          }
+          },
         );
 
         setInput("");
       } catch (error) {
         console.error("Failed to send branching message:", error);
-        const errorMessage =
-          error instanceof Error ? error : new Error("Failed to send message");
+        const errorMessage = error instanceof Error ? error : new Error("Failed to send message");
         setError(errorMessage);
         onError?.(errorMessage);
         setIsLoading(false);
@@ -177,22 +167,19 @@ export function useBranchingChat({
       aiSendMessage,
       model,
       onError,
-    ]
+    ],
   );
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setInput(e.target.value);
-    },
-    []
-  );
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+  }, []);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
       sendMessage(input);
     },
-    [input, sendMessage]
+    [input, sendMessage],
   );
 
   return {

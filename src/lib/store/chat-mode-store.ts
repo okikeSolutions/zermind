@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
-export type ChatMode = 'chat' | 'mind';
+export type ChatMode = "chat" | "mind";
 
 interface ChatModeStore {
   mode: ChatMode;
@@ -12,13 +12,13 @@ interface ChatModeStore {
 export const useChatModeStore = create<ChatModeStore>()(
   persist(
     (set, get) => ({
-      mode: 'chat',
+      mode: "chat",
       setMode: (mode: ChatMode) => set({ mode }),
-      toggleMode: () => set({ mode: get().mode === 'chat' ? 'mind' : 'chat' }),
+      toggleMode: () => set({ mode: get().mode === "chat" ? "mind" : "chat" }),
     }),
     {
-      name: 'chat-mode-storage',
+      name: "chat-mode-storage",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
-); 
+    },
+  ),
+);

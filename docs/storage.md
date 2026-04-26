@@ -244,37 +244,28 @@ const migrateAttachments = async () => {
         break;
       }
 
-      console.log(
-        `📦 Processing batch: ${offset + 1}-${offset + messages.length}`
-      );
+      console.log(`📦 Processing batch: ${offset + 1}-${offset + messages.length}`);
 
       const processedMessages: Array<{ id: string; attachments: any[] }> = [];
 
       // Process each message with error handling
       for (const message of messages) {
         try {
-          const updatedAttachments = message.attachments.map(
-            (attachment: any) => {
-              if (!attachment.filePath && attachment.url) {
-                const filePath = extractFilePathFromUrl(attachment.url);
-                if (filePath) {
-                  return { ...attachment, filePath };
-                } else {
-                  console.warn(
-                    `⚠️  Failed to extract file path from URL: ${attachment.url}`
-                  );
-                  return attachment; // Keep original if extraction fails
-                }
+          const updatedAttachments = message.attachments.map((attachment: any) => {
+            if (!attachment.filePath && attachment.url) {
+              const filePath = extractFilePathFromUrl(attachment.url);
+              if (filePath) {
+                return { ...attachment, filePath };
+              } else {
+                console.warn(`⚠️  Failed to extract file path from URL: ${attachment.url}`);
+                return attachment; // Keep original if extraction fails
               }
-              return attachment;
             }
-          );
+            return attachment;
+          });
 
           // Only include messages that had successful updates
-          if (
-            JSON.stringify(updatedAttachments) !==
-            JSON.stringify(message.attachments)
-          ) {
+          if (JSON.stringify(updatedAttachments) !== JSON.stringify(message.attachments)) {
             processedMessages.push({
               id: message.id,
               attachments: updatedAttachments,
@@ -296,17 +287,13 @@ const migrateAttachments = async () => {
       offset += BATCH_SIZE;
 
       // Progress update
-      console.log(
-        `📊 Progress: ${totalProcessed} messages processed, ${totalErrors} errors`
-      );
+      console.log(`📊 Progress: ${totalProcessed} messages processed, ${totalErrors} errors`);
 
       // Small delay to avoid overwhelming the database
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    console.log(
-      `🎉 Migration completed! Processed: ${totalProcessed}, Errors: ${totalErrors}`
-    );
+    console.log(`🎉 Migration completed! Processed: ${totalProcessed}, Errors: ${totalErrors}`);
   } catch (error) {
     console.error("💥 Migration failed:", error);
     throw error;
@@ -353,7 +340,7 @@ const extractFilePathFromUrl = (url: string): string | null => {
  */
 const updateMessagesInBatches = async (
   messages: Array<{ id: string; attachments: any[] }>,
-  batchSize: number
+  batchSize: number,
 ) => {
   for (let i = 0; i < messages.length; i += batchSize) {
     const batch = messages.slice(i, i + batchSize);
@@ -380,21 +367,14 @@ const updateMessagesInBatches = async (
       });
 
       const results = await Promise.allSettled(updatePromises);
-      const successful = results.filter(
-        (r) => r.status === "fulfilled" && r.value.success
-      ).length;
+      const successful = results.filter((r) => r.status === "fulfilled" && r.value.success).length;
       const failed = results.length - successful;
 
       if (failed > 0) {
-        console.warn(
-          `⚠️  Batch update completed with ${failed} failures out of ${results.length}`
-        );
+        console.warn(`⚠️  Batch update completed with ${failed} failures out of ${results.length}`);
       }
     } catch (error) {
-      console.error(
-        `❌ Batch update failed for batch starting at index ${i}:`,
-        error
-      );
+      console.error(`❌ Batch update failed for batch starting at index ${i}:`, error);
       // Continue with next batch instead of failing completely
     }
   }
@@ -415,14 +395,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ### Common Issues
 
 1. **"Access Denied" errors**
-
    - Verify RLS policies are correctly set up
    - Check that bucket is marked as private
    - Ensure user is authenticated
    - Verify `owner_id` is set correctly on uploaded files
 
 2. **Signed URL generation fails**
-
    - Verify file path format matches bucket structure
    - Check bucket permissions in Supabase dashboard
    - Ensure adequate Supabase plan limits

@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma";
 import { Message, NodeType } from "../../../prisma/generated/prisma/client";
 
-
 // Enhanced message creation with mind map positioning
 export async function createMessageWithPosition(data: {
   chatId: string;
@@ -33,7 +32,7 @@ export async function createMessageWithPosition(data: {
 export async function updateMessagePosition(
   messageId: string,
   xPosition: number,
-  yPosition: number
+  yPosition: number,
 ): Promise<Message> {
   return prisma.message.update({
     where: { id: messageId },
@@ -49,7 +48,7 @@ export async function updateMessagePositionSecure(
   messageId: string,
   xPosition: number,
   yPosition: number,
-  userId: string
+  userId: string,
 ): Promise<Message> {
   try {
     // Atomic operation: update only if message belongs to user's chat
@@ -80,7 +79,7 @@ export async function batchUpdateMessagePositions(
     id: string;
     xPosition: number;
     yPosition: number;
-  }>
+  }>,
 ): Promise<void> {
   // Use a transaction to ensure atomicity of all updates
   await prisma.$transaction(async (tx) => {
@@ -91,7 +90,7 @@ export async function batchUpdateMessagePositions(
           xPosition: update.xPosition,
           yPosition: update.yPosition,
         },
-      })
+      }),
     );
 
     await Promise.all(updatePromises);
@@ -105,7 +104,7 @@ export async function batchUpdateMessagePositionsSecure(
     xPosition: number;
     yPosition: number;
   }>,
-  userId: string
+  userId: string,
 ): Promise<void> {
   // Use a transaction to ensure atomicity of all updates
   await prisma.$transaction(async (tx) => {
@@ -121,7 +120,7 @@ export async function batchUpdateMessagePositionsSecure(
           xPosition: update.xPosition,
           yPosition: update.yPosition,
         },
-      })
+      }),
     );
 
     try {
@@ -158,7 +157,7 @@ export async function createBranchingPoint(
   parentId: string,
   branchName: string,
   xPosition: number,
-  yPosition: number
+  yPosition: number,
 ): Promise<Message> {
   return prisma.message.create({
     data: {
@@ -177,7 +176,7 @@ export async function createBranchingPoint(
 // Toggle message collapse state (for mind map UI)
 export async function toggleMessageCollapse(
   messageId: string,
-  isCollapsed: boolean
+  isCollapsed: boolean,
 ): Promise<Message> {
   return prisma.message.update({
     where: { id: messageId },
@@ -188,7 +187,7 @@ export async function toggleMessageCollapse(
 // Get messages by node type (useful for filtering in mind map)
 export async function getMessagesByNodeType(
   chatId: string,
-  nodeType: NodeType
+  nodeType: NodeType,
 ): Promise<Message[]> {
   return prisma.message.findMany({
     where: {
@@ -202,7 +201,7 @@ export async function getMessagesByNodeType(
 // Find optimal position for new message (avoiding overlaps)
 export async function findOptimalMessagePosition(
   chatId: string,
-  parentId?: string
+  parentId?: string,
 ): Promise<{ x: number; y: number }> {
   const existingMessages = await prisma.message.findMany({
     where: { chatId },
@@ -263,9 +262,7 @@ export async function findOptimalMessagePosition(
 }
 
 // Get conversation path from root to specific message
-export async function getConversationPath(
-  messageId: string
-): Promise<Message[]> {
+export async function getConversationPath(messageId: string): Promise<Message[]> {
   const path: Message[] = [];
   let currentId: string | null = messageId;
 

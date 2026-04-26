@@ -1,11 +1,7 @@
 import { z } from "zod";
 
 // Participant role enum
-export const participantRoleSchema = z.enum([
-  "owner",
-  "collaborator",
-  "viewer",
-]);
+export const participantRoleSchema = z.enum(["owner", "collaborator", "viewer"]);
 
 // Invitation role enum (subset of participant roles)
 export const invitationRoleSchema = z.enum(["collaborator", "viewer"]);
@@ -146,7 +142,7 @@ export const collaborationSessionSchema = z.object({
         if (typeof val === "string") return new Date(val);
         return val;
       }, z.date()),
-    })
+    }),
   ),
 });
 
@@ -154,15 +150,9 @@ export const collaborationSessionSchema = z.object({
 export type ParticipantRole = z.infer<typeof participantRoleSchema>;
 export type InvitationRole = z.infer<typeof invitationRoleSchema>;
 export type InvitationRequest = z.infer<typeof invitationRequestSchema>;
-export type CreateCollaborationSession = z.infer<
-  typeof createCollaborationSessionSchema
->;
-export type JoinCollaborationSession = z.infer<
-  typeof joinCollaborationSessionSchema
->;
-export type UpdateCollaborationSession = z.infer<
-  typeof updateCollaborationSessionSchema
->;
+export type CreateCollaborationSession = z.infer<typeof createCollaborationSessionSchema>;
+export type JoinCollaborationSession = z.infer<typeof joinCollaborationSessionSchema>;
+export type UpdateCollaborationSession = z.infer<typeof updateCollaborationSessionSchema>;
 export type CollaborationSession = z.infer<typeof collaborationSessionSchema>;
 export type UpdateParticipant = z.infer<typeof updateParticipantSchema>;
 export type CollaborationInvite = z.infer<typeof collaborationInviteSchema>;

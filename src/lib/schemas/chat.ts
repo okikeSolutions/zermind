@@ -6,12 +6,9 @@ export const AttachmentSchema = z.object({
   name: z.string(),
   mimeType: z.string(),
   size: z.number(),
-  url: z.string().refine(
-    (url) => url.startsWith("data:"),
-    {
-      message: "URL must be a data URL starting with 'data:'",
-    }
-  ), // Data URL for direct processing (no server storage)
+  url: z.string().refine((url) => url.startsWith("data:"), {
+    message: "URL must be a data URL starting with 'data:'",
+  }), // Data URL for direct processing (no server storage)
   type: z.enum(["image", "document"]),
 });
 
@@ -27,9 +24,7 @@ export const MessageSchema = z.object({
   branchName: z.string().nullish(), // User-defined branch labels
   xPosition: z.number().default(0), // Mind map coordinates
   yPosition: z.number().default(0), // Mind map coordinates
-  nodeType: z
-    .enum(["conversation", "branching_point", "insight"])
-    .default("conversation"),
+  nodeType: z.enum(["conversation", "branching_point", "insight"]).default("conversation"),
   isCollapsed: z.boolean().default(false), // For mind map UI state
   isLocked: z.boolean().default(false), // For preventing concurrent edits
   lastEditedBy: z.string().nullish(), // User ID who last edited
@@ -81,7 +76,7 @@ export const ChatListItemSchema = ChatSchema.extend({
         content: z.string(),
         createdAt: z.coerce.date(),
         attachments: z.array(AttachmentSchema).optional().default([]),
-      })
+      }),
     )
     .max(1)
     .optional()

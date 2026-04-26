@@ -10,18 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import {
-  ChevronDown,
-  Bot,
-  Paperclip,
-  Image as ImageIcon,
-  FileText,
-} from "lucide-react";
+import { ChevronDown, Bot, Paperclip, Image as ImageIcon, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  getModelCapabilities,
-  modelSupportsAttachments,
-} from "@/lib/utils/model-utils";
+import { getModelCapabilities, modelSupportsAttachments } from "@/lib/utils/model-utils";
 
 // Popular OpenRouter models
 const MODELS = [
@@ -82,8 +73,7 @@ export function ModelSelector({
   disabled = false,
   className,
 }: ModelSelectorProps) {
-  const currentModel =
-    MODELS.find((model) => model.id === selectedModel) || MODELS[0];
+  const currentModel = MODELS.find((model) => model.id === selectedModel) || MODELS[0];
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -106,19 +96,19 @@ export function ModelSelector({
         <div key="image" title="Supports images and documents">
           <ImageIcon className="h-3 w-3 text-primary" />
           <FileText className="h-3 w-3 text-primary" />
-        </div>
+        </div>,
       );
     } else if (capabilities.supportsImages) {
       icons.push(
         <div key="image" title="Supports images">
           <ImageIcon className="h-3 w-3 text-primary" />
-        </div>
+        </div>,
       );
     } else if (capabilities.supportsDocuments) {
       icons.push(
         <div key="document" title="Supports documents">
           <FileText className="h-3 w-3 text-primary" />
-        </div>
+        </div>,
       );
     }
 
@@ -127,10 +117,7 @@ export function ModelSelector({
     }
 
     return (
-      <div
-        className="flex items-center space-x-1"
-        title="Supports file attachments"
-      >
+      <div className="flex items-center space-x-1" title="Supports file attachments">
         {icons}
       </div>
     );
@@ -144,14 +131,12 @@ export function ModelSelector({
           disabled={disabled}
           className={cn(
             "justify-between min-w-0 w-full sm:min-w-[200px] h-9 sm:h-10 text-sm",
-            className
+            className,
           )}
         >
           <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
             <Bot className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="truncate text-xs sm:text-sm">
-              {currentModel.name}
-            </span>
+            <span className="truncate text-xs sm:text-sm">{currentModel.name}</span>
             {modelSupportsAttachments(selectedModel) && (
               <Paperclip className="h-3 w-3 text-primary flex-shrink-0" />
             )}
@@ -159,20 +144,13 @@ export function ModelSelector({
           <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 opacity-50 flex-shrink-0" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className="w-72 sm:w-80 max-h-[70vh] overflow-y-auto"
-      >
-        <DropdownMenuLabel className="text-sm">
-          Select AI Model
-        </DropdownMenuLabel>
+      <DropdownMenuContent align="start" className="w-72 sm:w-80 max-h-[70vh] overflow-y-auto">
+        <DropdownMenuLabel className="text-sm">Select AI Model</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
         {/* Group by provider */}
         {["Anthropic", "OpenAI", "Meta", "Google"].map((provider) => {
-          const providerModels = MODELS.filter(
-            (model) => model.provider === provider
-          );
+          const providerModels = MODELS.filter((model) => model.provider === provider);
           if (providerModels.length === 0) return null;
 
           return (
@@ -186,7 +164,7 @@ export function ModelSelector({
                   onClick={() => onModelChange(model.id)}
                   className={cn(
                     "flex flex-col items-start p-2 sm:p-3 cursor-pointer min-h-[3rem] sm:min-h-[3.5rem]",
-                    selectedModel === model.id && "bg-accent"
+                    selectedModel === model.id && "bg-accent",
                   )}
                 >
                   <div className="flex items-center justify-between w-full">
@@ -198,10 +176,7 @@ export function ModelSelector({
                     </div>
                     <Badge
                       variant="secondary"
-                      className={cn(
-                        "text-xs flex-shrink-0 ml-2",
-                        getTierColor(model.tier)
-                      )}
+                      className={cn("text-xs flex-shrink-0 ml-2", getTierColor(model.tier))}
                     >
                       {model.tier}
                     </Badge>

@@ -14,14 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Send,
-  StopCircle,
-  AlertCircle,
-  User,
-  Bot,
-  GitBranch,
-} from "lucide-react";
+import { Send, StopCircle, AlertCircle, User, Bot, GitBranch } from "lucide-react";
 import { useBranchingChat } from "@/hooks/use-branching-chat";
 import { useConversationContext } from "@/hooks/use-conversation-context";
 import { ModelSelector } from "@/components/model-selector";
@@ -124,12 +117,9 @@ function BranchingForm({
         {/* Context Preview */}
         <div className="space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0">
-            <label className="text-xs text-muted-foreground">
-              Branching from:
-            </label>
+            <label className="text-xs text-muted-foreground">Branching from:</label>
             <Badge variant="outline" className="text-xs w-fit">
-              {context.length} message{context.length !== 1 ? "s" : ""} in
-              context
+              {context.length} message{context.length !== 1 ? "s" : ""} in context
             </Badge>
           </div>
 
@@ -144,9 +134,7 @@ function BranchingForm({
                       <Bot className="h-3 w-3 mt-0.5 shrink-0" />
                     )}
                     <span className="text-xs leading-relaxed">
-                      {msg.content.length > 60
-                        ? msg.content.substring(0, 60) + "..."
-                        : msg.content}
+                      {msg.content.length > 60 ? msg.content.substring(0, 60) + "..." : msg.content}
                     </span>
                   </div>
                 ))}
@@ -164,22 +152,16 @@ function BranchingForm({
         {/* Branch Messages */}
         {messages.length > context.length && (
           <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
-            <label className="text-xs text-muted-foreground">
-              New branch messages:
-            </label>
+            <label className="text-xs text-muted-foreground">New branch messages:</label>
             {messages.slice(context.length).map((message) => {
               const msg = message as unknown as { content?: string };
               const messageContent =
-                typeof msg.content === "string"
-                  ? msg.content
-                  : String(msg.content || "");
+                typeof msg.content === "string" ? msg.content : String(msg.content || "");
               return (
                 <Card
                   key={message.id}
                   className={`${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                    message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                   }`}
                 >
                   <CardContent className="p-2">
@@ -212,10 +194,7 @@ function BranchingForm({
 
         {/* Branch Form */}
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleBranchSubmit)}
-            className="space-y-3"
-          >
+          <form onSubmit={form.handleSubmit(handleBranchSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="branchName"
@@ -303,8 +282,7 @@ function BranchingForm({
             />
 
             <p className="text-xs text-muted-foreground text-center leading-relaxed px-2">
-              Create a new conversation path from this point • Press Enter to
-              send
+              Create a new conversation path from this point • Press Enter to send
             </p>
           </form>
         </Form>

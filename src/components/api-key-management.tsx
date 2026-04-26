@@ -32,15 +32,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Key,
-  Plus,
-  Trash2,
-  Eye,
-  EyeOff,
-  AlertCircle,
-  CheckCircle,
-} from "lucide-react";
+import { Key, Plus, Trash2, Eye, EyeOff, AlertCircle, CheckCircle } from "lucide-react";
 import { type Provider } from "@/lib/schemas/api-keys";
 import {
   useApiKeys,
@@ -52,13 +44,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-const providers = [
-  "openrouter",
-  "openai",
-  "anthropic",
-  "meta",
-  "google",
-] as const;
+const providers = ["openrouter", "openai", "anthropic", "meta", "google"] as const;
 
 const addApiKeySchema = z.object({
   provider: z.enum(providers, {
@@ -69,10 +55,7 @@ const addApiKeySchema = z.object({
     .min(1, "Key name is required")
     .min(3, "Key name must be at least 3 characters")
     .max(50, "Key name must be less than 50 characters"),
-  apiKey: z
-    .string()
-    .min(1, "API key is required")
-    .min(10, "API key seems too short"),
+  apiKey: z.string().min(1, "API key is required").min(10, "API key seems too short"),
 });
 
 type AddApiKeyFormData = z.infer<typeof addApiKeySchema>;
@@ -83,11 +66,7 @@ interface ApiKeyManagementProps {
 
 export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
   // React Query hooks
-  const {
-    data: apiKeys = [],
-    isLoading: loading,
-    error: queryError,
-  } = useApiKeys();
+  const { data: apiKeys = [], isLoading: loading, error: queryError } = useApiKeys();
   const createApiKeyMutation = useCreateApiKey();
   const updateApiKeyMutation = useUpdateApiKey();
   const deleteApiKeyMutation = useDeleteApiKey();
@@ -120,31 +99,21 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
       setIsAddDialogOpen(false);
       form.reset();
     } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : "Failed to add API key"
-      );
+      setFormError(err instanceof Error ? err.message : "Failed to add API key");
     }
   };
 
   const handleToggleActive = async (keyId: string, isActive: boolean) => {
     try {
       await updateApiKeyMutation.mutateAsync({ keyId, data: { isActive } });
-      setSuccess(
-        `API key ${isActive ? "activated" : "deactivated"} successfully`
-      );
+      setSuccess(`API key ${isActive ? "activated" : "deactivated"} successfully`);
     } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : "Failed to update API key"
-      );
+      setFormError(err instanceof Error ? err.message : "Failed to update API key");
     }
   };
 
   const handleDeleteApiKey = async (keyId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this API key? This action cannot be undone."
-      )
-    ) {
+    if (!confirm("Are you sure you want to delete this API key? This action cannot be undone.")) {
       return;
     }
 
@@ -152,9 +121,7 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
       await deleteApiKeyMutation.mutateAsync(keyId);
       setSuccess("API key deleted successfully");
     } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : "Failed to delete API key"
-      );
+      setFormError(err instanceof Error ? err.message : "Failed to delete API key");
     }
   };
 
@@ -212,12 +179,10 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
           </DialogTrigger>
           <DialogContent className="mx-4 max-w-md sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-lg sm:text-xl">
-                Add New API Key
-              </DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl">Add New API Key</DialogTitle>
               <DialogDescription className="text-sm">
-                Add an API key to use your own credits with AI providers. Your
-                key will be encrypted and stored securely.
+                Add an API key to use your own credits with AI providers. Your key will be encrypted
+                and stored securely.
               </DialogDescription>
             </DialogHeader>
 
@@ -232,10 +197,7 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm">Provider</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a provider" />
@@ -243,14 +205,9 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                         </FormControl>
                         <SelectContent>
                           {providers.map((provider) => (
-                            <SelectItem
-                              key={provider.value}
-                              value={provider.value}
-                            >
+                            <SelectItem key={provider.value} value={provider.value}>
                               <div>
-                                <div className="font-medium text-sm">
-                                  {provider.label}
-                                </div>
+                                <div className="font-medium text-sm">{provider.label}</div>
                                 <div className="text-xs text-muted-foreground">
                                   {provider.description}
                                 </div>
@@ -340,9 +297,7 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                     disabled={createApiKeyMutation.isPending}
                     className="w-full sm:w-auto"
                   >
-                    {createApiKeyMutation.isPending
-                      ? "Adding..."
-                      : "Add API Key"}
+                    {createApiKeyMutation.isPending ? "Adding..." : "Add API Key"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -362,16 +317,11 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
             <Key className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
-            <h3 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">
-              No API Keys
-            </h3>
+            <h3 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">No API Keys</h3>
             <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 px-4">
               Add your API keys to use your own credits with AI providers
             </p>
-            <Button
-              onClick={() => setIsAddDialogOpen(true)}
-              className="w-full sm:w-auto"
-            >
+            <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Your First API Key
             </Button>
@@ -390,15 +340,11 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                       </h4>
                       <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         <Badge
-                          variant={
-                            apiKey.provider === "openrouter"
-                              ? "default"
-                              : "secondary"
-                          }
+                          variant={apiKey.provider === "openrouter" ? "default" : "secondary"}
                           className="text-xs"
                         >
-                          {providers.find((p) => p.value === apiKey.provider)
-                            ?.label || apiKey.provider}
+                          {providers.find((p) => p.value === apiKey.provider)?.label ||
+                            apiKey.provider}
                         </Badge>
                         <Badge
                           variant={apiKey.isActive ? "default" : "secondary"}
@@ -410,14 +356,9 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                     </div>
                     <div className="text-xs sm:text-sm text-muted-foreground space-y-0.5">
                       <p className="break-all">Key: {apiKey.keyPreview}</p>
-                      <p>
-                        Added: {new Date(apiKey.createdAt).toLocaleDateString()}
-                      </p>
+                      <p>Added: {new Date(apiKey.createdAt).toLocaleDateString()}</p>
                       {apiKey.lastUsedAt && (
-                        <p>
-                          Last used:{" "}
-                          {new Date(apiKey.lastUsedAt).toLocaleDateString()}
-                        </p>
+                        <p>Last used: {new Date(apiKey.lastUsedAt).toLocaleDateString()}</p>
                       )}
                     </div>
                   </div>
@@ -429,9 +370,7 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                       </span>
                       <Switch
                         checked={apiKey.isActive}
-                        onCheckedChange={(checked) =>
-                          handleToggleActive(apiKey.id, checked)
-                        }
+                        onCheckedChange={(checked) => handleToggleActive(apiKey.id, checked)}
                       />
                     </div>
                     <Button

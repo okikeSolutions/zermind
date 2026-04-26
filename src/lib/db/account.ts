@@ -101,17 +101,16 @@ export async function getUserDataStats(userId: string): Promise<{
   accountAge: number; // in days
 }> {
   try {
-    const [chatsCount, messagesCount, apiKeysCount, usageLogsCount] =
-      await Promise.all([
-        prisma.chat.count({ where: { userId } }),
-        prisma.message.count({
-          where: {
-            chat: { userId },
-          },
-        }),
-        prisma.apiKey.count({ where: { userId } }),
-        prisma.usageLog.count({ where: { userId } }),
-      ]);
+    const [chatsCount, messagesCount, apiKeysCount, usageLogsCount] = await Promise.all([
+      prisma.chat.count({ where: { userId } }),
+      prisma.message.count({
+        where: {
+          chat: { userId },
+        },
+      }),
+      prisma.apiKey.count({ where: { userId } }),
+      prisma.usageLog.count({ where: { userId } }),
+    ]);
 
     // Calculate account age (would need user creation date from Supabase)
     // For now, we'll use the oldest chat as a proxy
@@ -122,9 +121,7 @@ export async function getUserDataStats(userId: string): Promise<{
     });
 
     const accountAge = oldestChat
-      ? Math.floor(
-          (Date.now() - oldestChat.createdAt.getTime()) / (1000 * 60 * 60 * 24)
-        )
+      ? Math.floor((Date.now() - oldestChat.createdAt.getTime()) / (1000 * 60 * 60 * 24))
       : 0;
 
     return {
@@ -189,10 +186,7 @@ export async function exportUserData(userId: string) {
       userId,
       summary: {
         totalChats: chats.length,
-        totalMessages: chats.reduce(
-          (sum, chat) => sum + chat.messages.length,
-          0
-        ),
+        totalMessages: chats.reduce((sum, chat) => sum + chat.messages.length, 0),
         totalApiKeys: apiKeys.length,
         totalUsageLogs: usageLogs.length,
       },

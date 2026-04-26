@@ -11,20 +11,10 @@ export const FeedbackTypeSchema = z.enum([
 ]);
 
 // Feedback status enum
-export const FeedbackStatusSchema = z.enum([
-  "open",
-  "in_progress",
-  "resolved",
-  "closed",
-]);
+export const FeedbackStatusSchema = z.enum(["open", "in_progress", "resolved", "closed"]);
 
 // Feedback priority enum
-export const FeedbackPrioritySchema = z.enum([
-  "low",
-  "medium",
-  "high",
-  "critical",
-]);
+export const FeedbackPrioritySchema = z.enum(["low", "medium", "high", "critical"]);
 
 // Base feedback schema
 export const FeedbackSchema = z.object({
@@ -73,8 +63,6 @@ export type FeedbackPriority = z.infer<typeof FeedbackPrioritySchema>;
 export type Feedback = z.infer<typeof FeedbackSchema>;
 export type CreateFeedback = z.infer<typeof CreateFeedbackSchema>;
 export type UpdateFeedback = z.infer<typeof UpdateFeedbackSchema>;
-export type CreateFeedbackResponse = z.infer<
-  typeof CreateFeedbackResponseSchema
->;
+export type CreateFeedbackResponse = z.infer<typeof CreateFeedbackResponseSchema>;
 export type GetFeedbackResponse = z.infer<typeof GetFeedbackResponseSchema>;
 export type FeedbackErrorResponse = z.infer<typeof FeedbackErrorResponseSchema>;

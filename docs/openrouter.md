@@ -38,14 +38,17 @@ The chat interface should now work with real AI responses!
 The integration supports multiple AI models through OpenRouter:
 
 ### Anthropic
+
 - **Claude 3.5 Sonnet** - Best for reasoning, analysis, and coding
 - **Claude 3 Haiku** - Fast and efficient for simple tasks
 
-### OpenAI  
+### OpenAI
+
 - **GPT-4o** - Latest multimodal model from OpenAI
 - **GPT-4o Mini** - Faster and cheaper version of GPT-4o
 
 ### Meta
+
 - **Llama 3.1 405B** - Open source, great for general tasks
 - **Llama 3.1 70B** - Balanced performance and speed
 
@@ -70,7 +73,7 @@ The API route handles streaming chat completions:
 ### Components Used
 
 - **`ChatConversation`** - Main chat interface with streaming support
-- **`ModelSelector`** - Dropdown to choose between AI models  
+- **`ModelSelector`** - Dropdown to choose between AI models
 - **`useChat`** - Custom hook wrapping Vercel AI SDK
 
 ### Key Features
@@ -108,11 +111,11 @@ Modify the default parameters in `src/hooks/use-chat.ts`:
 
 ```typescript
 export function useChat({
-  model = 'openai/gpt-4o-mini',
-  maxTokens = 1000,        // Increase for longer responses
-  temperature = 0.7,       // 0.0 = deterministic, 1.0 = creative
+  model = "openai/gpt-4o-mini",
+  maxTokens = 1000, // Increase for longer responses
+  temperature = 0.7, // 0.0 = deterministic, 1.0 = creative
   // ...
-})
+});
 ```
 
 ## 💰 Cost Management
@@ -135,8 +138,9 @@ OpenRouter uses pay-as-you-go pricing:
 ### "OpenRouter API key not configured" Error
 
 Make sure you have:
+
 1. Created a `.env` file in the project root
-2. Added `OPENROUTER_API_KEY=your_key_here` 
+2. Added `OPENROUTER_API_KEY=your_key_here`
 3. Restarted your development server
 
 ### Slow Response Times
@@ -148,6 +152,7 @@ Make sure you have:
 ### Rate Limiting
 
 If you hit rate limits:
+
 - Wait a few minutes before retrying
 - Switch to a different model
 - Upgrade your OpenRouter plan if needed
@@ -157,4 +162,4 @@ If you hit rate limits:
 - [OpenRouter Documentation](https://openrouter.ai/docs)
 - [Vercel AI SDK Docs](https://ai-sdk.dev)
 - [OpenRouter Discord Community](https://discord.gg/openrouter)
-- [Model Comparison](https://openrouter.ai/models) 
+- [Model Comparison](https://openrouter.ai/models)

@@ -46,7 +46,8 @@ export default function TermsOfUse() {
 
             <div className="prose prose-neutral max-w-none mb-8">
               <p className="text-lg text-muted-foreground">
-                Welcome to Zermind! These Terms of Use govern your access to and use of our AI chat application. By using Zermind, you agree to these terms.
+                Welcome to Zermind! These Terms of Use govern your access to and use of our AI chat
+                application. By using Zermind, you agree to these terms.
               </p>
             </div>
 
@@ -62,7 +63,7 @@ export default function TermsOfUse() {
                   "Built for educational and productivity use",
                 ]}
               />
-              
+
               <InfoSection
                 icon={Users}
                 title="User Accounts"
@@ -174,20 +175,22 @@ export default function TermsOfUse() {
                   . You may fork, modify, and distribute the code under the license terms.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold text-primary mb-2">Third-Party Services</h4>
                 <p>
-                  Zermind integrates with various AI providers (OpenAI, Anthropic, Meta, etc.) and other services. 
-                  Your use of these integrations is subject to their respective terms of service.
+                  Zermind integrates with various AI providers (OpenAI, Anthropic, Meta, etc.) and
+                  other services. Your use of these integrations is subject to their respective
+                  terms of service.
                 </p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-primary mb-2">Governing Law</h4>
                 <p>
-                  These terms are governed by Austrian law. Disputes will be resolved in Austrian courts.
-                  For consumer disputes, you may also use the EU Online Dispute Resolution platform.
+                  These terms are governed by Austrian law. Disputes will be resolved in Austrian
+                  courts. For consumer disputes, you may also use the EU Online Dispute Resolution
+                  platform.
                 </p>
               </div>
 
@@ -202,17 +205,21 @@ export default function TermsOfUse() {
                     info@okike-solutions.com
                   </a>
                   . See our{" "}
-                  <Link href="/imprint" className="text-primary hover:text-primary/80 transition-colors">
+                  <Link
+                    href="/imprint"
+                    className="text-primary hover:text-primary/80 transition-colors"
+                  >
                     Imprint
-                  </Link>
-                  {" "}for full contact details.
+                  </Link>{" "}
+                  for full contact details.
                 </p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-primary mb-2">Severability</h4>
                 <p>
-                  If any provision of these terms is found unenforceable, the remaining provisions will continue in full force and effect.
+                  If any provision of these terms is found unenforceable, the remaining provisions
+                  will continue in full force and effect.
                 </p>
               </div>
             </div>
@@ -221,4 +228,4 @@ export default function TermsOfUse() {
       </div>
     </main>
   );
-} 
+}

@@ -3,13 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Send, StopCircle, AlertCircle, User, Bot } from "lucide-react";
@@ -109,7 +103,12 @@ export function ResumeMessageInput({
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm">{contextError.message}</span>
             </div>
-            <Button size="sm" variant="outline" onClick={onClose} className="min-h-[36px] sm:min-h-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onClose}
+              className="min-h-[36px] sm:min-h-auto"
+            >
               Close
             </Button>
           </div>
@@ -126,8 +125,7 @@ export function ResumeMessageInput({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0">
             <h4 className="text-sm font-medium">Resuming from:</h4>
             <Badge variant="outline" className="text-xs w-fit">
-              {context.length} message{context.length !== 1 ? "s" : ""} in
-              context
+              {context.length} message{context.length !== 1 ? "s" : ""} in context
             </Badge>
           </div>
 
@@ -142,9 +140,7 @@ export function ResumeMessageInput({
                       <Bot className="h-3 w-3 mt-0.5 shrink-0" />
                     )}
                     <span className="text-xs leading-relaxed">
-                      {msg.content.length > 50
-                        ? msg.content.substring(0, 50) + "..."
-                        : msg.content}
+                      {msg.content.length > 50 ? msg.content.substring(0, 50) + "..." : msg.content}
                     </span>
                   </div>
                 ))}
@@ -213,9 +209,9 @@ export function ResumeMessageInput({
                 disabled={isLoading}
               />
             </div>
-            <Button 
-              size="sm" 
-              variant="outline" 
+            <Button
+              size="sm"
+              variant="outline"
               onClick={onClose}
               className="min-h-[36px] sm:min-h-auto w-full sm:w-auto"
             >
@@ -275,8 +271,7 @@ export function ResumeMessageInput({
           </Form>
 
           <p className="text-xs text-muted-foreground text-center leading-relaxed px-2">
-            Your message will branch from the selected node • Press Enter to
-            send
+            Your message will branch from the selected node • Press Enter to send
           </p>
         </div>
       </CardContent>

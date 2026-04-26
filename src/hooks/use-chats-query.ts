@@ -1,268 +1,233 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  type ChatListItem,
-  type ChatWithMessages,
-  type CreateChat,
-  type UpdateChat,
-  type Message,
-  ChatListItemSchema,
-  ChatWithMessagesSchema,
-  CreateChatResponseSchema,
+"use client";
+
+import { useCallback, useMemo, useState } from "react";
+import { useMutation as useConvexMutation, useQuery as useConvexQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
+import type {
+  ChatListItem,
+  ChatWithMessages,
+  CreateChat,
+  UpdateChat,
+  Message,
 } from "@/lib/schemas/chat";
 
-// Query Keys
 export const chatKeys = {
   all: ["chats"] as const,
   lists: () => [...chatKeys.all, "list"] as const,
   list: (userId: string) => [...chatKeys.lists(), userId] as const,
   details: () => [...chatKeys.all, "detail"] as const,
-  detail: (id: string, userId: string) =>
-    [...chatKeys.details(), id, userId] as const,
+  detail: (id: string, userId: string) => [...chatKeys.details(), id, userId] as const,
 } as const;
 
-// API Functions
-async function fetchUserChats(userId: string): Promise<ChatListItem[]> {
-  const response = await fetch(`/api/chats/user/${userId}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch chats: ${response.statusText}`);
-  }
-  const data = await response.json();
+type MutationFn<Args, Result> = (args: Args) => Promise<Result>;
 
-  // Validate response data
-  if (Array.isArray(data.chats)) {
-    return data.chats.map((chat: unknown) => ChatListItemSchema.parse(chat));
-  }
-  return [];
-}
+function useMutationCompat<Args, Result>(mutationFn: MutationFn<Args, Result>) {
+  const [isPending, setIsPending] = useState(false);
 
-async function fetchChatWithMessages(
-  chatId: string,
-  userId: string
-): Promise<ChatWithMessages> {
-  const response = await fetch(`/api/chats/${chatId}?userId=${userId}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch chat: ${response.statusText}`);
-  }
-  const data = await response.json();
-  return ChatWithMessagesSchema.parse(data);
-}
-
-async function createChat(data: CreateChat) {
-  const response = await fetch("/api/chats", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to create chat: ${response.statusText}`);
-  }
-
-  const result = await response.json();
-  return CreateChatResponseSchema.parse(result);
-}
-
-async function updateChatTitle(chatId: string, data: UpdateChat) {
-  const response = await fetch(`/api/chats/${chatId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to update chat: ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
-async function deleteChat(chatId: string) {
-  const response = await fetch(`/api/chats/${chatId}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to delete chat: ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
-async function saveMessage(
-  chatId: string,
-  message: Omit<Message, "id" | "createdAt">
-) {
-  const response = await fetch(`/api/chats/${chatId}/messages`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(message),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to save message: ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
-async function generateShareLink(chatId: string) {
-  const response = await fetch(`/api/chats/${chatId}/share`, {
-    method: "POST",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to generate share link: ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
-async function removeShareLink(chatId: string) {
-  const response = await fetch(`/api/chats/${chatId}/share`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to remove share link: ${response.statusText}`);
-  }
-
-  return response.json();
-}
-
-// Query Hooks
-export function useUserChats(userId: string | undefined) {
-  return useQuery({
-    queryKey: chatKeys.list(userId || ""),
-    queryFn: () => fetchUserChats(userId!),
-    enabled: !!userId,
-    staleTime: 30 * 1000, // 30 seconds
-  });
-}
-
-export function useChatWithMessages(
-  chatId: string | undefined,
-  userId: string | undefined
-) {
-  return useQuery({
-    queryKey: chatKeys.detail(chatId || "", userId || ""),
-    queryFn: () => fetchChatWithMessages(chatId!, userId!),
-    enabled: !!chatId && !!userId,
-    staleTime: 60 * 1000, // 1 minute
-  });
-}
-
-// Mutation Hooks
-export function useCreateChat() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: createChat,
-    onSuccess: (newChat) => {
-      // Invalidate and refetch user chats
-      queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
-
-      // Optimistically add to cache if we know the userId
-      const userId = newChat.userId;
-      if (userId) {
-        queryClient.setQueryData<ChatListItem[]>(
-          chatKeys.list(userId),
-          (old) => {
-            const newChatListItem: ChatListItem = {
-              ...newChat,
-              _count: { messages: 0 },
-              messages: [],
-            };
-            return old ? [newChatListItem, ...old] : [newChatListItem];
-          }
-        );
+  const mutateAsync = useCallback(
+    async (args: Args) => {
+      setIsPending(true);
+      try {
+        return await mutationFn(args);
+      } finally {
+        setIsPending(false);
       }
     },
+    [mutationFn],
+  );
+
+  const mutate = useCallback(
+    (args: Args) => {
+      void mutateAsync(args);
+    },
+    [mutateAsync],
+  );
+
+  return { mutate, mutateAsync, isPending };
+}
+
+function toDate(timestamp: number) {
+  return new Date(timestamp);
+}
+
+function toUiMessage(message: {
+  _id: Id<"messages">;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: number;
+  model?: string;
+  attachments: Message["attachments"];
+  parentId?: Id<"messages">;
+  branchName?: string;
+  xPosition: number;
+  yPosition: number;
+  nodeType: "conversation" | "branching_point" | "insight";
+  isCollapsed: boolean;
+  isLocked: boolean;
+  lastEditedBy?: string;
+  editedAt?: number;
+}): Message {
+  return {
+    id: message._id,
+    role: message.role,
+    content: message.content,
+    createdAt: toDate(message.createdAt),
+    model: message.model,
+    attachments: message.attachments,
+    parentId: message.parentId,
+    branchName: message.branchName,
+    xPosition: message.xPosition,
+    yPosition: message.yPosition,
+    nodeType: message.nodeType,
+    isCollapsed: message.isCollapsed,
+    isLocked: message.isLocked,
+    lastEditedBy: message.lastEditedBy,
+    editedAt: message.editedAt ? toDate(message.editedAt) : undefined,
+  };
+}
+
+function toUiChat(chat: {
+  _id: Id<"chats">;
+  title?: string;
+  userId: string;
+  mode: "chat" | "mind";
+  isCollaborative: boolean;
+  templateId?: Id<"conversationTemplates">;
+  createdAt: number;
+  updatedAt: number;
+  shareId?: string;
+}) {
+  return {
+    id: chat._id,
+    title: chat.title ?? null,
+    userId: chat.userId,
+    mode: chat.mode,
+    isCollaborative: chat.isCollaborative,
+    templateId: chat.templateId,
+    createdAt: toDate(chat.createdAt),
+    updatedAt: toDate(chat.updatedAt),
+    shareId: chat.shareId ?? null,
+  };
+}
+
+function toUiChatListItem(
+  chat: Parameters<typeof toUiChat>[0] & {
+    messages: Array<{
+      content: string;
+      createdAt: number;
+      attachments: Message["attachments"];
+    }>;
+  },
+): ChatListItem {
+  return {
+    ...toUiChat(chat),
+    _count: { messages: chat.messages.length },
+    messages: chat.messages.map((message) => ({
+      content: message.content,
+      createdAt: toDate(message.createdAt),
+      attachments: message.attachments,
+    })),
+  };
+}
+
+export function useUserChats(userId: string | undefined) {
+  const chats = useConvexQuery(api.chats.listMine, userId ? {} : "skip");
+
+  return {
+    data: useMemo(() => chats?.map((chat) => toUiChatListItem(chat)) ?? [], [chats]),
+    isLoading: userId !== undefined && chats === undefined,
+    error: null,
+    refetch: () => undefined,
+  };
+}
+
+export function useChatWithMessages(chatId: string | undefined, userId: string | undefined) {
+  const chat = useConvexQuery(
+    api.chats.getWithMessages,
+    chatId && userId ? { chatId: chatId as Id<"chats"> } : "skip",
+  );
+
+  return {
+    data: useMemo<ChatWithMessages | undefined>(() => {
+      if (!chat) return undefined;
+      return {
+        ...toUiChat(chat),
+        messages: chat.messages.map((message) => toUiMessage(message)),
+      };
+    }, [chat]),
+    isLoading: !!chatId && !!userId && chat === undefined,
+    error: null,
+    refetch: () => undefined,
+  };
+}
+
+export function useCreateChat() {
+  const createChat = useConvexMutation(api.chats.create);
+
+  return useMutationCompat(async (data: CreateChat) => {
+    const chat = await createChat({ title: data.title });
+    return toUiChat(chat);
   });
 }
 
 export function useUpdateChatTitle() {
-  const queryClient = useQueryClient();
+  const updateTitle = useConvexMutation(api.chats.updateTitle);
 
-  return useMutation({
-    mutationFn: ({ chatId, data }: { chatId: string; data: UpdateChat }) =>
-      updateChatTitle(chatId, data),
-    onSuccess: () => {
-      // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: chatKeys.details() });
-    },
+  return useMutationCompat(async ({ chatId, data }: { chatId: string; data: UpdateChat }) => {
+    const chat = await updateTitle({
+      chatId: chatId as Id<"chats">,
+      title: data.title,
+    });
+    return toUiChat(chat);
   });
 }
 
 export function useDeleteChat() {
-  const queryClient = useQueryClient();
+  const removeChat = useConvexMutation(api.chats.remove);
 
-  return useMutation({
-    mutationFn: deleteChat,
-    onSuccess: () => {
-      // Remove from all caches
-      queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
-      queryClient.removeQueries({ queryKey: chatKeys.details() });
-    },
+  return useMutationCompat(async (chatId: string) => {
+    return await removeChat({ chatId: chatId as Id<"chats"> });
   });
 }
 
 export function useSaveMessage() {
-  const queryClient = useQueryClient();
+  const createMessage = useConvexMutation(api.messages.create);
 
-  return useMutation({
-    mutationFn: ({
-      chatId,
-      message,
-    }: {
-      chatId: string;
-      message: Omit<Message, "id" | "createdAt">;
-    }) => saveMessage(chatId, message),
-    onSuccess: (savedMessage, { chatId }) => {
-      // Update the specific chat's messages
-      queryClient.invalidateQueries({
-        queryKey: chatKeys.details(),
-        predicate: (query) => query.queryKey.includes(chatId),
+  return useMutationCompat(
+    async ({ chatId, message }: { chatId: string; message: Omit<Message, "id" | "createdAt"> }) => {
+      const savedMessage = await createMessage({
+        chatId: chatId as Id<"chats">,
+        role: message.role,
+        content: message.content,
+        model: message.model ?? undefined,
+        attachments: message.attachments ?? [],
+        parentId: message.parentId as Id<"messages"> | undefined,
+        branchName: message.branchName ?? undefined,
+        xPosition: message.xPosition ?? 0,
+        yPosition: message.yPosition ?? 0,
+        nodeType: message.nodeType ?? "conversation",
+        isCollapsed: message.isCollapsed ?? false,
+        isLocked: message.isLocked ?? false,
       });
 
-      // Update chat list to show latest message
-      queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
+      return toUiMessage(savedMessage);
     },
-  });
+  );
 }
 
 export function useGenerateShareLink() {
-  const queryClient = useQueryClient();
+  const generateShareLink = useConvexMutation(api.chats.generateShareLink);
 
-  return useMutation({
-    mutationFn: (chatId: string) => generateShareLink(chatId),
-    onSuccess: (_result, chatId) => {
-      // Invalidate the specific chat to update shareId
-      queryClient.invalidateQueries({
-        queryKey: chatKeys.details(),
-        predicate: (query) => query.queryKey.includes(chatId),
-      });
-    },
+  return useMutationCompat(async (chatId: string) => {
+    return await generateShareLink({ chatId: chatId as Id<"chats"> });
   });
 }
 
 export function useRemoveShareLink() {
-  const queryClient = useQueryClient();
+  const removeShareLink = useConvexMutation(api.chats.removeShareLink);
 
-  return useMutation({
-    mutationFn: (chatId: string) => removeShareLink(chatId),
-    onSuccess: (_result, chatId) => {
-      // Invalidate the specific chat to remove shareId
-      queryClient.invalidateQueries({
-        queryKey: chatKeys.details(),
-        predicate: (query) => query.queryKey.includes(chatId),
-      });
-    },
+  return useMutationCompat(async (chatId: string) => {
+    return await removeShareLink({ chatId: chatId as Id<"chats"> });
   });
 }

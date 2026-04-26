@@ -25,14 +25,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Generate share link
     const shareId = await generateShareLink(chatId, user.id);
-    
+
     if (!shareId) {
       return NextResponse.json({ error: "Chat not found or access denied" }, { status: 404 });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       shareId,
-      shareUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${shareId}`
+      shareUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/share/${shareId}`,
     });
   } catch (error) {
     console.error("Error generating share link:", error);
@@ -57,7 +57,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Remove share link
     const success = await removeShareLink(chatId, user.id);
-    
+
     if (!success) {
       return NextResponse.json({ error: "Failed to remove share link" }, { status: 500 });
     }
@@ -67,4 +67,4 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     console.error("Error removing share link:", error);
     return NextResponse.json({ error: "Failed to remove share link" }, { status: 500 });
   }
-} 
+}

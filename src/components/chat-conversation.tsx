@@ -3,13 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -42,21 +36,13 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { type Message, type Attachment } from "@/lib/schemas/chat";
 import { useChat } from "@/hooks/use-chat";
 import { ModelSelector } from "@/components/model-selector";
 import { useSaveMessage, useUpdateChatTitle } from "@/hooks/use-chats-query";
-import {
-  generateChatTitle,
-  shouldUpdateChatTitle,
-} from "@/lib/utils/chat-utils";
+import { generateChatTitle, shouldUpdateChatTitle } from "@/lib/utils/chat-utils";
 import { MessageAttachment } from "@/components/message-attachment";
 import { useFileAttachments } from "@/hooks/use-file-attachments";
 import { formatBytes } from "@/components/dropzone";
@@ -155,7 +141,7 @@ export function ChatConversation({
 
   // Sort messages chronologically (oldest first) to ensure correct display order
   const sortedMessages = [...messages].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 
   const scrollToBottom = () => {
@@ -183,7 +169,7 @@ export function ChatConversation({
 
       fileInputRef.current.click();
     },
-    [fileAttachments.allowedMimeTypes]
+    [fileAttachments.allowedMimeTypes],
   );
 
   const handleFileInputChange = useCallback(
@@ -195,7 +181,7 @@ export function ChatConversation({
       // Reset input
       e.target.value = "";
     },
-    [fileAttachments]
+    [fileAttachments],
   );
 
   const handleSendMessage = async (data: MessageFormData) => {
@@ -210,11 +196,9 @@ export function ChatConversation({
 
       // Check if this is the first user message and title should be updated
       const isFirstMessage =
-        messages.length === 0 ||
-        messages.every((msg) => msg.role === "assistant");
+        messages.length === 0 || messages.every((msg) => msg.role === "assistant");
 
-      const shouldUpdateTitle =
-        isFirstMessage && shouldUpdateChatTitle(chatTitle || null);
+      const shouldUpdateTitle = isFirstMessage && shouldUpdateChatTitle(chatTitle || null);
 
       // Skip database operations in demo mode
       if (!isDemo) {
@@ -227,13 +211,10 @@ export function ChatConversation({
             try {
               // For privacy, process files directly without storing in Supabase
               // This converts files to base64 and includes them in the message content
-              processedAttachments =
-                await fileAttachments.processFilesDirectly();
+              processedAttachments = await fileAttachments.processFilesDirectly();
             } catch (error) {
               console.error("Failed to process files:", error);
-              throw new Error(
-                "Failed to process attachments. Please try again."
-              );
+              throw new Error("Failed to process attachments. Please try again.");
             }
           }
 
@@ -323,25 +304,13 @@ export function ChatConversation({
       ref={chatContainerRef}
       className="flex flex-col h-full relative"
       onDragEnter={
-        fileAttachments.supportsAttachments
-          ? fileAttachments.handleDragEnter
-          : undefined
+        fileAttachments.supportsAttachments ? fileAttachments.handleDragEnter : undefined
       }
       onDragLeave={
-        fileAttachments.supportsAttachments
-          ? fileAttachments.handleDragLeave
-          : undefined
+        fileAttachments.supportsAttachments ? fileAttachments.handleDragLeave : undefined
       }
-      onDragOver={
-        fileAttachments.supportsAttachments
-          ? fileAttachments.handleDragOver
-          : undefined
-      }
-      onDrop={
-        fileAttachments.supportsAttachments
-          ? fileAttachments.handleDrop
-          : undefined
-      }
+      onDragOver={fileAttachments.supportsAttachments ? fileAttachments.handleDragOver : undefined}
+      onDrop={fileAttachments.supportsAttachments ? fileAttachments.handleDrop : undefined}
     >
       {/* Hidden file input */}
       <input
@@ -364,16 +333,14 @@ export function ChatConversation({
           <div className="text-center space-y-4">
             <Upload className="h-12 w-12 text-primary mx-auto" />
             <DialogHeader>
-              <DialogTitle className="text-lg font-semibold">
-                Drop files here
-              </DialogTitle>
+              <DialogTitle className="text-lg font-semibold">Drop files here</DialogTitle>
               <DialogDescription className="text-sm">
                 {fileAttachments.modelCapabilities.supportsImages &&
                 fileAttachments.modelCapabilities.supportsDocuments
                   ? "Upload images and PDFs to enhance your conversation"
                   : fileAttachments.modelCapabilities.supportsImages
-                  ? "Upload images to enhance your conversation"
-                  : "Upload documents to enhance your conversation"}
+                    ? "Upload images to enhance your conversation"
+                    : "Upload documents to enhance your conversation"}
               </DialogDescription>
             </DialogHeader>
 
@@ -381,21 +348,13 @@ export function ChatConversation({
               {fileAttachments.modelCapabilities.supportsImages && (
                 <span>
                   Images: up to{" "}
-                  {formatBytes(
-                    fileAttachments.modelCapabilities.maxImageSize! *
-                      1024 *
-                      1024
-                  )}
+                  {formatBytes(fileAttachments.modelCapabilities.maxImageSize! * 1024 * 1024)}
                 </span>
               )}
               {fileAttachments.modelCapabilities.supportsDocuments && (
                 <span>
                   PDFs: up to{" "}
-                  {formatBytes(
-                    fileAttachments.modelCapabilities.maxDocumentSize! *
-                      1024 *
-                      1024
-                  )}
+                  {formatBytes(fileAttachments.modelCapabilities.maxDocumentSize! * 1024 * 1024)}
                 </span>
               )}
             </div>
@@ -413,9 +372,7 @@ export function ChatConversation({
                 <div className="flex items-center space-x-2 text-destructive">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   <div className="text-sm">
-                    <p className="font-medium text-xs sm:text-sm">
-                      Error occurred
-                    </p>
+                    <p className="font-medium text-xs sm:text-sm">Error occurred</p>
                     <p className="text-xs mt-1">{error.message}</p>
                   </div>
                 </div>
@@ -428,15 +385,11 @@ export function ChatConversation({
           <div className="flex flex-col items-center justify-center h-full text-center space-y-3 sm:space-y-4 px-4">
             <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
             <div>
-              <h3 className="text-base sm:text-lg font-medium">
-                Start the conversation
-              </h3>
+              <h3 className="text-base sm:text-lg font-medium">Start the conversation</h3>
               <p className="text-xs sm:text-sm text-muted-foreground">
                 Send a message to begin chatting with AI
               </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Using: {selectedModel}
-              </p>
+              <p className="text-xs text-muted-foreground mt-2">Using: {selectedModel}</p>
             </div>
           </div>
         ) : (
@@ -444,17 +397,12 @@ export function ChatConversation({
             {sortedMessages.map((message) => (
               <div
                 key={message.id}
-                className={cn(
-                  "flex",
-                  message.role === "user" ? "justify-end" : "justify-start"
-                )}
+                className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
               >
                 <Card
                   className={cn(
                     "max-w-[85%] sm:max-w-[80%] md:max-w-[70%]",
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                    message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted",
                   )}
                 >
                   <CardContent className="p-2 sm:p-3">
@@ -470,9 +418,7 @@ export function ChatConversation({
                         <div className="whitespace-pre-wrap break-words text-xs sm:text-sm">
                           {message.content}
                         </div>
-                        <MessageAttachment
-                          attachments={message.attachments || []}
-                        />
+                        <MessageAttachment attachments={message.attachments || []} />
                         <div className="flex items-center justify-between mt-1.5 sm:mt-2">
                           <Badge
                             variant="outline"
@@ -480,7 +426,7 @@ export function ChatConversation({
                               "text-xs",
                               message.role === "user"
                                 ? "border-primary-foreground/20 text-primary-foreground/70"
-                                : "border-muted-foreground/20 text-muted-foreground"
+                                : "border-muted-foreground/20 text-muted-foreground",
                             )}
                           >
                             {formatTime(message.createdAt)}
@@ -490,9 +436,7 @@ export function ChatConversation({
                               variant="ghost"
                               size="sm"
                               className="h-6 w-6 sm:h-7 sm:w-7 p-0 hover:bg-background/20"
-                              onClick={() =>
-                                copyToClipboard(message.content, message.id)
-                              }
+                              onClick={() => copyToClipboard(message.content, message.id)}
                             >
                               {copiedMessageId === message.id ? (
                                 <Check className="h-3 w-3" />
@@ -560,9 +504,7 @@ export function ChatConversation({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="w-56">
-                          <DropdownMenuLabel className="text-sm">
-                            Attach Files
-                          </DropdownMenuLabel>
+                          <DropdownMenuLabel className="text-sm">Attach Files</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           {fileAttachments.modelCapabilities.supportsImages && (
                             <DropdownMenuItem
@@ -573,16 +515,12 @@ export function ChatConversation({
                               Upload Images
                               <span className="ml-auto text-xs text-muted-foreground">
                                 up to{" "}
-                                {Math.round(
-                                  fileAttachments.modelCapabilities
-                                    .maxImageSize! || 5
-                                )}
+                                {Math.round(fileAttachments.modelCapabilities.maxImageSize! || 5)}
                                 MB
                               </span>
                             </DropdownMenuItem>
                           )}
-                          {fileAttachments.modelCapabilities
-                            .supportsDocuments && (
+                          {fileAttachments.modelCapabilities.supportsDocuments && (
                             <DropdownMenuItem
                               onClick={() => handleFileSelect("document")}
                               className="text-sm"
@@ -592,8 +530,7 @@ export function ChatConversation({
                               <span className="ml-auto text-xs text-muted-foreground">
                                 up to{" "}
                                 {Math.round(
-                                  fileAttachments.modelCapabilities
-                                    .maxDocumentSize! || 5
+                                  fileAttachments.modelCapabilities.maxDocumentSize! || 5,
                                 )}
                                 MB
                               </span>
@@ -640,13 +577,8 @@ export function ChatConversation({
                         <FileText className="h-4 w-4" />
                       )}
                     </div>
-                    <span className="text-xs sm:text-sm font-medium truncate">
-                      {file.name}
-                    </span>
-                    <Badge
-                      variant="secondary"
-                      className="text-xs flex-shrink-0"
-                    >
+                    <span className="text-xs sm:text-sm font-medium truncate">{file.name}</span>
+                    <Badge variant="secondary" className="text-xs flex-shrink-0">
                       {formatBytes(file.size)}
                     </Badge>
                   </div>
@@ -666,10 +598,7 @@ export function ChatConversation({
 
           {/* Input Form */}
           <Form {...messageForm}>
-            <form
-              onSubmit={messageForm.handleSubmit(handleSendMessage)}
-              className="flex space-x-2"
-            >
+            <form onSubmit={messageForm.handleSubmit(handleSendMessage)} className="flex space-x-2">
               <FormField
                 control={messageForm.control}
                 name="message"
@@ -717,19 +646,18 @@ export function ChatConversation({
           </Form>
           <p className="text-xs text-muted-foreground text-center px-2">
             Press Enter to send, Shift + Enter for new line
-            {fileAttachments.supportsAttachments &&
-              fileAttachments.pendingFiles.length === 0 && (
-                <span className="block mt-1">
-                  💡 Drag and drop{" "}
-                  {fileAttachments.modelCapabilities.supportsImages &&
-                  fileAttachments.modelCapabilities.supportsDocuments
-                    ? "images or PDFs"
-                    : fileAttachments.modelCapabilities.supportsImages
+            {fileAttachments.supportsAttachments && fileAttachments.pendingFiles.length === 0 && (
+              <span className="block mt-1">
+                💡 Drag and drop{" "}
+                {fileAttachments.modelCapabilities.supportsImages &&
+                fileAttachments.modelCapabilities.supportsDocuments
+                  ? "images or PDFs"
+                  : fileAttachments.modelCapabilities.supportsImages
                     ? "images"
                     : "PDFs"}{" "}
-                  anywhere to attach
-                </span>
-              )}
+                anywhere to attach
+              </span>
+            )}
             {!fileAttachments.supportsAttachments && (
               <span className="block mt-1 text-muted-foreground/60">
                 ℹ️ Current model does not support file attachments

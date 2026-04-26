@@ -1,21 +1,21 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
-const ALGORITHM = 'aes-256-gcm';
+const ALGORITHM = "aes-256-gcm";
 const KEY_LENGTH = 32; // 256 bits
 
 // Get encryption key from environment variable
 function getEncryptionKey(): Buffer {
   const key = process.env.API_KEY_ENCRYPTION_SECRET;
-  
+
   if (!key) {
-    throw new Error('API_KEY_ENCRYPTION_SECRET environment variable is required');
+    throw new Error("API_KEY_ENCRYPTION_SECRET environment variable is required");
   }
-  
+
   // If key is shorter than required, derive a proper key using PBKDF2
   if (key.length < KEY_LENGTH) {
-    return crypto.pbkdf2Sync(key, 'zermind-salt', 100000, KEY_LENGTH, 'sha256');
+    return crypto.pbkdf2Sync(key, "zermind-salt", 100000, KEY_LENGTH, "sha256");
   }
-  
+
   // If key is longer, truncate to required length
   return Buffer.from(key.slice(0, KEY_LENGTH));
 }
@@ -28,26 +28,22 @@ export function encryptApiKey(apiKey: string): string {
   try {
     const key = getEncryptionKey();
     const iv = crypto.randomBytes(16); // 128-bit IV for GCM
-    
+
     const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-    cipher.setAAD(Buffer.from('zermind-api-key')); // Additional authenticated data
-    
-    let encrypted = cipher.update(apiKey, 'utf8', 'base64');
-    encrypted += cipher.final('base64');
-    
+    cipher.setAAD(Buffer.from("zermind-api-key")); // Additional authenticated data
+
+    let encrypted = cipher.update(apiKey, "utf8", "base64");
+    encrypted += cipher.final("base64");
+
     const authTag = cipher.getAuthTag();
-    
+
     // Combine IV + auth tag + encrypted data
-    const combined = Buffer.concat([
-      iv,
-      authTag,
-      Buffer.from(encrypted, 'base64')
-    ]);
-    
-    return combined.toString('base64');
+    const combined = Buffer.concat([iv, authTag, Buffer.from(encrypted, "base64")]);
+
+    return combined.toString("base64");
   } catch (error) {
-    console.error('Error encrypting API key:', error);
-    throw new Error('Failed to encrypt API key');
+    console.error("Error encrypting API key:", error);
+    throw new Error("Failed to encrypt API key");
   }
 }
 
@@ -57,24 +53,24 @@ export function encryptApiKey(apiKey: string): string {
 export function decryptApiKey(encryptedData: string): string {
   try {
     const key = getEncryptionKey();
-    const combined = Buffer.from(encryptedData, 'base64');
-    
+    const combined = Buffer.from(encryptedData, "base64");
+
     // Extract components
     const iv = combined.subarray(0, 16);
     const authTag = combined.subarray(16, 32);
     const encrypted = combined.subarray(32);
-    
+
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-    decipher.setAAD(Buffer.from('zermind-api-key'));
+    decipher.setAAD(Buffer.from("zermind-api-key"));
     decipher.setAuthTag(authTag);
-    
-    let decrypted = decipher.update(encrypted, undefined, 'utf8');
-    decrypted += decipher.final('utf8');
-    
+
+    let decrypted = decipher.update(encrypted, undefined, "utf8");
+    decrypted += decipher.final("utf8");
+
     return decrypted;
   } catch (error) {
-    console.error('Error decrypting API key:', error);
-    throw new Error('Failed to decrypt API key');
+    console.error("Error decrypting API key:", error);
+    throw new Error("Failed to decrypt API key");
   }
 }
 
@@ -84,13 +80,13 @@ export function decryptApiKey(encryptedData: string): string {
  */
 export function createApiKeyPreview(apiKey: string): string {
   if (apiKey.length <= 8) {
-    return '****';
+    return "****";
   }
-  
+
   const start = apiKey.slice(0, 4);
   const end = apiKey.slice(-4);
-  const middle = '*'.repeat(Math.min(apiKey.length - 8, 20));
-  
+  const middle = "*".repeat(Math.min(apiKey.length - 8, 20));
+
   return `${start}${middle}${end}`;
 }
 
@@ -101,20 +97,20 @@ export function createApiKeyPreview(apiKey: string): string {
 export function validateApiKeyFormat(apiKey: string, provider: string): boolean {
   // Remove whitespace
   const cleanKey = apiKey.trim();
-  
+
   // Basic length checks by provider
   switch (provider) {
-    case 'openrouter':
+    case "openrouter":
       // OpenRouter keys typically start with 'sk-or-' and are ~60 chars
-      return cleanKey.startsWith('sk-or-') && cleanKey.length >= 40;
-    case 'openai':
+      return cleanKey.startsWith("sk-or-") && cleanKey.length >= 40;
+    case "openai":
       // OpenAI keys start with 'sk-' and are ~50 chars
-      return cleanKey.startsWith('sk-') && cleanKey.length >= 40;
-    case 'anthropic':
+      return cleanKey.startsWith("sk-") && cleanKey.length >= 40;
+    case "anthropic":
       // Anthropic keys start with 'sk-ant-' and are longer
-      return cleanKey.startsWith('sk-ant-') && cleanKey.length >= 40;
+      return cleanKey.startsWith("sk-ant-") && cleanKey.length >= 40;
     default:
       // Generic validation - must be at least 20 chars and contain alphanumeric + special chars
       return cleanKey.length >= 20 && /^[A-Za-z0-9_-]+$/.test(cleanKey);
   }
-} 
+}

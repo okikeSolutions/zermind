@@ -22,10 +22,8 @@ export function ZermindLogo({ variant = "default", className = "" }: ZermindLogo
   return (
     <Button asChild variant="ghost" className={`hover:bg-transparent ${className}`}>
       <Link href="/" className="flex items-center space-x-2">
-        <span className="font-bold text-2xl bg-primary bg-clip-text text-transparent">
-          Zermind
-        </span>
+        <span className="font-bold text-2xl bg-primary bg-clip-text text-transparent">Zermind</span>
       </Link>
     </Button>
   );
-} 
+}

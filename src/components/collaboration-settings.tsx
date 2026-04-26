@@ -1,13 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -18,24 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Users,
-  Eye,
-  MousePointer,
-  Shield,
-  Zap,
-  Crown,
-  Edit,
-} from "lucide-react";
+import { Users, Eye, MousePointer, Shield, Zap, Crown, Edit } from "lucide-react";
 import { toast } from "sonner";
 
 interface CollaborationSettingsProps {
   className?: string;
 }
 
-export function CollaborationSettings({
-  className,
-}: CollaborationSettingsProps) {
+export function CollaborationSettings({ className }: CollaborationSettingsProps) {
   // Default collaboration preferences
   const [settings, setSettings] = useState({
     showCursors: true,
@@ -43,17 +27,11 @@ export function CollaborationSettings({
     autoLayout: true,
     allowAnonymous: false,
     requireApproval: true,
-    conflictResolution: "last-writer-wins" as
-      | "last-writer-wins"
-      | "manual"
-      | "auto-merge",
+    conflictResolution: "last-writer-wins" as "last-writer-wins" | "manual" | "auto-merge",
     defaultRole: "collaborator" as "collaborator" | "viewer",
   });
 
-  const handleSettingChange = (
-    key: keyof typeof settings,
-    value: boolean | string
-  ) => {
+  const handleSettingChange = (key: keyof typeof settings, value: boolean | string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
     toast.success("Collaboration preferences updated");
   };
@@ -78,9 +56,7 @@ export function CollaborationSettings({
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
                   <MousePointer className="h-4 w-4" />
-                  <Label className="text-sm font-medium">
-                    Real-time Cursors
-                  </Label>
+                  <Label className="text-sm font-medium">Real-time Cursors</Label>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Show other users&apos; cursors in mind maps
@@ -88,9 +64,7 @@ export function CollaborationSettings({
               </div>
               <Switch
                 checked={settings.showCursors}
-                onCheckedChange={(checked) =>
-                  handleSettingChange("showCursors", checked)
-                }
+                onCheckedChange={(checked) => handleSettingChange("showCursors", checked)}
               />
             </div>
 
@@ -107,9 +81,7 @@ export function CollaborationSettings({
               </div>
               <Switch
                 checked={settings.showPresence}
-                onCheckedChange={(checked) =>
-                  handleSettingChange("showPresence", checked)
-                }
+                onCheckedChange={(checked) => handleSettingChange("showPresence", checked)}
               />
             </div>
 
@@ -126,9 +98,7 @@ export function CollaborationSettings({
               </div>
               <Switch
                 checked={settings.autoLayout}
-                onCheckedChange={(checked) =>
-                  handleSettingChange("autoLayout", checked)
-                }
+                onCheckedChange={(checked) => handleSettingChange("autoLayout", checked)}
               />
             </div>
 
@@ -137,9 +107,7 @@ export function CollaborationSettings({
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4" />
-                  <Label className="text-sm font-medium">
-                    Require Approval
-                  </Label>
+                  <Label className="text-sm font-medium">Require Approval</Label>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Approve new collaborators before they join
@@ -147,9 +115,7 @@ export function CollaborationSettings({
               </div>
               <Switch
                 checked={settings.requireApproval}
-                onCheckedChange={(checked) =>
-                  handleSettingChange("requireApproval", checked)
-                }
+                onCheckedChange={(checked) => handleSettingChange("requireApproval", checked)}
               />
             </div>
           </div>
@@ -160,9 +126,7 @@ export function CollaborationSettings({
               <Label className="text-sm font-medium">Conflict Resolution</Label>
               <Select
                 value={settings.conflictResolution}
-                onValueChange={(value) =>
-                  handleSettingChange("conflictResolution", value)
-                }
+                onValueChange={(value) => handleSettingChange("conflictResolution", value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -207,14 +171,10 @@ export function CollaborationSettings({
 
             {/* Default Role */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Default Role for New Collaborators
-              </Label>
+              <Label className="text-sm font-medium">Default Role for New Collaborators</Label>
               <Select
                 value={settings.defaultRole}
-                onValueChange={(value) =>
-                  handleSettingChange("defaultRole", value)
-                }
+                onValueChange={(value) => handleSettingChange("defaultRole", value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -225,9 +185,7 @@ export function CollaborationSettings({
                       <Edit className="h-4 w-4" />
                       <div>
                         <p className="font-medium">Collaborator</p>
-                        <p className="text-xs text-muted-foreground">
-                          Can edit and add content
-                        </p>
+                        <p className="text-xs text-muted-foreground">Can edit and add content</p>
                       </div>
                     </div>
                   </SelectItem>
@@ -236,9 +194,7 @@ export function CollaborationSettings({
                       <Eye className="h-4 w-4" />
                       <div>
                         <p className="font-medium">Viewer</p>
-                        <p className="text-xs text-muted-foreground">
-                          Can view but not edit
-                        </p>
+                        <p className="text-xs text-muted-foreground">Can view but not edit</p>
                       </div>
                     </div>
                   </SelectItem>

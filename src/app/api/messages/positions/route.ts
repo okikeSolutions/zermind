@@ -24,14 +24,14 @@ export async function PATCH(request: NextRequest) {
 
     // Log the update attempt for security monitoring
     console.log(
-      `User ${user.id} attempting to update positions for ${validatedData.updates.length} messages`
+      `User ${user.id} attempting to update positions for ${validatedData.updates.length} messages`,
     );
 
     // Update message positions with ownership verification
     await batchUpdateMessagePositionsSecure(validatedData.updates, user.id);
 
     console.log(
-      `Successfully updated ${validatedData.updates.length} message positions for user ${user.id}`
+      `Successfully updated ${validatedData.updates.length} message positions for user ${user.id}`,
     );
 
     return NextResponse.json({
@@ -45,32 +45,24 @@ export async function PATCH(request: NextRequest) {
     if (error instanceof ZodError) {
       return NextResponse.json(
         { error: "Invalid request data", details: error.message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Handle ownership/authorization errors
     if (error instanceof Error && error.message.includes("Unauthorized")) {
-      console.warn(
-        `Authorization failed for message position update: ${error.message}`
-      );
+      console.warn(`Authorization failed for message position update: ${error.message}`);
       return NextResponse.json(
         { error: "Forbidden: You can only update your own messages" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Handle not found errors
     if (error instanceof Error && error.message.includes("not found")) {
-      return NextResponse.json(
-        { error: "One or more messages were not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "One or more messages were not found" }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { error: "Failed to update message positions" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update message positions" }, { status: 500 });
   }
 }

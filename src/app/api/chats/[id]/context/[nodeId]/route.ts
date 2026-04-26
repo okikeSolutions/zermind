@@ -5,7 +5,7 @@ import { ErrorResponseSchema } from "@/lib/schemas/chat";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; nodeId: string }> }
+  { params }: { params: Promise<{ id: string; nodeId: string }> },
 ) {
   try {
     const supabase = await createClient();

@@ -5,7 +5,7 @@ import { GetUserChatsResponseSchema, ErrorResponseSchema } from "@/lib/schemas/c
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ userId: string }> }
+  { params }: { params: Promise<{ userId: string }> },
 ) {
   try {
     const supabase = await createClient();
@@ -36,10 +36,10 @@ export async function GET(
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error fetching user chats:", error);
-    
-    const errorResponse = ErrorResponseSchema.parse({ 
-      error: "Failed to fetch chats" 
+
+    const errorResponse = ErrorResponseSchema.parse({
+      error: "Failed to fetch chats",
     });
     return NextResponse.json(errorResponse, { status: 500 });
   }
-} 
+}

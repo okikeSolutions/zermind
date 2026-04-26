@@ -1,24 +1,15 @@
 import prisma from "@/lib/prisma";
-import {
-  FeedbackSchema,
-  type Feedback,
-  type CreateFeedback,
-} from "@/lib/schemas/feedback";
+import { FeedbackSchema, type Feedback, type CreateFeedback } from "@/lib/schemas/feedback";
 import { z } from "zod";
 
 // Define Zod schema for valid feedback status values
-const FeedbackStatusSchema = z.enum([
-  "open",
-  "in_progress",
-  "resolved",
-  "closed",
-]);
+const FeedbackStatusSchema = z.enum(["open", "in_progress", "resolved", "closed"]);
 
 // Create new feedback
 export async function createFeedback(
   userId: string,
   data: CreateFeedback,
-  userAgent?: string
+  userAgent?: string,
 ): Promise<Feedback> {
   const rawFeedback = await prisma.feedback.create({
     data: {
@@ -49,10 +40,7 @@ export async function getUserFeedback(userId: string): Promise<Feedback[]> {
 }
 
 // Get all feedback (admin only - optional)
-export async function getAllFeedback(
-  limit: number = 50,
-  offset: number = 0
-): Promise<Feedback[]> {
+export async function getAllFeedback(limit: number = 50, offset: number = 0): Promise<Feedback[]> {
   const rawFeedback = await prisma.feedback.findMany({
     orderBy: {
       createdAt: "desc",
@@ -68,14 +56,14 @@ export async function getAllFeedback(
 // Update feedback status (admin only - optional)
 export async function updateFeedbackStatus(
   feedbackId: string,
-  status: "open" | "in_progress" | "resolved" | "closed"
+  status: "open" | "in_progress" | "resolved" | "closed",
 ): Promise<Feedback> {
   // Validate status parameter before database update
   try {
     FeedbackStatusSchema.parse(status);
   } catch {
     throw new Error(
-      `Invalid feedback status: ${status}. Must be one of: open, in_progress, resolved, closed`
+      `Invalid feedback status: ${status}. Must be one of: open, in_progress, resolved, closed`,
     );
   }
 
@@ -116,13 +104,19 @@ export async function getFeedbackStats(): Promise<{
 
   return {
     total,
-    byType: byType.reduce((acc, item) => {
-      acc[item.type] = item._count.id;
-      return acc;
-    }, {} as Record<string, number>),
-    byStatus: byStatus.reduce((acc, item) => {
-      acc[item.status] = item._count.id;
-      return acc;
-    }, {} as Record<string, number>),
+    byType: byType.reduce(
+      (acc, item) => {
+        acc[item.type] = item._count.id;
+        return acc;
+      },
+      {} as Record<string, number>,
+    ),
+    byStatus: byStatus.reduce(
+      (acc, item) => {
+        acc[item.status] = item._count.id;
+        return acc;
+      },
+      {} as Record<string, number>,
+    ),
   };
 }

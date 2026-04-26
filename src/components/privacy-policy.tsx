@@ -46,9 +46,8 @@ export default function PrivacyPolicy() {
 
             <div className="prose prose-neutral max-w-none mb-8">
               <p className="text-lg text-muted-foreground">
-                At Zermind, we take your privacy seriously. This Privacy Policy
-                explains how we collect, use, and protect your information when
-                you use our AI chat application.
+                At Zermind, we take your privacy seriously. This Privacy Policy explains how we
+                collect, use, and protect your information when you use our AI chat application.
               </p>
             </div>
 
@@ -164,12 +163,10 @@ export default function PrivacyPolicy() {
 
             <div className="mt-8 border-t pt-6 text-sm text-muted-foreground space-y-4">
               <div>
-                <h4 className="font-semibold text-primary mb-2">
-                  Open Source Transparency
-                </h4>
+                <h4 className="font-semibold text-primary mb-2">Open Source Transparency</h4>
                 <p>
-                  Zermind is open source under the MIT license. You can review
-                  our code, security practices, and data handling on{" "}
+                  Zermind is open source under the MIT license. You can review our code, security
+                  practices, and data handling on{" "}
                   <a
                     href="https://github.com/okikeSolutions/zermind"
                     className="text-primary hover:text-primary/80 transition-colors"
@@ -195,12 +192,10 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-primary mb-2">
-                  Changes to This Policy
-                </h4>
+                <h4 className="font-semibold text-primary mb-2">Changes to This Policy</h4>
                 <p>
-                  We may update this Privacy Policy periodically. Significant
-                  changes will be communicated via email or app notification.
+                  We may update this Privacy Policy periodically. Significant changes will be
+                  communicated via email or app notification.
                 </p>
               </div>
             </div>

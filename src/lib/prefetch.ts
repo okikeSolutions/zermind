@@ -1,18 +1,15 @@
 import { QueryClient } from "@tanstack/react-query";
 import { chatKeys } from "@/hooks/use-chats-query";
-import { 
-  type ChatListItem, 
+import {
+  type ChatListItem,
   type ChatWithMessages,
   ChatListItemSchema,
-  ChatWithMessagesSchema 
+  ChatWithMessagesSchema,
 } from "@/lib/schemas/chat";
 
 // Server-side prefetch utilities for Next.js App Router
 
-export async function prefetchUserChats(
-  queryClient: QueryClient,
-  userId: string
-): Promise<void> {
+export async function prefetchUserChats(queryClient: QueryClient, userId: string): Promise<void> {
   await queryClient.prefetchQuery({
     queryKey: chatKeys.list(userId),
     queryFn: async (): Promise<ChatListItem[]> => {
@@ -20,16 +17,16 @@ export async function prefetchUserChats(
       // For now, we'll use fetch but you could use Prisma directly
       const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/chats/user/${userId}`, {
         headers: {
-          'Cookie': '', // You'd pass the request cookies here
+          Cookie: "", // You'd pass the request cookies here
         },
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch user chats');
+        throw new Error("Failed to fetch user chats");
       }
-      
+
       const data = await response.json();
-      
+
       if (Array.isArray(data.chats)) {
         return data.chats.map((chat: unknown) => ChatListItemSchema.parse(chat));
       }
@@ -42,21 +39,24 @@ export async function prefetchUserChats(
 export async function prefetchChatWithMessages(
   queryClient: QueryClient,
   chatId: string,
-  userId: string
+  userId: string,
 ): Promise<void> {
   await queryClient.prefetchQuery({
     queryKey: chatKeys.detail(chatId, userId),
     queryFn: async (): Promise<ChatWithMessages> => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/chats/${chatId}?userId=${userId}`, {
-        headers: {
-          'Cookie': '', // You'd pass the request cookies here
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_APP_URL}/api/chats/${chatId}?userId=${userId}`,
+        {
+          headers: {
+            Cookie: "", // You'd pass the request cookies here
+          },
         },
-      });
-      
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to fetch chat');
+        throw new Error("Failed to fetch chat");
       }
-      
+
       const data = await response.json();
       return ChatWithMessagesSchema.parse(data);
     },
@@ -69,7 +69,7 @@ import { getUserChats, getChatWithMessages } from "@/lib/db/chats";
 
 export async function prefetchUserChatsFromDB(
   queryClient: QueryClient,
-  userId: string
+  userId: string,
 ): Promise<void> {
   await queryClient.prefetchQuery({
     queryKey: chatKeys.list(userId),
@@ -81,11 +81,11 @@ export async function prefetchUserChatsFromDB(
 export async function prefetchChatWithMessagesFromDB(
   queryClient: QueryClient,
   chatId: string,
-  userId: string
+  userId: string,
 ): Promise<void> {
   await queryClient.prefetchQuery({
     queryKey: chatKeys.detail(chatId, userId),
     queryFn: () => getChatWithMessages(chatId, userId),
     staleTime: 60 * 1000,
   });
-} 
+}

@@ -14,7 +14,7 @@ interface SharePageProps {
 export async function generateMetadata({ params }: SharePageProps): Promise<Metadata> {
   const { shareId } = await params;
   const chatData = await getSharedChat(shareId);
-  
+
   if (!chatData) {
     return {
       title: "Shared Chat Not Found | Zermind",
@@ -42,9 +42,7 @@ export default async function SharePage({ params }: SharePageProps) {
           <CardContent className="p-6 text-center space-y-4">
             <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
             <div>
-              <h1 className="text-lg font-semibold text-destructive">
-                Shared Chat Not Found
-              </h1>
+              <h1 className="text-lg font-semibold text-destructive">Shared Chat Not Found</h1>
               <p className="text-sm text-muted-foreground mt-2">
                 This shared chat link is invalid or has been removed.
               </p>
@@ -63,12 +61,8 @@ export default async function SharePage({ params }: SharePageProps) {
           <div className="flex items-center space-x-3">
             <Share className="h-5 w-5 text-primary" />
             <div>
-              <h1 className="text-lg font-semibold">
-                {chatData.title || "Shared Chat"}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Shared conversation • Read-only
-              </p>
+              <h1 className="text-lg font-semibold">{chatData.title || "Shared Chat"}</h1>
+              <p className="text-sm text-muted-foreground">Shared conversation • Read-only</p>
             </div>
           </div>
           <Badge variant="secondary" className="flex items-center gap-1">
@@ -93,4 +87,4 @@ export default async function SharePage({ params }: SharePageProps) {
       </div>
     </div>
   );
-} 
+}

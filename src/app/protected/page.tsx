@@ -3,13 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Brain,
   MessageSquare,
@@ -59,16 +53,13 @@ export default function ProtectedPage() {
     <div className="p-4 sm:p-6 lg:p-8 min-h-full">
       <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
         <div className="space-y-2 sm:space-y-4">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-            Welcome to Zermind
-          </h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Welcome to Zermind</h1>
           <p className="text-muted-foreground text-base sm:text-lg">
             Hello <span className="font-semibold">{user?.email}</span>
           </p>
           <p className="text-muted-foreground text-sm sm:text-base mt-1 sm:mt-2">
-            The first AI chat with{" "}
-            <span className="font-semibold text-purple-600">Mind Mode</span> -
-            where conversations become visual mind maps.
+            The first AI chat with <span className="font-semibold text-purple-600">Mind Mode</span>{" "}
+            - where conversations become visual mind maps.
           </p>
         </div>
 
@@ -81,10 +72,7 @@ export default function ProtectedPage() {
                 <CardTitle className="text-blue-700 dark:text-blue-300 text-base sm:text-lg">
                   Chat Mode
                 </CardTitle>
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-100 text-blue-700 text-xs"
-                >
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs">
                   Default
                 </Badge>
               </div>
@@ -117,10 +105,7 @@ export default function ProtectedPage() {
                 <CardTitle className="text-purple-700 dark:text-purple-300 text-base sm:text-lg">
                   Mind Mode
                 </CardTitle>
-                <Badge
-                  variant="secondary"
-                  className="bg-purple-100 text-purple-700 text-xs"
-                >
+                <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-xs">
                   New!
                 </Badge>
               </div>
@@ -159,9 +144,8 @@ export default function ProtectedPage() {
               Ready to get started?
             </CardTitle>
             <CardDescription className="text-sm sm:text-base">
-              Create your first chat and experience both Chat and Mind Mode
-              interfaces. Switch between modes using the toggle in the sidebar
-              anytime!
+              Create your first chat and experience both Chat and Mind Mode interfaces. Switch
+              between modes using the toggle in the sidebar anytime!
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4">
@@ -176,8 +160,7 @@ export default function ProtectedPage() {
               <ArrowRight className="h-4 w-4" />
             </Button>
             <p className="text-xs text-muted-foreground">
-              Your chat will be saved automatically and accessible from the
-              sidebar
+              Your chat will be saved automatically and accessible from the sidebar
             </p>
           </CardContent>
         </Card>

@@ -91,27 +91,20 @@ export const ConversationNode = memo(
     } = data;
 
     const isUser = role === "user";
-    const truncatedContent =
-      content.length > 100 ? content.slice(0, 100) + "..." : content;
+    const truncatedContent = content.length > 100 ? content.slice(0, 100) + "..." : content;
 
     const modelTheme = getModelTheme(model);
     const hasModelComparison = siblingModels && siblingModels.length > 0;
 
     return (
       <div className={`conversation-node ${selected ? "selected" : ""}`}>
-        <Handle
-          type="target"
-          position={Position.Top}
-          className="w-3 h-3 bg-border"
-        />
+        <Handle type="target" position={Position.Top} className="w-3 h-3 bg-border" />
 
         <Card
           className={`w-80 shadow-md border-2 transition-all ${
             selected
               ? "border-purple-500 shadow-lg"
-              : `border-border hover:border-purple-300 ${
-                  isUser ? "" : modelTheme.border
-                }`
+              : `border-border hover:border-purple-300 ${isUser ? "" : modelTheme.border}`
           } ${isUser ? "bg-blue-50 dark:bg-blue-950/20" : modelTheme.bg}`}
         >
           <CardHeader className="pb-2">
@@ -127,10 +120,7 @@ export const ConversationNode = memo(
                 </span>
                 <div className="flex flex-col items-start gap-1">
                   {!isUser && model && (
-                    <Badge
-                      variant="outline"
-                      className={`text-xs ${modelTheme.accent}`}
-                    >
+                    <Badge variant="outline" className={`text-xs ${modelTheme.accent}`}>
                       {getProviderDisplayName(getProviderFromModel(model))}
                     </Badge>
                   )}
@@ -163,9 +153,7 @@ export const ConversationNode = memo(
 
             {hasModelComparison && (
               <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50">
-                <span className="text-xs text-muted-foreground">
-                  Compared with:
-                </span>
+                <span className="text-xs text-muted-foreground">Compared with:</span>
                 <div className="flex gap-1 flex-wrap">
                   {siblingModels!.slice(0, 3).map((siblingModel) => {
                     const siblingTheme = getModelTheme(siblingModel);
@@ -175,9 +163,7 @@ export const ConversationNode = memo(
                         variant="outline"
                         className={`text-xs ${siblingTheme.accent}`}
                       >
-                        {getProviderDisplayName(
-                          getProviderFromModel(siblingModel)
-                        )}
+                        {getProviderDisplayName(getProviderFromModel(siblingModel))}
                       </Badge>
                     );
                   })}
@@ -207,11 +193,7 @@ export const ConversationNode = memo(
                 Resume
               </Button>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onCreateBranch?.(data.id)}
-              >
+              <Button size="sm" variant="outline" onClick={() => onCreateBranch?.(data.id)}>
                 <Plus className="h-3 w-3" />
               </Button>
 
@@ -230,14 +212,10 @@ export const ConversationNode = memo(
           </CardContent>
         </Card>
 
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          className="w-3 h-3 bg-border"
-        />
+        <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-border" />
       </div>
     );
-  }
+  },
 );
 
 ConversationNode.displayName = "ConversationNode";

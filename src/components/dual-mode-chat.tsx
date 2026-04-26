@@ -16,10 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Brain, MessageSquare, X } from "lucide-react";
 import { CollaborationButton } from "@/components/collaboration/collaboration-button";
-import {
-  RealtimeCursors,
-  CollaborationPresence,
-} from "@/components/mind-map/realtime-cursors";
+import { RealtimeCursors, CollaborationPresence } from "@/components/mind-map/realtime-cursors";
 import { useRealtimeCollaboration } from "@/hooks/use-realtime-collaboration";
 import { chatKeys } from "@/hooks/use-chats-query";
 import { conversationContextKeys } from "@/hooks/use-conversation-context";
@@ -60,11 +57,7 @@ interface DualModeChatProps {
 // Error handler for collaboration features
 function handleCollaborationError(error: Error, errorInfo: unknown) {
   // Log the error for debugging purposes
-  console.warn(
-    "Collaboration Error Boundary caught an error:",
-    error,
-    errorInfo
-  );
+  console.warn("Collaboration Error Boundary caught an error:", error, errorInfo);
 
   // You can also log the error to an error reporting service here
   // Example: errorReportingService.captureException(error, { extra: errorInfo });
@@ -86,12 +79,8 @@ export function DualModeChat({
   const { user } = useAuthUser();
   const queryClient = useQueryClient();
   const [resumeFromNodeId, setResumeFromNodeId] = useState<string | null>(null);
-  const [createBranchFromNodeId, setCreateBranchFromNodeId] = useState<
-    string | null
-  >(null);
-  const [createMultiModelFromNodeId, setCreateMultiModelFromNodeId] = useState<
-    string | null
-  >(null);
+  const [createBranchFromNodeId, setCreateBranchFromNodeId] = useState<string | null>(null);
+  const [createMultiModelFromNodeId, setCreateMultiModelFromNodeId] = useState<string | null>(null);
 
   // Use custom hook for node position management
   const { handleNodePositionChange, savePendingPositions } = useNodePositions();
@@ -218,9 +207,7 @@ export function DualModeChat({
     // Update chat list to show latest message
     queryClient.invalidateQueries({ queryKey: chatKeys.lists() });
 
-    console.log(
-      "Multi-model branch created successfully - queries invalidated"
-    );
+    console.log("Multi-model branch created successfully - queries invalidated");
   }, [queryClient, chatId]);
 
   // Clear all active actions
@@ -235,9 +222,7 @@ export function DualModeChat({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         const hasActiveAction =
-          resumeFromNodeId ||
-          createBranchFromNodeId ||
-          createMultiModelFromNodeId;
+          resumeFromNodeId || createBranchFromNodeId || createMultiModelFromNodeId;
         if (hasActiveAction) {
           clearAllActions();
         }
@@ -251,12 +236,7 @@ export function DualModeChat({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [
-    resumeFromNodeId,
-    createBranchFromNodeId,
-    createMultiModelFromNodeId,
-    clearAllActions,
-  ]);
+  }, [resumeFromNodeId, createBranchFromNodeId, createMultiModelFromNodeId, clearAllActions]);
 
   // Save pending node positions on component unmount or navigation
   useEffect(() => {
@@ -280,8 +260,7 @@ export function DualModeChat({
   }));
 
   // Check if any action is active
-  const hasActiveAction =
-    resumeFromNodeId || createBranchFromNodeId || createMultiModelFromNodeId;
+  const hasActiveAction = resumeFromNodeId || createBranchFromNodeId || createMultiModelFromNodeId;
 
   // Get active action name for better UX
   const getActiveActionName = () => {
@@ -300,9 +279,7 @@ export function DualModeChat({
             <div className="flex items-center gap-3">
               <Brain className="h-5 w-5 text-purple-500" />
               <div>
-                <h2 className="font-semibold">
-                  {currentChatTitle || "Mind Map Chat"}
-                </h2>
+                <h2 className="font-semibold">{currentChatTitle || "Mind Map Chat"}</h2>
                 <p className="text-xs text-muted-foreground">
                   Interactive conversation visualization
                 </p>
@@ -340,9 +317,7 @@ export function DualModeChat({
                   className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white"
                 >
                   <X className="h-3 w-3" />
-                  <span className="hidden sm:inline">
-                    Close {getActiveActionName()}
-                  </span>
+                  <span className="hidden sm:inline">Close {getActiveActionName()}</span>
                   <span className="sm:hidden">Close</span>
                 </Button>
               )}
@@ -465,9 +440,7 @@ export function DualModeChat({
             <MessageSquare className="h-5 w-5 text-blue-500" />
             <div>
               <h2 className="font-semibold">{currentChatTitle || "Chat"}</h2>
-              <p className="text-xs text-muted-foreground">
-                Traditional linear conversation
-              </p>
+              <p className="text-xs text-muted-foreground">Traditional linear conversation</p>
             </div>
           </div>
 

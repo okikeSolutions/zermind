@@ -1,33 +1,30 @@
-import prisma from '@/lib/prisma';
-import { encryptApiKey, decryptApiKey, createApiKeyPreview } from '@/lib/crypto';
-import { 
+import prisma from "@/lib/prisma";
+import { encryptApiKey, decryptApiKey, createApiKeyPreview } from "@/lib/crypto";
+import {
   ApiKeySchema,
   PublicApiKeySchema,
   type ApiKey,
   type PublicApiKey,
-  type Provider
-} from '@/lib/schemas/api-keys';
+  type Provider,
+} from "@/lib/schemas/api-keys";
 
 // Get all API keys for a user (returns public data only)
 export async function getUserApiKeys(userId: string): Promise<PublicApiKey[]> {
   const rawKeys = await prisma.apiKey.findMany({
     where: {
-      userId
+      userId,
     },
-    orderBy: [
-      { isActive: 'desc' },
-      { createdAt: 'desc' }
-    ]
+    orderBy: [{ isActive: "desc" }, { createdAt: "desc" }],
   });
 
   // Transform to public schema (no decryption needed for preview)
-  return rawKeys.map(key => {
+  return rawKeys.map((key) => {
     const decryptedKey = decryptApiKey(key.encryptedKey);
     const keyPreview = createApiKeyPreview(decryptedKey);
-    
+
     return PublicApiKeySchema.parse({
       ...key,
-      keyPreview
+      keyPreview,
     });
   });
 }
@@ -38,11 +35,11 @@ export async function getActiveApiKey(userId: string, provider: Provider): Promi
     where: {
       userId,
       provider,
-      isActive: true
+      isActive: true,
     },
     orderBy: {
-      lastUsedAt: 'desc'
-    }
+      lastUsedAt: "desc",
+    },
   });
 
   if (!apiKey) return null;
@@ -50,7 +47,7 @@ export async function getActiveApiKey(userId: string, provider: Provider): Promi
   // Update last used timestamp
   await prisma.apiKey.update({
     where: { id: apiKey.id },
-    data: { lastUsedAt: new Date() }
+    data: { lastUsedAt: new Date() },
   });
 
   return decryptApiKey(apiKey.encryptedKey);
@@ -61,7 +58,7 @@ export async function createApiKey(
   userId: string,
   provider: Provider,
   apiKey: string,
-  keyName: string
+  keyName: string,
 ): Promise<PublicApiKey> {
   // Encrypt the API key
   const encryptedKey = encryptApiKey(apiKey);
@@ -72,13 +69,13 @@ export async function createApiKey(
       userId,
       provider,
       encryptedKey,
-      keyName
-    }
+      keyName,
+    },
   });
 
   return PublicApiKeySchema.parse({
     ...newKey,
-    keyPreview
+    keyPreview,
   });
 }
 
@@ -86,14 +83,14 @@ export async function createApiKey(
 export async function updateApiKey(
   keyId: string,
   userId: string,
-  updates: { keyName?: string; isActive?: boolean }
+  updates: { keyName?: string; isActive?: boolean },
 ): Promise<PublicApiKey> {
   const updatedKey = await prisma.apiKey.update({
     where: {
       id: keyId,
-      userId // Ensure user owns the key
+      userId, // Ensure user owns the key
     },
-    data: updates
+    data: updates,
   });
 
   const decryptedKey = decryptApiKey(updatedKey.encryptedKey);
@@ -101,7 +98,7 @@ export async function updateApiKey(
 
   return PublicApiKeySchema.parse({
     ...updatedKey,
-    keyPreview
+    keyPreview,
   });
 }
 
@@ -111,12 +108,12 @@ export async function deleteApiKey(keyId: string, userId: string): Promise<boole
     await prisma.apiKey.delete({
       where: {
         id: keyId,
-        userId // Ensure user owns the key
-      }
+        userId, // Ensure user owns the key
+      },
     });
     return true;
   } catch (error) {
-    console.error('Error deleting API key:', error);
+    console.error("Error deleting API key:", error);
     return false;
   }
 }
@@ -127,10 +124,10 @@ export async function hasApiKeyForProvider(userId: string, provider: Provider): 
     where: {
       userId,
       provider,
-      isActive: true
-    }
+      isActive: true,
+    },
   });
-  
+
   return count > 0;
 }
 
@@ -139,8 +136,8 @@ export async function getApiKeyById(keyId: string, userId: string): Promise<ApiK
   const apiKey = await prisma.apiKey.findFirst({
     where: {
       id: keyId,
-      userId
-    }
+      userId,
+    },
   });
 
   if (!apiKey) return null;
@@ -149,14 +146,18 @@ export async function getApiKeyById(keyId: string, userId: string): Promise<ApiK
 }
 
 // Test API key format and basic validation
-export async function validateApiKeyExists(userId: string, provider: Provider, keyName: string): Promise<boolean> {
+export async function validateApiKeyExists(
+  userId: string,
+  provider: Provider,
+  keyName: string,
+): Promise<boolean> {
   const existing = await prisma.apiKey.findFirst({
     where: {
       userId,
       provider,
-      keyName
-    }
+      keyName,
+    },
   });
-  
+
   return !!existing;
-} 
+}

@@ -17,6 +17,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import {
   Select,
   SelectContent,
@@ -39,14 +41,7 @@ const feedbackFormSchema = z.object({
     .string()
     .min(1, "Feedback message is required")
     .max(2000, "Feedback message is too long"),
-  type: z.enum([
-    "general",
-    "bug",
-    "feature",
-    "improvement",
-    "complaint",
-    "compliment",
-  ]),
+  type: z.enum(["general", "bug", "feature", "improvement", "complaint", "compliment"]),
 });
 
 type FeedbackFormValues = z.infer<typeof feedbackFormSchema>;
@@ -58,6 +53,7 @@ interface FeedbackDialogProps {
 export function FeedbackDialog({ children }: FeedbackDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const createFeedback = useMutation(api.feedback.create);
 
   const form = useForm<FeedbackFormValues>({
     resolver: zodResolver(feedbackFormSchema),
@@ -71,21 +67,11 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: values.message.trim(),
-          type: values.type,
-        }),
+      await createFeedback({
+        message: values.message.trim(),
+        type: values.type,
+        userAgent: navigator.userAgent,
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to submit feedback");
-      }
 
       toast.success("Thank you for your feedback! We'll review it soon.");
       form.reset();
@@ -93,9 +79,7 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
     } catch (error) {
       console.error("Error submitting feedback:", error);
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to submit feedback. Please try again."
+        error instanceof Error ? error.message : "Failed to submit feedback. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -119,8 +103,7 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
             Share Your Feedback
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            Help us improve by sharing your thoughts, reporting bugs, or
-            suggesting new features.
+            Help us improve by sharing your thoughts, reporting bugs, or suggesting new features.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -133,9 +116,7 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
-                    Feedback Type
-                  </FormLabel>
+                  <FormLabel className="text-sm font-medium">Feedback Type</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -164,9 +145,7 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
-                    Your Message
-                  </FormLabel>
+                  <FormLabel className="text-sm font-medium">Your Message</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Tell us what's on your mind..."

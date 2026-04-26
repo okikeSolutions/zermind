@@ -19,4 +19,4 @@ export function DemoScenarioClient({ scenario }: DemoScenarioClientProps) {
       <DemoModeChat onUpgrade={handleUpgrade} selectedScenario={scenario} />
     </div>
   );
-} 
+}

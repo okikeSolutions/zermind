@@ -47,8 +47,7 @@ export const DEMO_CONVERSATIONS = {
       {
         id: "demo-4",
         role: "user" as const,
-        content:
-          "Help me write a short story about a robot discovering emotions",
+        content: "Help me write a short story about a robot discovering emotions",
         xPosition: 100,
         yPosition: 100,
         nodeType: "conversation" as const,
@@ -86,8 +85,7 @@ export const DEMO_CONVERSATIONS = {
       {
         id: "demo-7",
         role: "user" as const,
-        content:
-          "How can cities reduce traffic congestion while improving air quality?",
+        content: "How can cities reduce traffic congestion while improving air quality?",
         xPosition: 100,
         yPosition: 100,
         nodeType: "conversation" as const,

@@ -5,23 +5,23 @@
  */
 export function generateChatTitle(message: string): string {
   // Remove extra whitespace and newlines
-  const cleaned = message.replace(/\s+/g, ' ').trim();
-  
+  const cleaned = message.replace(/\s+/g, " ").trim();
+
   // If message is very short, use it as is
   if (cleaned.length <= 40) {
     return cleaned;
   }
-  
+
   // Try to truncate at a word boundary within 40 characters
   const truncated = cleaned.substring(0, 40);
-  const lastSpaceIndex = truncated.lastIndexOf(' ');
-  
+  const lastSpaceIndex = truncated.lastIndexOf(" ");
+
   if (lastSpaceIndex > 20) {
     // Truncate at the last space if it's not too early
-    return truncated.substring(0, lastSpaceIndex) + '...';
+    return truncated.substring(0, lastSpaceIndex) + "...";
   } else {
     // If no good space found, just cut at character limit
-    return truncated + '...';
+    return truncated + "...";
   }
 }
 
@@ -32,12 +32,8 @@ export function generateChatTitle(message: string): string {
  */
 export function shouldUpdateChatTitle(title: string | null): boolean {
   if (!title) return true;
-  
-  const defaultTitles = [
-    'New Chat',
-    'Untitled Chat',
-    'Chat',
-  ];
-  
+
+  const defaultTitles = ["New Chat", "Untitled Chat", "Chat"];
+
   return defaultTitles.includes(title);
-} 
+}

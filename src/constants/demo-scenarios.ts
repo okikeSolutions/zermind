@@ -2,12 +2,7 @@ export const DEMO_SCENARIOS = {
   "ai-comparison": {
     title: "AI Model Comparison Demo",
     description: "See how different AI models approach the same question",
-    keywords: [
-      "AI comparison",
-      "GPT-4 vs Claude",
-      "model comparison",
-      "AI debate",
-    ],
+    keywords: ["AI comparison", "GPT-4 vs Claude", "model comparison", "AI debate"],
   },
   "creative-writing": {
     title: "Creative Writing with AI",

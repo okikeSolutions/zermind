@@ -28,10 +28,7 @@ function parseAttachments(attachments: JsonValue): Attachment[] {
       // Type guard to ensure it's an array of valid attachments
       return attachments.filter(
         (item): item is Attachment =>
-          item != null &&
-          typeof item === "object" &&
-          "id" in item &&
-          "name" in item
+          item != null && typeof item === "object" && "id" in item && "name" in item,
       );
     }
 
@@ -46,10 +43,7 @@ function parseAttachments(attachments: JsonValue): Attachment[] {
       if (Array.isArray(parsed)) {
         return parsed.filter(
           (item): item is Attachment =>
-            item != null &&
-            typeof item === "object" &&
-            "id" in item &&
-            "name" in item
+            item != null && typeof item === "object" && "id" in item && "name" in item,
         );
       }
       return [];
@@ -117,7 +111,7 @@ export async function getUserChats(userId: string): Promise<ChatListItem[]> {
 // Get a single chat with all messages
 export async function getChatWithMessages(
   chatId: string,
-  userId: string
+  userId: string,
 ): Promise<ChatWithMessages | null> {
   const rawChat = await prisma.chat.findFirst({
     where: {
@@ -159,11 +153,7 @@ export async function createChat(userId: string, title?: string) {
 }
 
 // Update chat title
-export async function updateChatTitle(
-  chatId: string,
-  userId: string,
-  title: string
-) {
+export async function updateChatTitle(chatId: string, userId: string, title: string) {
   return await prisma.chat.update({
     where: {
       id: chatId,
@@ -196,7 +186,7 @@ export async function addMessage(
   xPosition?: number,
   yPosition?: number,
   nodeType?: "conversation" | "branching_point" | "insight",
-  branchName?: string
+  branchName?: string,
 ) {
   try {
     return await prisma.$transaction(async (tx) => {
@@ -222,10 +212,7 @@ export async function addMessage(
           xPosition: xPosition || 0,
           yPosition: yPosition || 0,
           nodeType: nodeType || "conversation",
-          attachments:
-            attachments && attachments.length > 0
-              ? JSON.stringify(attachments)
-              : "[]",
+          attachments: attachments && attachments.length > 0 ? JSON.stringify(attachments) : "[]",
         },
       });
     });
@@ -243,7 +230,7 @@ export async function addBranchingMessage(
   content: string,
   model?: string,
   branchName?: string,
-  attachments?: Attachment[]
+  attachments?: Attachment[],
 ) {
   try {
     return await prisma.$transaction(async (tx) => {
@@ -266,10 +253,7 @@ export async function addBranchingMessage(
           content,
           model,
           branchName,
-          attachments:
-            attachments && attachments.length > 0
-              ? JSON.stringify(attachments)
-              : "[]",
+          attachments: attachments && attachments.length > 0 ? JSON.stringify(attachments) : "[]",
         },
       });
     });
@@ -282,7 +266,7 @@ export async function addBranchingMessage(
 // Get conversation context up to a specific node (for resuming)
 export async function getConversationContext(
   nodeId: string,
-  userId: string
+  userId: string,
 ): Promise<
   {
     id: string;
@@ -350,9 +334,7 @@ export async function getConversationContext(
 }
 
 // Get a shared chat by shareId (public access, no user authentication required)
-export async function getSharedChat(
-  shareId: string
-): Promise<ChatWithMessages | null> {
+export async function getSharedChat(shareId: string): Promise<ChatWithMessages | null> {
   const rawChat = await prisma.chat.findFirst({
     where: {
       shareId,
@@ -373,10 +355,7 @@ export async function getSharedChat(
 }
 
 // Generate or get existing share link for a chat
-export async function generateShareLink(
-  chatId: string,
-  userId: string
-): Promise<string | null> {
+export async function generateShareLink(chatId: string, userId: string): Promise<string | null> {
   // First check if the chat exists and belongs to the user
   const chat = await prisma.chat.findFirst({
     where: {
@@ -410,10 +389,7 @@ export async function generateShareLink(
 }
 
 // Remove share link from a chat
-export async function removeShareLink(
-  chatId: string,
-  userId: string
-): Promise<boolean> {
+export async function removeShareLink(chatId: string, userId: string): Promise<boolean> {
   try {
     await prisma.chat.update({
       where: {
@@ -432,10 +408,7 @@ export async function removeShareLink(
 }
 
 // Check if user is the owner of a chat
-export async function isChatOwner(
-  chatId: string,
-  userId: string
-): Promise<boolean> {
+export async function isChatOwner(chatId: string, userId: string): Promise<boolean> {
   try {
     const chat = await prisma.chat.findFirst({
       where: {

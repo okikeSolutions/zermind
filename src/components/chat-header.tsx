@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useChatWithMessages } from "@/hooks/use-chats-query";
+import {
+  useChatWithMessages,
+  useGenerateShareLink,
+  useRemoveShareLink,
+} from "@/hooks/use-chats-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Share, Copy, Check, Trash2, ExternalLink } from "lucide-react";
@@ -30,18 +34,15 @@ const formatDate = (date: Date): string => {
   });
 };
 
-export function ChatHeader({
-  chatId,
-  userId,
-  initialTitle,
-  initialUpdatedAt,
-}: ChatHeaderProps) {
+export function ChatHeader({ chatId, userId, initialTitle, initialUpdatedAt }: ChatHeaderProps) {
   const [isGeneratingShare, setIsGeneratingShare] = useState(false);
   const [isRemovingShare, setIsRemovingShare] = useState(false);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
-  // Use React Query to get the latest chat data
-  const { data: chatData, refetch } = useChatWithMessages(chatId, userId);
+  // Use Convex to get the latest chat data.
+  const { data: chatData } = useChatWithMessages(chatId, userId);
+  const generateShareLinkMutation = useGenerateShareLink();
+  const removeShareLinkMutation = useRemoveShareLink();
 
   // Use the latest data if available, otherwise fall back to initial data
   const title = chatData?.title || initialTitle || "New Chat";
@@ -51,25 +52,17 @@ export function ChatHeader({
   const generateShareLink = async () => {
     setIsGeneratingShare(true);
     try {
-      const response = await fetch(`/api/chats/${chatId}/share`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate share link");
-      }
-
-      const data = await response.json();
+      const data = await generateShareLinkMutation.mutateAsync(chatId);
+      const shareUrl = `${window.location.origin}/share/${data.shareId}`;
 
       // Copy to clipboard
-      await navigator.clipboard.writeText(data.shareUrl);
+      await navigator.clipboard.writeText(shareUrl);
       setCopiedToClipboard(true);
       setTimeout(() => setCopiedToClipboard(false), 2000);
 
       toast.success("Share link generated and copied to clipboard!");
 
-      // Refresh chat data to get the new shareId
-      refetch();
+      // Convex subscriptions update the chat data automatically.
     } catch (error) {
       console.error("Error generating share link:", error);
       toast.error("Failed to generate share link");
@@ -96,18 +89,11 @@ export function ChatHeader({
   const removeShareLink = async () => {
     setIsRemovingShare(true);
     try {
-      const response = await fetch(`/api/chats/${chatId}/share`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to remove share link");
-      }
+      await removeShareLinkMutation.mutateAsync(chatId);
 
       toast.success("Share link removed");
 
-      // Refresh chat data to remove the shareId
-      refetch();
+      // Convex subscriptions update the chat data automatically.
     } catch (error) {
       console.error("Error removing share link:", error);
       toast.error("Failed to remove share link");
@@ -126,9 +112,7 @@ export function ChatHeader({
     <div className="border-b p-2 sm:p-4 bg-background/50 backdrop-blur">
       <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-base sm:text-lg font-semibold truncate">
-            {title}
-          </h1>
+          <h1 className="text-base sm:text-lg font-semibold truncate">{title}</h1>
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
             <p className="text-xs sm:text-sm text-muted-foreground">
               Last updated: {formatDate(updatedAt)}
@@ -151,9 +135,7 @@ export function ChatHeader({
               className="flex items-center gap-1.5 sm:gap-2 h-8 sm:h-9 text-xs sm:text-sm whitespace-nowrap"
             >
               <Share className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">
-                {shareId ? "Shared" : "Share"}
-              </span>
+              <span className="hidden xs:inline">{shareId ? "Shared" : "Share"}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 sm:w-56">

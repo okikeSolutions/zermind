@@ -4,14 +4,7 @@ import { type Attachment } from "@/lib/schemas/chat";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Image as ImageIcon,
-  FileText,
-  ExternalLink,
-  Download,
-  Eye,
-  Paperclip,
-} from "lucide-react";
+import { Image as ImageIcon, FileText, ExternalLink, Download, Eye, Paperclip } from "lucide-react";
 import { formatBytes } from "@/components/dropzone";
 import { cn } from "@/lib/utils";
 import NextImage from "next/image";
@@ -90,11 +83,7 @@ export function MessageAttachment({
 
       return blobUrl;
     } catch (error) {
-      console.error(
-        "Failed to create blob URL for attachment:",
-        attachment.id,
-        error
-      );
+      console.error("Failed to create blob URL for attachment:", attachment.id, error);
       return attachment.url; // Fallback to original data URL
     }
   }, []);
@@ -150,15 +139,10 @@ export function MessageAttachment({
         </span>
         <div className="flex space-x-1">
           {attachments.slice(0, 3).map((attachment) => (
-            <div
-              key={attachment.id}
-              className="h-2 w-2 rounded-full bg-current opacity-60"
-            />
+            <div key={attachment.id} className="h-2 w-2 rounded-full bg-current opacity-60" />
           ))}
           {attachments.length > 3 && (
-            <span className="text-xs text-muted-foreground">
-              +{attachments.length - 3}
-            </span>
+            <span className="text-xs text-muted-foreground">+{attachments.length - 3}</span>
           )}
         </div>
       </div>
@@ -168,9 +152,7 @@ export function MessageAttachment({
   return (
     <div className={cn("space-y-2 mt-2", className)}>
       {/* Grid layout for multiple images */}
-      {attachments.filter(
-        (att) => att.type === "image" && !imageErrors.has(att.id)
-      ).length > 1 ? (
+      {attachments.filter((att) => att.type === "image" && !imageErrors.has(att.id)).length > 1 ? (
         <div className="grid grid-cols-2 gap-2">
           {attachments
             .filter((att) => att.type === "image" && !imageErrors.has(att.id))
@@ -189,16 +171,11 @@ export function MessageAttachment({
                     className="object-cover"
                     onError={() => handleImageError(attachment.id)}
                   />
-                  {attachments.filter((att) => att.type === "image").length >
-                    4 &&
-                    attachments
-                      .filter((att) => att.type === "image")
-                      .indexOf(attachment) === 3 && (
+                  {attachments.filter((att) => att.type === "image").length > 4 &&
+                    attachments.filter((att) => att.type === "image").indexOf(attachment) === 3 && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <span className="text-white font-medium">
-                          +
-                          {attachments.filter((att) => att.type === "image")
-                            .length - 4}
+                          +{attachments.filter((att) => att.type === "image").length - 4}
                         </span>
                       </div>
                     )}
@@ -208,8 +185,7 @@ export function MessageAttachment({
         </div>
       ) : (
         attachments.map((attachment) => {
-          const isImage =
-            attachment.type === "image" && !imageErrors.has(attachment.id);
+          const isImage = attachment.type === "image" && !imageErrors.has(attachment.id);
 
           return (
             <Card
@@ -269,16 +245,12 @@ export function MessageAttachment({
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 p-0"
-                        onClick={() =>
-                          window.open(getAttachmentUrl(attachment), "_blank")
-                        }
+                        onClick={() => window.open(getAttachmentUrl(attachment), "_blank")}
                       >
                         <ExternalLink className="h-3 w-3" />
                       </Button>
                     </div>
-                    <p className="text-xs font-medium truncate mt-1">
-                      {attachment.name}
-                    </p>
+                    <p className="text-xs font-medium truncate mt-1">{attachment.name}</p>
                   </CardContent>
                 </div>
               ) : (
@@ -289,9 +261,7 @@ export function MessageAttachment({
                         {getFileTypeIcon(attachment.mimeType)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {attachment.name}
-                        </p>
+                        <p className="text-sm font-medium truncate">{attachment.name}</p>
                         <div className="flex items-center space-x-2 mt-1">
                           <Badge variant="secondary" className="text-xs">
                             {getFileTypeLabel(attachment.mimeType)}
@@ -306,9 +276,7 @@ export function MessageAttachment({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() =>
-                          window.open(getAttachmentUrl(attachment), "_blank")
-                        }
+                        onClick={() => window.open(getAttachmentUrl(attachment), "_blank")}
                         className="h-8 w-8 p-0"
                         title="View document"
                       >
@@ -353,9 +321,7 @@ export function MessageAttachment({
               ✕
             </Button>
             {(() => {
-              const attachment = attachments.find(
-                (att) => att.id === expandedImage
-              );
+              const attachment = attachments.find((att) => att.id === expandedImage);
               return attachment ? (
                 <NextImage
                   src={getAttachmentUrl(attachment)}

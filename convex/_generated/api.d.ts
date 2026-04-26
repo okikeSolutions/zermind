@@ -8,8 +8,18 @@
  * @module
  */
 
+import type * as account from "../account.js";
+import type * as apiKeyActions from "../apiKeyActions.js";
+import type * as apiKeys from "../apiKeys.js";
 import type * as auth from "../auth.js";
-import type * as https from "../https.js";
+import type * as chats from "../chats.js";
+import type * as collaboration from "../collaboration.js";
+import type * as feedback from "../feedback.js";
+import type * as http from "../http.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as messages from "../messages.js";
+import type * as presence from "../presence.js";
+import type * as usage from "../usage.js";
 
 import type {
   ApiFromModules,
@@ -18,8 +28,18 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  account: typeof account;
+  apiKeyActions: typeof apiKeyActions;
+  apiKeys: typeof apiKeys;
   auth: typeof auth;
-  https: typeof https;
+  chats: typeof chats;
+  collaboration: typeof collaboration;
+  feedback: typeof feedback;
+  http: typeof http;
+  "lib/auth": typeof lib_auth;
+  messages: typeof messages;
+  presence: typeof presence;
+  usage: typeof usage;
 }>;
 
 /**

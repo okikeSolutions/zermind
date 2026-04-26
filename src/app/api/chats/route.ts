@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createChat } from "@/lib/db/chats";
-import { CreateChatSchema, CreateChatResponseSchema, ErrorResponseSchema } from "@/lib/schemas/chat";
+import {
+  CreateChatSchema,
+  CreateChatResponseSchema,
+  ErrorResponseSchema,
+} from "@/lib/schemas/chat";
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,17 +41,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error("Error creating chat:", error);
-    
+
     // Handle Zod validation errors
     if (error instanceof Error && error.name === "ZodError") {
-      const errorResponse = ErrorResponseSchema.parse({ 
-        error: "Invalid request data" 
+      const errorResponse = ErrorResponseSchema.parse({
+        error: "Invalid request data",
       });
       return NextResponse.json(errorResponse, { status: 400 });
     }
-    
-    const errorResponse = ErrorResponseSchema.parse({ 
-      error: "Failed to create chat" 
+
+    const errorResponse = ErrorResponseSchema.parse({
+      error: "Failed to create chat",
     });
     return NextResponse.json(errorResponse, { status: 500 });
   }

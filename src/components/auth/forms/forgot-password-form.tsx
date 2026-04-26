@@ -1,15 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -26,18 +20,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const forgotPasswordSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
 });
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
-export function ForgotPasswordForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,16 +38,15 @@ export function ForgotPasswordForm({
   });
 
   const handleForgotPassword = async (data: ForgotPasswordFormData) => {
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
-      // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      const result = await authClient.requestPasswordReset({
+        email: data.email,
         redirectTo: `${window.location.origin}/auth/update-password`,
       });
-      if (error) throw error;
+      if (result.error) throw new Error(result.error.message);
       setSuccess(true);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -78,8 +65,8 @@ export function ForgotPasswordForm({
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              If you registered using your email and password, you will receive
-              a password reset email.
+              If you registered using your email and password, you will receive a password reset
+              email.
             </p>
           </CardContent>
         </Card>
@@ -88,16 +75,12 @@ export function ForgotPasswordForm({
           <CardHeader>
             <CardTitle className="text-2xl">Reset Your Password</CardTitle>
             <CardDescription>
-              Type in your email and we&apos;ll send you a link to reset your
-              password
+              Type in your email and we&apos;ll send you a link to reset your password
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(handleForgotPassword)}
-                className="space-y-6"
-              >
+              <form onSubmit={form.handleSubmit(handleForgotPassword)} className="space-y-6">
                 <FormField
                   control={form.control}
                   name="email"
@@ -105,11 +88,7 @@ export function ForgotPasswordForm({
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="m@example.com"
-                          {...field}
-                        />
+                        <Input type="email" placeholder="m@example.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

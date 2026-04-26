@@ -94,7 +94,7 @@ export function useChat({
           id: msg.id,
           role: msg.role,
           parts: [{ type: "text" as const, text: msg.content }],
-        }))
+        })),
       );
     },
     sendMessage: async (content: string, attachments: Attachment[] = []) => {
@@ -124,13 +124,11 @@ export function useChat({
               maxTokens,
               temperature,
             },
-          }
+          },
         );
       } catch (error) {
         console.error("Failed to process message with attachments:", error);
-        onError?.(
-          error instanceof Error ? error : new Error("Failed to send message")
-        );
+        onError?.(error instanceof Error ? error : new Error("Failed to send message"));
         throw error;
       }
     },

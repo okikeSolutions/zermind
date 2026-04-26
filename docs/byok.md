@@ -7,6 +7,7 @@ This implementation allows users to securely store and use their own API keys fo
 ## Security Features
 
 ### 🔐 Encryption at Rest
+
 - API keys are encrypted using **AES-256-GCM** encryption before storage
 - Each encrypted key includes:
   - Random 128-bit IV (Initialization Vector)
@@ -14,17 +15,20 @@ This implementation allows users to securely store and use their own API keys fo
   - Additional Authenticated Data (AAD) for extra security
 
 ### 🛡️ Key Management
+
 - Encryption key derived from `API_KEY_ENCRYPTION_SECRET` environment variable
 - Uses PBKDF2 with 100,000 iterations for key derivation
 - Keys are never stored in plaintext
 - Only key previews (first 4 + last 4 characters) are shown in UI
 
 ### 🔍 Access Control
+
 - API keys are tied to specific user accounts
 - Server-side validation ensures users can only access their own keys
 - Proper authentication required for all operations
 
 ### 📡 Transmission Security
+
 - API keys transmitted over HTTPS only
 - Password-type input fields prevent shoulder surfing
 - No logging of actual API key values
@@ -35,7 +39,7 @@ This implementation allows users to securely store and use their own API keys fo
 -- API Key model for BYOK functionality
 model ApiKey {
   id            String   @id @default(cuid())
-  userId        String   @map("user_id") 
+  userId        String   @map("user_id")
   provider      String   -- "openrouter", "openai", "anthropic", etc.
   encryptedKey  String   @map("encrypted_key") -- AES-256 encrypted
   keyName       String?  @map("key_name") -- User-friendly name
@@ -43,7 +47,7 @@ model ApiKey {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   lastUsedAt    DateTime? @map("last_used_at")
-  
+
   @@unique([userId, provider, keyName])
   @@map("api_keys")
 }
@@ -61,6 +65,7 @@ API_KEY_ENCRYPTION_SECRET="your-very-strong-encryption-secret-here"
 ```
 
 Generate a strong secret:
+
 ```bash
 # Using OpenSSL
 openssl rand -base64 32
@@ -87,8 +92,9 @@ npx prisma migrate dev --name add-api-keys
 ### 3. Supported Providers
 
 Currently supports:
+
 - **OpenRouter** - Multiple AI models in one API
-- **OpenAI** - GPT models  
+- **OpenAI** - GPT models
 - **Anthropic** - Claude models
 - **Meta** - Llama models
 - **Google** - Gemini models
@@ -96,10 +102,13 @@ Currently supports:
 ## API Endpoints
 
 ### GET `/api/user/api-keys`
+
 Retrieve user's API keys (returns public data only)
 
 ### POST `/api/user/api-keys`
+
 Create a new API key
+
 ```json
 {
   "provider": "openrouter",
@@ -109,7 +118,9 @@ Create a new API key
 ```
 
 ### PATCH `/api/user/api-keys/[keyId]`
+
 Update API key (name or active status)
+
 ```json
 {
   "keyName": "Updated Name",
@@ -118,6 +129,7 @@ Update API key (name or active status)
 ```
 
 ### DELETE `/api/user/api-keys/[keyId]`
+
 Delete an API key permanently
 
 ## Usage in Chat System
@@ -150,6 +162,7 @@ The chat system automatically handles BYOK with this simplified flow:
 ## Error Handling
 
 The implementation includes comprehensive error handling:
+
 - Validation errors with field-specific messages
 - Encryption/decryption error recovery
 - Database constraint violations
@@ -185,4 +198,4 @@ The implementation includes comprehensive error handling:
 4. Consider implementing:
    - IP allowlisting for sensitive operations
    - Multi-factor authentication for key management
-   - Regular security audits 
+   - Regular security audits

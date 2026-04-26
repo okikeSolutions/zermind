@@ -20,14 +20,9 @@ export const conversationContextKeys = {
 } as const;
 
 // API Function
-async function fetchConversationContext(
-  chatId: string,
-  parentNodeId: string
-): Promise<Message[]> {
+async function fetchConversationContext(chatId: string, parentNodeId: string): Promise<Message[]> {
   const response = await fetch(
-    `/api/chats/${encodeURIComponent(chatId)}/context/${encodeURIComponent(
-      parentNodeId
-    )}`
+    `/api/chats/${encodeURIComponent(chatId)}/context/${encodeURIComponent(parentNodeId)}`,
   );
 
   if (!response.ok) {
@@ -46,20 +41,17 @@ async function fetchConversationContext(
       createdAt: string;
     }) => ({
       ...msg,
-      role:
-        msg.role === "user" || msg.role === "assistant"
-          ? msg.role
-          : "assistant",
+      role: msg.role === "user" || msg.role === "assistant" ? msg.role : "assistant",
       createdAt: new Date(msg.createdAt),
       attachments: [],
-    })
+    }),
   );
 }
 
 // Hook
 export function useConversationContext(
   chatId: string | undefined,
-  parentNodeId: string | undefined
+  parentNodeId: string | undefined,
 ) {
   return useQuery({
     queryKey: conversationContextKeys.context(chatId, parentNodeId),

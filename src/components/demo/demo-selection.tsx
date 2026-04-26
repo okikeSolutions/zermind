@@ -100,16 +100,10 @@ export function DemoSelection({ onUpgrade }: DemoSelectionProps) {
                       {demo.description}
                     </p>
                     <div className="flex items-center justify-between gap-2">
-                      <Badge
-                        variant="outline"
-                        className="text-xs sm:text-sm px-2 py-1"
-                      >
+                      <Badge variant="outline" className="text-xs sm:text-sm px-2 py-1">
                         {demo.messageCount} messages
                       </Badge>
-                      <Badge
-                        variant="secondary"
-                        className="text-xs sm:text-sm px-2 py-1"
-                      >
+                      <Badge variant="secondary" className="text-xs sm:text-sm px-2 py-1">
                         Interactive Demo
                       </Badge>
                     </div>
@@ -129,8 +123,8 @@ export function DemoSelection({ onUpgrade }: DemoSelectionProps) {
           </CardHeader>
           <CardContent className="text-center space-y-3 sm:space-y-4">
             <p className="text-muted-foreground text-xs sm:text-sm lg:text-base leading-relaxed max-w-2xl mx-auto px-2">
-              Sign in to unlock unlimited conversations, real-time
-              collaboration, and advanced features
+              Sign in to unlock unlimited conversations, real-time collaboration, and advanced
+              features
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-2 justify-center px-2">
               <Button
