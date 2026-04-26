@@ -1,165 +1,144 @@
-# OpenRouter Integration Setup
+# OpenRouter Integration
 
-This document explains how to set up and use the OpenRouter integration in Zermind for AI chat functionality.
+Zermind uses OpenRouter as the system fallback provider for AI model access. Users can optionally provide direct provider keys through BYOK; when no user key is available, requests use OpenRouter.
 
-## 🚀 Quick Start
+## Why OpenRouter
 
-### 1. Get Your OpenRouter API Key
+OpenRouter provides one API for many model families, which makes it a good fallback for:
 
-1. Visit [OpenRouter](https://openrouter.ai) and create an account
-2. Go to [API Keys](https://openrouter.ai/keys)
-3. Create a new API key
-4. Copy the key for the next step
+- OpenAI-compatible model IDs
+- Anthropic model IDs
+- Google/Gemini model IDs
+- Meta/Llama model IDs
+- other models exposed by OpenRouter
 
-### 2. Configure Environment Variables
+## Required setup
 
-Create a `.env` file in your project root and add your OpenRouter API key:
+Create an OpenRouter key at:
+
+```txt
+https://openrouter.ai/keys
+```
+
+Set it locally:
 
 ```bash
-# Required: OpenRouter API Key
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-
-# Optional: Other environment variables
-DATABASE_URL=your_database_url
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+OPENROUTER_API_KEY="sk-or-v1-..."
 ```
 
-### 3. Start the Development Server
+Set it in Convex:
 
 ```bash
-yarn dev
+bunx convex env set OPENROUTER_API_KEY "sk-or-v1-..."
 ```
 
-The chat interface should now work with real AI responses!
+## Runtime path
 
-## 🤖 Supported Models
+The current chat path is Convex Agent based:
 
-The integration supports multiple AI models through OpenRouter:
-
-### Anthropic
-
-- **Claude 3.5 Sonnet** - Best for reasoning, analysis, and coding
-- **Claude 3 Haiku** - Fast and efficient for simple tasks
-
-### OpenAI
-
-- **GPT-4o** - Latest multimodal model from OpenAI
-- **GPT-4o Mini** - Faster and cheaper version of GPT-4o
-
-### Meta
-
-- **Llama 3.1 405B** - Open source, great for general tasks
-- **Llama 3.1 70B** - Balanced performance and speed
-
-## 🛠 Technical Implementation
-
-### API Route (`/api/chat`)
-
-The API route handles streaming chat completions:
-
-```typescript
-// POST /api/chat
-{
-  "messages": [
-    { "role": "user", "content": "Hello!" }
-  ],
-  "model": "openai/gpt-4o-mini",
-  "maxTokens": 1000,
-  "temperature": 0.7
-}
+```txt
+client
+  → api.agentActions.send
+  → convex/agentActions.ts
+  → convex/lib/modelProvider.ts
+  → @openrouter/ai-sdk-provider
+  → Convex Agent streamText
 ```
 
-### Components Used
+There is no `/api/chat` Next.js route in the current setup.
 
-- **`ChatConversation`** - Main chat interface with streaming support
-- **`ModelSelector`** - Dropdown to choose between AI models
-- **`useChat`** - Custom hook wrapping Vercel AI SDK
+## Provider resolution
 
-### Key Features
+Provider detection is implemented in:
 
-- ✅ **Real-time Streaming** - Token-by-token AI responses
-- ✅ **Multiple Models** - Switch between different AI providers
-- ✅ **Error Handling** - Graceful error display and recovery
-- ✅ **Stop Generation** - Cancel ongoing AI responses
-- ✅ **Message History** - Persistent conversation context
-- ✅ **Copy Responses** - One-click copy AI messages
+```txt
+convex/lib/modelProvider.ts
+```
 
-## 🔧 Customization
+Rules:
 
-### Adding New Models
+```txt
+openai/* or gpt-*       → openai
+anthropic/* or claude-* → anthropic
+google/* or gemini-*   → google
+meta/* or llama-*      → meta
+otherwise              → openrouter
+```
 
-Edit `src/components/model-selector.tsx` to add more models:
+If a user has an active key for the detected provider, Zermind uses the direct provider client. Otherwise it uses OpenRouter.
 
-```typescript
-const MODELS = [
-  // Add your custom model here
+## Model IDs
+
+The UI model selector can include OpenRouter-compatible IDs, for example:
+
+```txt
+openai/gpt-4o-mini
+anthropic/claude-3.5-sonnet
+google/gemini-2.0-flash
+meta-llama/llama-3.1-70b-instruct
+```
+
+When the app falls back to OpenRouter, model names are normalized for OpenRouter where needed.
+
+## AI SDK v6
+
+Zermind uses AI SDK v6 packages:
+
+```txt
+ai
+@ai-sdk/openai
+@ai-sdk/anthropic
+@ai-sdk/google
+@openrouter/ai-sdk-provider
+```
+
+The Agent call receives a resolved AI SDK language model per request:
+
+```ts
+zermindAgent.streamText(
+  ctx,
+  { userId, threadId },
   {
-    id: "your-provider/your-model",
-    name: "Your Model Name",
-    provider: "Your Provider",
-    description: "Model description",
-    tier: "standard", // or "premium",
+    prompt,
+    model: languageModel,
+    temperature,
   },
-  // ... existing models
-];
+  { saveStreamDeltas: true },
+);
 ```
 
-### Adjusting Model Parameters
+## Cost management
 
-Modify the default parameters in `src/hooks/use-chat.ts`:
+- Monitor usage in the OpenRouter dashboard.
+- Set spending limits in OpenRouter.
+- Encourage users to add BYOK keys if they want to use their own direct provider credits.
+- Zermind logs request counts/model usage in Convex `usageLogs`.
 
-```typescript
-export function useChat({
-  model = "openai/gpt-4o-mini",
-  maxTokens = 1000, // Increase for longer responses
-  temperature = 0.7, // 0.0 = deterministic, 1.0 = creative
-  // ...
-});
+## Troubleshooting
+
+### `OpenRouter API key not configured`
+
+Set `OPENROUTER_API_KEY` in both local env and Convex env:
+
+```bash
+bunx convex env set OPENROUTER_API_KEY "sk-or-v1-..."
 ```
 
-## 💰 Cost Management
+### A direct provider key is ignored
 
-OpenRouter uses pay-as-you-go pricing:
+Check that:
 
-- Check current pricing at [OpenRouter Models](https://openrouter.ai/models)
-- Monitor usage in your [OpenRouter Dashboard](https://openrouter.ai/usage)
-- Set spending limits to control costs
+- the key is active in Settings
+- the selected model maps to the same provider
+- the key format passes validation
+- Convex has `API_KEY_ENCRYPTION_SECRET` set so keys can be decrypted
 
-## 🔒 Security Notes
+### A model does not work through OpenRouter
 
-- Never commit your API key to version control
-- Use environment variables for all sensitive data
-- Consider implementing rate limiting for production use
-- Monitor API usage to prevent unexpected charges
+Check the exact model slug on:
 
-## 🐛 Troubleshooting
+```txt
+https://openrouter.ai/models
+```
 
-### "OpenRouter API key not configured" Error
-
-Make sure you have:
-
-1. Created a `.env` file in the project root
-2. Added `OPENROUTER_API_KEY=your_key_here`
-3. Restarted your development server
-
-### Slow Response Times
-
-- Try switching to a faster model (e.g., Claude 3 Haiku, GPT-4o Mini)
-- Reduce `maxTokens` parameter
-- Check your internet connection
-
-### Rate Limiting
-
-If you hit rate limits:
-
-- Wait a few minutes before retrying
-- Switch to a different model
-- Upgrade your OpenRouter plan if needed
-
-## 📚 Additional Resources
-
-- [OpenRouter Documentation](https://openrouter.ai/docs)
-- [Vercel AI SDK Docs](https://ai-sdk.dev)
-- [OpenRouter Discord Community](https://discord.gg/openrouter)
-- [Model Comparison](https://openrouter.ai/models)
+and update the model selector accordingly.

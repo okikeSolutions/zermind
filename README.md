@@ -6,216 +6,220 @@
 <p align="center">
   <a href="https://zermind.ai/privacy"><strong>Privacy Policy</strong></a> ·
   <a href="https://zermind.ai/terms"><strong>Terms of Use</strong></a> ·
-  <a href="https://zermind.ai/imprint"><strong>Imprint</strong></a> ·
+  <a href="https://zermind.ai/imprint"><strong>Imprint</strong></a>
 </p>
-<br/>
+<br />
 
-**Zermind** is an open-source AI conversation platform that revolutionizes how you interact with multiple LLM providers through **dual interaction modes**: traditional chat and groundbreaking **conversational mind maps**.
+**Zermind** is an open-source AI conversation platform for visual thinking with LLMs. It combines traditional chat with **conversational mind maps**, so AI conversations can branch, resume from any node, compare multiple models, and be explored as knowledge trees.
 
-**Transform linear conversations into visual thinking** – Where AI conversations themselves become explorable mind maps, enabling branching dialogues, multi-model debates, and resumable conversation trees.
+Zermind is now built on a Convex-native backend:
+
+- **Convex Better Auth** for auth
+- **Convex Agent** for persistent AI threads, messages, and streaming
+- **Convex database** for app metadata, BYOK keys, collaboration, usage, and feedback
+- **Convex Presence** for realtime collaboration presence/cursors
 
 ---
 
 ## Features
 
-### **Dual-Mode Innovation**
+### Dual interaction modes
 
-- **Chat Mode**: Traditional linear conversation interface
-- **Mind Mode**: Revolutionary conversational mind mapping
-- **Seamless Switching**: Convert any chat to mind map with one click
+- **Chat Mode**: Traditional linear AI chat
+- **Mind Mode**: Conversation-as-mind-map visualization
+- **Seamless switching** between chat and visual graph views
 
-### **Conversational Mind Maps**
+### Conversational mind maps
 
-- **Node-Based Conversations**: Each mind map node represents a conversation point
-- **Multi-Model Branching**: Ask the same question to different LLMs visually
-- **Resumable Nodes**: Click any node to continue that conversation thread
-- **Visual Flow**: See conversation logic and idea progression at a glance
-- **Smart Auto-Layout**: Automatic positioning for clean visualization
+- **Node-based conversations**: Each node represents an Agent-backed message
+- **Branching**: Resume from any node and create alternate paths
+- **Multi-model branching**: Ask multiple models from the same context
+- **Persistent layout**: Node positions and graph metadata are stored in Convex `zermindNodes`
+- **Shared views**: Generate read-only share links
 
-### **Enhanced Multi-LLM Support**
+### Multi-provider AI / BYOK
 
-- **Model Selection per Branch**: Choose different models for different conversation paths
-- **Side-by-Side Responses**: Visual comparison of how models approach problems
-- **Conversation Handoffs**: Seamlessly pass conversation context between models
+- Supports OpenRouter, OpenAI, Anthropic, Meta/Llama, and Google/Gemini model IDs
+- Users can add their own provider keys in settings
+- If no user key exists, Zermind falls back to `OPENROUTER_API_KEY`
+- API keys are encrypted at rest in Convex actions with AES-256-GCM
 
-### **Real-time Collaboration**
+### Realtime collaboration
 
-- **Collaborative Mind Maps**: Multiple users editing the same conversation tree
-- **Conversation Ownership**: Track who created which branches
-
-### **BYOK (Bring Your Own Key)**
-
-- **Multi-Provider Support**: OpenRouter, OpenAI, Anthropic, Meta, Google
-- **Smart Fallbacks**: Automatic OpenRouter fallback when no user keys exist
-- **Key Previews**: Never display full keys in UI
+- Collaboration sessions and participants stored in Convex
+- Presence/cursors powered by `@convex-dev/presence`
+- App data updates are realtime through Convex subscriptions
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
-| Layer            | Technology               | Purpose                                  |
-| ---------------- | ------------------------ | ---------------------------------------- |
-| Frontend         | Next.js 15 (App Router)  | SSR + React Server Components            |
-| Mind Map UI      | React Flow               | Interactive conversation visualization   |
-| Styling          | Tailwind CSS + shadcn/ui | Responsive UI components                 |
-| Auth             | Supabase Auth            | Email & OAuth authentication             |
-| Database         | Supabase Postgres        | Conversation trees, users, collaboration |
-| ORM              | Prisma                   | Enhanced schema for branching support    |
-| LLM Interface    | Vercel AI SDK            | Unified API for multi-model LLMs         |
-| BYOK             | Open Router              | Unified interface + secure key storage   |
-| Collaboration    | Supabase Realtime        | Real-time collaboration and sessions     |
-| State Management | Zustand                  | Conversation tree state management       |
+| Layer           | Technology                       | Purpose                                              |
+| --------------- | -------------------------------- | ---------------------------------------------------- |
+| Frontend        | Next.js 16 App Router + React 19 | App shell and server/client components               |
+| Backend         | Convex                           | Database, functions, actions, realtime subscriptions |
+| Auth            | Convex Better Auth               | Email/password and OAuth auth                        |
+| AI runtime      | AI SDK v6 + Convex Agent         | Persistent AI threads/messages and streaming         |
+| Model providers | OpenRouter + direct providers    | Fallback and BYOK provider access                    |
+| Mind map UI     | `@xyflow/react`                  | Interactive conversation graph                       |
+| Collaboration   | Convex Presence + Convex tables  | Online presence, cursors, sessions, invites          |
+| Styling         | Tailwind CSS                     | Responsive UI                                        |
+| State           | Zustand + Convex subscriptions   | Local UI state + realtime backend state              |
+| Tooling         | Bun, Oxlint, Oxfmt, TypeScript   | Package/runtime, linting, formatting, type checking  |
+
+---
+
+## Architecture
+
+Clean-slate data model:
+
+```txt
+Convex Better Auth
+  ↓
+chats table
+  - app-level chat metadata
+  - agentThreadId
+  ↓
+Convex Agent component
+  - persistent threads
+  - persistent messages
+  - stream deltas
+  ↓
+zermindNodes table
+  - mind-map layout and branch metadata
+  - agentMessageId links back to Agent messages
+```
+
+The old Prisma/Supabase backend has been removed. There are no Prisma migrations, Supabase clients, or REST chat routes in the current setup.
 
 ---
 
 ## Getting Started
 
-### 1. Clone the Repository
+### 1. Clone
 
 ```bash
 git clone https://github.com/yourusername/zermind.git
 cd zermind
 ```
 
-### 2. Install Dependencies
+### 2. Install dependencies
 
 ```bash
-npm install
-# or
-yarn install
-# or
-pnpm install
-# or
 bun install
 ```
 
-### 3. Environment Setup
+### 3. Configure environment variables
 
-Copy `.env.example` to `.env` and configure:
+Copy the example file:
 
 ```bash
-cp .env.example .env
+cp env.example .env.local
 ```
 
-**Required environment variables:**
+Required local variables:
 
 ```bash
-# Database (Supabase)
-DATABASE_URL="postgresql://..."
-DIRECT_URL="postgresql://..."
-NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+# Convex
+NEXT_PUBLIC_CONVEX_URL="https://your-deployment.convex.cloud"
+NEXT_PUBLIC_CONVEX_SITE_URL="https://your-deployment.convex.site"
+SITE_URL="http://localhost:3000"
 
-# BYOK Encryption (REQUIRED - Generate with: openssl rand -base64 32)
-API_KEY_ENCRYPTION_SECRET="your-very-strong-encryption-secret-here"
+# AI fallback provider
+OPENROUTER_API_KEY="sk-or-v1-..."
 
-# Fallback API Key (Required - Works with ALL models)
-OPENROUTER_API_KEY="sk-or-v1-your-openrouter-key"
+# BYOK encryption secret, 32+ chars recommended
+API_KEY_ENCRYPTION_SECRET="$(openssl rand -base64 32)"
 
-# NODE ENV
-NODE_ENV=development
-
-# SEO
-NEXT_PUBLIC_SITE_URL=your-production-url
+# Optional OAuth providers
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+GITHUB_CLIENT_ID="..."
+GITHUB_CLIENT_SECRET="..."
 ```
 
-### 4. Database Setup
+See [docs/env-setup.md](docs/env-setup.md) for details.
+
+### 4. Set Convex environment variables
+
+Convex actions need server-side secrets in the Convex deployment:
 
 ```bash
-# Generate Prisma client
-npx prisma generate
-
-# Push schema to database
-npx prisma db push
+bunx convex env set OPENROUTER_API_KEY "sk-or-v1-..."
+bunx convex env set API_KEY_ENCRYPTION_SECRET "$(openssl rand -base64 32)"
+bunx convex env set SITE_URL "http://localhost:3000"
 ```
 
-### 5. Launch Zermind
+Add OAuth secrets if using Google/GitHub:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+bunx convex env set GOOGLE_CLIENT_ID "..."
+bunx convex env set GOOGLE_CLIENT_SECRET "..."
+bunx convex env set GITHUB_CLIENT_ID "..."
+bunx convex env set GITHUB_CLIENT_SECRET "..."
+```
+
+### 5. Generate Convex bindings
+
+```bash
+bunx convex codegen
+```
+
+### 6. Run locally
+
+Run Convex dev in one terminal if needed:
+
+```bash
+bunx convex dev
+```
+
+Run Next.js in another terminal:
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and experience the future of AI interaction!
+Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## What Makes Zermind Revolutionary
+## Common commands
 
-### **Category Creation**
-
-Zermind doesn't just use AI to create mind maps – **it turns AI conversations into mind maps**. We're creating the "Conversational AI Visualization" category.
-
-### **Visual Thinking**
-
-Transform complex ideas from linear chat limitations into explorable, shareable knowledge trees that reveal conversation logic and enable true multi-perspective AI collaboration.
-
-### **"What If" Scenarios Made Visual**
-
-- "What if I asked Claude instead of GPT-4?" → Create a branch and see both responses
-- "What if we approached this differently?" → Branch from any conversation point
-- "What would multiple AIs think?" → Multi-model debates in visual format
-
----
-
-### Supported Providers
-
-- **OpenRouter** - Access to 100+ AI models (fallback for all users)
-- **OpenAI** - GPT models with your credits
-- **Anthropic** - Claude models with your credits
-- **Meta** - Llama models with your credits
-- **Google** - Gemini models with your credits
-
-See [docs/byok.md](docs/byok.md) for detailed security implementation.
-
----
-
-## Open Source & Community
-
-Zermind is proudly **MIT licensed** – use it freely, contribute back if you like.
-
-### Contributing
-
-We welcome contributions! Whether it's:
-
-- New mind map visualization features
-- Additional LLM provider integrations
-- Mobile experience improvements
-- Performance optimizations
-- Documentation and examples
-
-## Support Zermind
-
-Zermind is an innovative open-source project built solo with passion and limited resources.
-
-If you find it valuable or want to support development:
-
-👉 [GitHub Sponsors – okikeSolutions](https://github.com/sponsors/okikeSolutions)
-
-Your support helps us:
-
-- Cover API costs for the demo environment
-- Add new LLM providers and features
-- Improve performance and scalability
-- Build the future of AI interaction
+```bash
+bun dev              # Start Next.js
+bun run build        # Build Next.js
+bun run start        # Start production server
+bunx convex dev      # Start Convex dev loop
+bunx convex codegen  # Generate Convex types
+bunx tsc --noEmit    # Type check
+bun run lint         # Oxlint
+bun run fmt          # Oxfmt
+bun run fmt:check    # Check formatting
+```
 
 ---
 
 ## Documentation
 
-- [BYOK Implementation](docs/byok.md) - Security details for API key management
-- [Environment Setup](docs/env-setup.md) - Complete configuration guide
-- [OpenRouter Integration](docs/openrouter.md) - Multi-model API setup
+- [Environment Setup](docs/env-setup.md)
+- [BYOK Implementation](docs/byok.md)
+- [OpenRouter Integration](docs/openrouter.md)
+- [Storage and Attachments](docs/storage.md)
+
+---
+
+## Supported Providers
+
+- **OpenRouter** — fallback provider and access to many models
+- **OpenAI** — direct BYOK support
+- **Anthropic** — direct BYOK support
+- **Google** — direct BYOK support
+- **Meta/Llama** — generally routed through OpenRouter
 
 ---
 
 ## License
 
-MIT – use it freely, contribute back if you like.
+MIT — use it freely, contribute back if you like.
 
 **Zermind** was built to revolutionize how we think with AI.

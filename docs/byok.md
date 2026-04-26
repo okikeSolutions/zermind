@@ -1,201 +1,141 @@
-# BYOK (Bring Your Own Key) Implementation
+# BYOK (Bring Your Own Key)
 
-## Overview
+Zermind lets users store their own AI provider API keys and use their own credits. BYOK is implemented entirely with Convex actions and Convex tables.
 
-This implementation allows users to securely store and use their own API keys for AI providers, enabling them to use their own credits instead of relying on the application's API keys.
+## Supported providers
 
-## Security Features
+```txt
+openrouter
+openai
+anthropic
+google
+meta
+```
 
-### 🔐 Encryption at Rest
+Model/provider routing is handled in:
 
-- API keys are encrypted using **AES-256-GCM** encryption before storage
-- Each encrypted key includes:
-  - Random 128-bit IV (Initialization Vector)
-  - Authentication tag for integrity verification
-  - Additional Authenticated Data (AAD) for extra security
+```txt
+convex/lib/modelProvider.ts
+```
 
-### 🛡️ Key Management
+## Runtime flow
 
-- Encryption key derived from `API_KEY_ENCRYPTION_SECRET` environment variable
-- Uses PBKDF2 with 100,000 iterations for key derivation
-- Keys are never stored in plaintext
-- Only key previews (first 4 + last 4 characters) are shown in UI
+When a user sends a message:
 
-### 🔍 Access Control
+```txt
+src/hooks/use-chat.ts
+  → api.agentActions.send
+  → convex/agentActions.ts
+  → resolveLanguageModel(...)
+  → zermindAgent.streamText(...)
+```
 
-- API keys are tied to specific user accounts
-- Server-side validation ensures users can only access their own keys
-- Proper authentication required for all operations
+`resolveLanguageModel` checks for an active user key for the selected provider:
 
-### 📡 Transmission Security
+1. If a user key exists, use the direct provider client.
+2. If no user key exists, fall back to OpenRouter using `OPENROUTER_API_KEY`.
+3. The selected model is passed to Convex Agent as a per-call AI SDK v6 language model.
 
-- API keys transmitted over HTTPS only
-- Password-type input fields prevent shoulder surfing
-- No logging of actual API key values
+## Storage model
 
-## Database Schema
+API keys are stored in the Convex `apiKeys` table:
 
-```sql
--- API Key model for BYOK functionality
-model ApiKey {
-  id            String   @id @default(cuid())
-  userId        String   @map("user_id")
-  provider      String   -- "openrouter", "openai", "anthropic", etc.
-  encryptedKey  String   @map("encrypted_key") -- AES-256 encrypted
-  keyName       String?  @map("key_name") -- User-friendly name
-  isActive      Boolean  @default(true) @map("is_active")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-  lastUsedAt    DateTime? @map("last_used_at")
-
-  @@unique([userId, provider, keyName])
-  @@map("api_keys")
+```ts
+apiKeys: {
+  userId: string;
+  provider: "openrouter" | "openai" | "anthropic" | "meta" | "google";
+  encryptedKey: string;
+  keyPreview: string;
+  keyName: string;
+  isActive: boolean;
+  createdAt: number;
+  updatedAt: number;
+  lastUsedAt?: number;
 }
 ```
 
-## Setup Instructions
+Public client queries never return `encryptedKey`.
 
-### 1. Environment Variables
+## Encryption
 
-Add to your `.env` file:
+Encryption/decryption happens only in Convex Node actions:
+
+```txt
+convex/apiKeyActions.ts
+convex/lib/modelProvider.ts
+```
+
+Security properties:
+
+- AES-256-GCM encryption
+- random IV per encrypted key
+- auth tag for integrity verification
+- Additional Authenticated Data (AAD): `zermind-api-key`
+- PBKDF2 key derivation if the configured secret is shorter than 32 bytes
+- only key previews are shown in UI
+
+Required secret:
 
 ```bash
-# REQUIRED: Strong encryption secret (32+ characters)
-API_KEY_ENCRYPTION_SECRET="your-very-strong-encryption-secret-here"
+API_KEY_ENCRYPTION_SECRET="$(openssl rand -base64 32)"
 ```
 
-Generate a strong secret:
+Set it in Convex:
 
 ```bash
-# Using OpenSSL
-openssl rand -base64 32
-
-# Using Node.js
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+bunx convex env set API_KEY_ENCRYPTION_SECRET "$(openssl rand -base64 32)"
 ```
 
-### 2. Database Migration
+## Convex functions
 
-Run Prisma commands to apply the schema:
+Public/user-facing functions:
+
+```txt
+api.apiKeys.listMine
+api.apiKeys.update
+api.apiKeys.remove
+api.apiKeyActions.create
+```
+
+Internal functions:
+
+```txt
+internal.apiKeys.createEncrypted
+internal.apiKeys.getActiveEncrypted
+internal.apiKeys.markUsed
+```
+
+## UI integration
+
+The settings UI uses:
+
+```txt
+src/hooks/use-api-keys.ts
+src/components/api-key-management.tsx
+```
+
+The hook calls Convex directly. There are no `/api/user/api-keys` REST routes.
+
+## OpenRouter fallback
+
+OpenRouter is the only required system provider key:
 
 ```bash
-# Generate Prisma client
-npx prisma generate
-
-# Push schema to database (development)
-npx prisma db push
-
-# Or create and apply migration (production)
-npx prisma migrate dev --name add-api-keys
+OPENROUTER_API_KEY="sk-or-v1-..."
 ```
 
-### 3. Supported Providers
+Set it in Convex:
 
-Currently supports:
-
-- **OpenRouter** - Multiple AI models in one API
-- **OpenAI** - GPT models
-- **Anthropic** - Claude models
-- **Meta** - Llama models
-- **Google** - Gemini models
-
-## API Endpoints
-
-### GET `/api/user/api-keys`
-
-Retrieve user's API keys (returns public data only)
-
-### POST `/api/user/api-keys`
-
-Create a new API key
-
-```json
-{
-  "provider": "openrouter",
-  "apiKey": "sk-or-v1-...",
-  "keyName": "My OpenRouter Key"
-}
+```bash
+bunx convex env set OPENROUTER_API_KEY "sk-or-v1-..."
 ```
 
-### PATCH `/api/user/api-keys/[keyId]`
+Direct provider environment keys such as `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and `GOOGLE_GENERATIVE_AI_API_KEY` are not required for the application fallback path. Users add direct provider keys through BYOK.
 
-Update API key (name or active status)
+## Security notes
 
-```json
-{
-  "keyName": "Updated Name",
-  "isActive": false
-}
-```
-
-### DELETE `/api/user/api-keys/[keyId]`
-
-Delete an API key permanently
-
-## Usage in Chat System
-
-The chat system automatically handles BYOK with this simplified flow:
-
-```typescript
-// Chat API automatically:
-// 1. Detects provider from model (e.g., "openai/gpt-4" → OpenAI)
-// 2. Checks for user's API key for that provider
-// 3. If user key exists: Use direct provider API (OpenAI, Anthropic, etc.)
-// 4. If no user key: Always fallback to OpenRouter
-
-// Benefits:
-// - User keys = Direct API access (better performance, user's credits)
-// - No user keys = OpenRouter fallback (all models still work)
-// - Only requires one system API key (OpenRouter)
-```
-
-## Security Best Practices Implemented
-
-1. **Never log API keys** - Logging only logs encrypted versions or previews
-2. **Input validation** - Strict validation of API key formats per provider
-3. **Rate limiting** - Should be implemented at the API route level
-4. **Audit trail** - Track when keys are used via `lastUsedAt`
-5. **Graceful errors** - Don't expose internal encryption errors to clients
-6. **Key rotation** - Users can add new keys and deactivate old ones
-7. **Secure transmission** - HTTPS only, password-type inputs
-
-## Error Handling
-
-The implementation includes comprehensive error handling:
-
-- Validation errors with field-specific messages
-- Encryption/decryption error recovery
-- Database constraint violations
-- Authentication and authorization errors
-
-## Future Enhancements
-
-- **Key validation** - Test API keys against provider endpoints
-- **Usage tracking** - Monitor API key usage and costs
-- **Key expiration** - Automatic key rotation reminders
-- **Team sharing** - Allow sharing keys within teams (enterprise feature)
-- **Audit logs** - Detailed logging of key operations
-
-## Security Considerations
-
-⚠️ **Important Security Notes:**
-
-1. The `API_KEY_ENCRYPTION_SECRET` should be:
-   - At least 32 characters long
-   - Generated randomly
-   - Never committed to version control
-   - Rotated periodically in production
-
-2. Database backups will contain encrypted keys
-   - Ensure backup security matches production
-   - Consider additional backup encryption
-
-3. Application logs should never contain:
-   - Raw API keys
-   - Encryption secrets
-   - Decrypted key data
-
-4. Consider implementing:
-   - IP allowlisting for sensitive operations
-   - Multi-factor authentication for key management
-   - Regular security audits
+- Never log raw API keys.
+- Never return `encryptedKey` from public queries.
+- Keep `API_KEY_ENCRYPTION_SECRET` out of source control.
+- Rotating `API_KEY_ENCRYPTION_SECRET` requires re-encrypting stored keys.
+- Account deletion removes the user’s stored API keys.
