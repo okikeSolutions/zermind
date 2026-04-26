@@ -1,4 +1,6 @@
+import { listMessages } from "@convex-dev/agent";
 import { v } from "convex/values";
+import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { zermindAgent } from "./agent";
 import { requireUserId } from "./lib/auth";
@@ -59,6 +61,38 @@ export const stats = query({
   },
 });
 
+function extractExportAttachments(message?: { content?: unknown }) {
+  if (!message || !Array.isArray(message.content)) return [];
+
+  return message.content.flatMap((part, index) => {
+    if (typeof part !== "object" || part === null || !("type" in part)) return [];
+
+    const typedPart = part as {
+      type: string;
+      image?: string;
+      data?: string;
+      mediaType?: string;
+      mimeType?: string;
+      filename?: string;
+    };
+
+    if (typedPart.type !== "image" && typedPart.type !== "file") return [];
+
+    const url = typedPart.type === "image" ? typedPart.image : typedPart.data;
+    if (!url) return [];
+
+    return [
+      {
+        id: `${typedPart.type}-${index}`,
+        name: typedPart.filename ?? (typedPart.type === "image" ? "Image" : "File"),
+        mimeType: typedPart.mediaType ?? typedPart.mimeType ?? "application/octet-stream",
+        url,
+        type: typedPart.type === "image" ? "image" : "document",
+      },
+    ];
+  });
+}
+
 export const exportMine = mutation({
   args: {},
   returns: v.any(),
@@ -85,24 +119,77 @@ export const exportMine = mutation({
 
     const chatsWithMessages = await Promise.all(
       chats.map(async (chat) => {
-        const messages = await ctx.db
-          .query("zermindNodes")
-          .withIndex("by_chatId_and_createdAt", (q) => q.eq("chatId", chat._id))
-          .order("asc")
-          .take(1000);
+        const [paginated, nodes, files] = await Promise.all([
+          listMessages(ctx, components.agent, {
+            threadId: chat.agentThreadId,
+            paginationOpts: { numItems: 1000, cursor: null },
+            excludeToolMessages: true,
+          }),
+          ctx.db
+            .query("zermindNodes")
+            .withIndex("by_chatId_and_createdAt", (q) => q.eq("chatId", chat._id))
+            .order("asc")
+            .take(1000),
+          ctx.db
+            .query("fileAttachments")
+            .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
+            .take(1000),
+        ]);
+
+        const nodesByMessageId = new Map(nodes.map((node) => [node.agentMessageId, node]));
+        const messages = paginated.page
+          .filter(
+            (message) => message.message?.role === "user" || message.message?.role === "assistant",
+          )
+          .sort((a, b) => a._creationTime - b._creationTime)
+          .map((message) => {
+            const node = nodesByMessageId.get(message._id);
+            const role = message.message?.role === "user" ? "user" : "assistant";
+            return {
+              id: message._id,
+              role,
+              content: message.text ?? message.error ?? "",
+              status: message.status,
+              model: role === "assistant" ? message.model : null,
+              error: message.error ?? null,
+              createdAt: new Date(node?.createdAt ?? message._creationTime).toISOString(),
+              parentId: node?.parentAgentMessageId ?? null,
+              branchName: node?.branchName ?? null,
+              mindMap: {
+                xPosition: node?.xPosition ?? 0,
+                yPosition: node?.yPosition ?? 0,
+                nodeType: node?.nodeType ?? "conversation",
+                isCollapsed: node?.isCollapsed ?? false,
+                isLocked: node?.isLocked ?? false,
+                lastEditedBy: node?.lastEditedBy ?? null,
+                editedAt: node?.editedAt ? new Date(node.editedAt).toISOString() : null,
+              },
+              attachments: extractExportAttachments(message.message),
+            };
+          });
 
         return {
           id: chat._id,
+          agentThreadId: chat.agentThreadId,
           title: chat.title ?? null,
           mode: chat.mode,
+          isCollaborative: chat.isCollaborative,
+          shareId: chat.shareId ?? null,
           createdAt: new Date(chat.createdAt).toISOString(),
           updatedAt: new Date(chat.updatedAt).toISOString(),
-          messages: messages.map((message) => ({
-            id: message.agentMessageId,
-            createdAt: new Date(message.createdAt).toISOString(),
-            parentId: message.parentAgentMessageId ?? null,
-            branchName: message.branchName ?? null,
-          })),
+          messages,
+          files: await Promise.all(
+            files.map(async (file) => ({
+              id: file._id,
+              storageId: file.storageId,
+              name: file.name,
+              mimeType: file.mimeType,
+              size: file.size,
+              type: file.type,
+              url: await ctx.storage.getUrl(file.storageId),
+              createdAt: new Date(file.createdAt).toISOString(),
+            })),
+          ),
         };
       }),
     );
