@@ -3,6 +3,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { type Attachment } from "@/lib/schemas/chat";
+import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 import { nanoid } from "nanoid";
 import {
   getAllowedMimeTypes,
@@ -141,7 +142,7 @@ export function useFileAttachments({ model, chatId }: UseFileAttachmentsOptions)
       clearFiles();
       return uploadedAttachments;
     } catch (error) {
-      const nextError = error instanceof Error ? error : new Error("Failed to upload files");
+      const nextError = new Error(getFriendlyErrorMessage(error, "Failed to upload files"));
       setUploadError(nextError);
       console.error("Failed to upload files:", nextError);
       throw nextError;

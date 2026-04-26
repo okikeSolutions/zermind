@@ -1,24 +1,6 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, query } from "./_generated/server";
 import { requireUserId } from "./lib/auth";
-
-export const log = mutation({
-  args: {
-    model: v.string(),
-    chatId: v.optional(v.id("chats")),
-  },
-  returns: v.null(),
-  handler: async (ctx, args) => {
-    const userId = await requireUserId(ctx);
-    await ctx.db.insert("usageLogs", {
-      userId,
-      model: args.model,
-      chatId: args.chatId,
-      createdAt: Date.now(),
-    });
-    return null;
-  },
-});
 
 export const logInternal = internalMutation({
   args: {

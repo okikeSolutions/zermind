@@ -3,7 +3,7 @@ import { ConvexError, v } from "convex/values";
 import { components } from "./_generated/api";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { type Id } from "./_generated/dataModel";
-import { collaborationRole } from "./schema";
+import { chatMode, collaborationRole, nodeType } from "./schema";
 import { requireUserId } from "./lib/auth";
 import { rateLimiter } from "./rateLimits";
 
@@ -18,6 +18,55 @@ const sessionInfo = v.object({
   participantCount: v.number(),
   isParticipant: v.boolean(),
   userRole: v.optional(collaborationRole),
+});
+
+const collaborationMessage = v.object({
+  _id: v.string(),
+  _creationTime: v.number(),
+  chatId: v.id("chats"),
+  parentId: v.optional(v.string()),
+  branchName: v.optional(v.string()),
+  role: v.union(v.literal("user"), v.literal("assistant")),
+  content: v.string(),
+  model: v.optional(v.string()),
+  attachments: v.array(
+    v.object({
+      id: v.string(),
+      name: v.string(),
+      mimeType: v.string(),
+      size: v.number(),
+      url: v.string(),
+      type: v.union(v.literal("image"), v.literal("document")),
+    }),
+  ),
+  xPosition: v.number(),
+  yPosition: v.number(),
+  nodeType,
+  isCollapsed: v.boolean(),
+  isLocked: v.boolean(),
+  lastEditedBy: v.optional(v.string()),
+  editedAt: v.optional(v.number()),
+  createdAt: v.number(),
+});
+
+const joinAndGetChatResult = v.object({
+  chat: v.object({
+    _id: v.id("chats"),
+    _creationTime: v.number(),
+    userId: v.string(),
+    agentThreadId: v.string(),
+    title: v.optional(v.string()),
+    shareId: v.optional(v.string()),
+    mode: chatMode,
+    isCollaborative: v.boolean(),
+    templateId: v.optional(v.id("conversationTemplates")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    messages: v.array(collaborationMessage),
+  }),
+  session: sessionInfo,
+  userId: v.string(),
+  userRole: collaborationRole,
 });
 
 async function getActiveSession(ctx: QueryCtx | MutationCtx, chatId: Id<"chats">) {
@@ -292,7 +341,7 @@ export const invite = mutation({
 
 export const joinAndGetChat = mutation({
   args: { chatId: v.id("chats") },
-  returns: v.any(),
+  returns: v.union(joinAndGetChatResult, v.null()),
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     await rateLimiter.limit(ctx, "collaborationJoin", { key: userId, throws: true });
@@ -346,7 +395,7 @@ export const joinAndGetChat = mutation({
       )
       .map((message) => {
         const node = nodesByMessageId.get(message._id);
-        const role = message.message?.role === "user" ? "user" : "assistant";
+        const role: "user" | "assistant" = message.message?.role === "user" ? "user" : "assistant";
         return {
           _id: message._id,
           _creationTime: message._creationTime,

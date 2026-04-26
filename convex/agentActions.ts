@@ -60,9 +60,21 @@ export const send = action({
           { type: "text", text: args.prompt },
           ...(await Promise.all(
             (args.attachments ?? []).map(async (attachment) => {
-              const url = attachment.storageId
-                ? await ctx.storage.getUrl(attachment.storageId)
-                : attachment.url;
+              if (!attachment.storageId) {
+                throw new ConvexError({
+                  code: "INVALID_ATTACHMENT",
+                  message: "Attachment storage ID is required",
+                });
+              }
+              const { authorized } = await ctx.runQuery(internal.files.authorizeForSend, {
+                storageId: attachment.storageId,
+                chatId: args.chatId,
+                userId,
+              });
+              if (!authorized) {
+                throw new ConvexError({ code: "NOT_FOUND", message: "Attachment not found" });
+              }
+              const url = await ctx.storage.getUrl(attachment.storageId);
               if (!url) {
                 throw new ConvexError({ code: "NOT_FOUND", message: "Attachment not found" });
               }

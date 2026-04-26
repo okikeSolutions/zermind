@@ -3,8 +3,99 @@ import { v } from "convex/values";
 import { components } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { zermindAgent } from "./agent";
+import { nodeType } from "./schema";
 import { requireUserId } from "./lib/auth";
 import { rateLimiter } from "./rateLimits";
+
+const exportAttachment = v.object({
+  id: v.string(),
+  name: v.string(),
+  mimeType: v.string(),
+  url: v.string(),
+  type: v.union(v.literal("image"), v.literal("document")),
+});
+
+const exportMessage = v.object({
+  id: v.string(),
+  role: v.union(v.literal("user"), v.literal("assistant")),
+  content: v.string(),
+  status: v.string(),
+  model: v.union(v.string(), v.null()),
+  error: v.union(v.string(), v.null()),
+  createdAt: v.string(),
+  parentId: v.union(v.string(), v.null()),
+  branchName: v.union(v.string(), v.null()),
+  mindMap: v.object({
+    xPosition: v.number(),
+    yPosition: v.number(),
+    nodeType,
+    isCollapsed: v.boolean(),
+    isLocked: v.boolean(),
+    lastEditedBy: v.union(v.string(), v.null()),
+    editedAt: v.union(v.string(), v.null()),
+  }),
+  attachments: v.array(exportAttachment),
+});
+
+const exportFile = v.object({
+  id: v.id("fileAttachments"),
+  storageId: v.id("_storage"),
+  name: v.string(),
+  mimeType: v.string(),
+  size: v.number(),
+  type: v.union(v.literal("image"), v.literal("document")),
+  url: v.union(v.string(), v.null()),
+  createdAt: v.string(),
+});
+
+const exportChat = v.object({
+  id: v.id("chats"),
+  agentThreadId: v.string(),
+  title: v.union(v.string(), v.null()),
+  mode: v.union(v.literal("chat"), v.literal("mind")),
+  isCollaborative: v.boolean(),
+  shareId: v.union(v.string(), v.null()),
+  createdAt: v.string(),
+  updatedAt: v.string(),
+  messages: v.array(exportMessage),
+  files: v.array(exportFile),
+});
+
+const accountExport = v.object({
+  exportDate: v.string(),
+  userId: v.string(),
+  summary: v.object({
+    totalChats: v.number(),
+    totalMessages: v.number(),
+    totalApiKeys: v.number(),
+    totalUsageLogs: v.number(),
+  }),
+  chats: v.array(exportChat),
+  apiKeys: v.array(
+    v.object({
+      id: v.id("apiKeys"),
+      provider: v.union(
+        v.literal("openrouter"),
+        v.literal("openai"),
+        v.literal("anthropic"),
+        v.literal("meta"),
+        v.literal("google"),
+      ),
+      keyName: v.string(),
+      isActive: v.boolean(),
+      createdAt: v.string(),
+      lastUsedAt: v.union(v.string(), v.null()),
+    }),
+  ),
+  usageLogs: v.array(
+    v.object({
+      id: v.id("usageLogs"),
+      model: v.string(),
+      chatId: v.union(v.id("chats"), v.null()),
+      createdAt: v.string(),
+    }),
+  ),
+});
 
 export const stats = query({
   args: {},
@@ -61,6 +152,44 @@ export const stats = query({
   },
 });
 
+async function listAllMine<T>(queryBuilder: {
+  paginate: (opts: { numItems: number; cursor: string | null }) => Promise<{
+    page: T[];
+    isDone: boolean;
+    continueCursor: string;
+  }>;
+}) {
+  const results: T[] = [];
+  let cursor: string | null = null;
+
+  while (true) {
+    const page = await queryBuilder.paginate({ numItems: 1000, cursor });
+    results.push(...page.page);
+    if (page.isDone) break;
+    cursor = page.continueCursor;
+  }
+
+  return results;
+}
+
+async function listAllAgentMessages(ctx: Parameters<typeof listMessages>[0], threadId: string) {
+  const results: Awaited<ReturnType<typeof listMessages>>["page"] = [];
+  let cursor: string | null = null;
+
+  while (true) {
+    const page = await listMessages(ctx, components.agent, {
+      threadId,
+      paginationOpts: { numItems: 500, cursor },
+      excludeToolMessages: true,
+    });
+    results.push(...page.page);
+    if (page.isDone) break;
+    cursor = page.continueCursor;
+  }
+
+  return results;
+}
+
 function extractExportAttachments(message?: { content?: unknown }) {
   if (!message || !Array.isArray(message.content)) return [];
 
@@ -81,13 +210,14 @@ function extractExportAttachments(message?: { content?: unknown }) {
     const url = typedPart.type === "image" ? typedPart.image : typedPart.data;
     if (!url) return [];
 
+    const attachmentType: "image" | "document" = typedPart.type === "image" ? "image" : "document";
     return [
       {
         id: `${typedPart.type}-${index}`,
         name: typedPart.filename ?? (typedPart.type === "image" ? "Image" : "File"),
         mimeType: typedPart.mediaType ?? typedPart.mimeType ?? "application/octet-stream",
         url,
-        type: typedPart.type === "image" ? "image" : "document",
+        type: attachmentType,
       },
     ];
   });
@@ -95,62 +225,58 @@ function extractExportAttachments(message?: { content?: unknown }) {
 
 export const exportMine = mutation({
   args: {},
-  returns: v.any(),
+  returns: accountExport,
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
     await rateLimiter.limit(ctx, "accountExport", { key: userId, throws: true });
 
     const [chats, apiKeys, usageLogs] = await Promise.all([
-      ctx.db
-        .query("chats")
-        .withIndex("by_userId", (q) => q.eq("userId", userId))
-        .order("desc")
-        .take(1000),
-      ctx.db
-        .query("apiKeys")
-        .withIndex("by_userId", (q) => q.eq("userId", userId))
-        .take(1000),
-      ctx.db
-        .query("usageLogs")
-        .withIndex("by_userId", (q) => q.eq("userId", userId))
-        .order("desc")
-        .take(1000),
+      listAllMine(
+        ctx.db
+          .query("chats")
+          .withIndex("by_userId", (q) => q.eq("userId", userId))
+          .order("desc"),
+      ),
+      listAllMine(ctx.db.query("apiKeys").withIndex("by_userId", (q) => q.eq("userId", userId))),
+      listAllMine(
+        ctx.db
+          .query("usageLogs")
+          .withIndex("by_userId", (q) => q.eq("userId", userId))
+          .order("desc"),
+      ),
     ]);
 
     const chatsWithMessages = await Promise.all(
       chats.map(async (chat) => {
-        const [paginated, nodes, files] = await Promise.all([
-          listMessages(ctx, components.agent, {
-            threadId: chat.agentThreadId,
-            paginationOpts: { numItems: 1000, cursor: null },
-            excludeToolMessages: true,
-          }),
-          ctx.db
-            .query("zermindNodes")
-            .withIndex("by_chatId_and_createdAt", (q) => q.eq("chatId", chat._id))
-            .order("asc")
-            .take(1000),
-          ctx.db
-            .query("fileAttachments")
-            .withIndex("by_chatId", (q) => q.eq("chatId", chat._id))
-            .take(1000),
+        const [agentMessages, nodes, files] = await Promise.all([
+          listAllAgentMessages(ctx, chat.agentThreadId),
+          listAllMine(
+            ctx.db
+              .query("zermindNodes")
+              .withIndex("by_chatId_and_createdAt", (q) => q.eq("chatId", chat._id))
+              .order("asc"),
+          ),
+          listAllMine(
+            ctx.db.query("fileAttachments").withIndex("by_chatId", (q) => q.eq("chatId", chat._id)),
+          ),
         ]);
 
         const nodesByMessageId = new Map(nodes.map((node) => [node.agentMessageId, node]));
-        const messages = paginated.page
+        const messages = agentMessages
           .filter(
             (message) => message.message?.role === "user" || message.message?.role === "assistant",
           )
           .sort((a, b) => a._creationTime - b._creationTime)
           .map((message) => {
             const node = nodesByMessageId.get(message._id);
-            const role = message.message?.role === "user" ? "user" : "assistant";
+            const role: "user" | "assistant" =
+              message.message?.role === "user" ? "user" : "assistant";
             return {
               id: message._id,
               role,
               content: message.text ?? message.error ?? "",
               status: message.status,
-              model: role === "assistant" ? message.model : null,
+              model: role === "assistant" ? (message.model ?? null) : null,
               error: message.error ?? null,
               createdAt: new Date(node?.createdAt ?? message._creationTime).toISOString(),
               parentId: node?.parentAgentMessageId ?? null,

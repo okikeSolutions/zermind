@@ -1,6 +1,6 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
-import { ConvexError } from "convex/values";
+import { v } from "convex/values";
 import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
@@ -41,17 +41,27 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
 
 export const getCurrentUser = query({
   args: {},
+  returns: v.union(
+    v.object({
+      _id: v.string(),
+      _creationTime: v.number(),
+      userId: v.optional(v.union(v.string(), v.null())),
+      email: v.string(),
+      emailVerified: v.boolean(),
+      name: v.string(),
+      image: v.optional(v.union(v.string(), v.null())),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      twoFactorEnabled: v.optional(v.union(v.boolean(), v.null())),
+      isAnonymous: v.optional(v.union(v.boolean(), v.null())),
+      username: v.optional(v.union(v.string(), v.null())),
+      displayUsername: v.optional(v.union(v.string(), v.null())),
+      phoneNumber: v.optional(v.union(v.string(), v.null())),
+      phoneNumberVerified: v.optional(v.union(v.boolean(), v.null())),
+    }),
+    v.null(),
+  ),
   handler: async (ctx) => {
-    try {
-      return await authComponent.getAuthUser(ctx);
-    } catch (error) {
-      if (
-        error instanceof ConvexError &&
-        (error.data === "Unauthenticated" || error.message === "Unauthenticated")
-      ) {
-        return null;
-      }
-      throw error;
-    }
+    return (await authComponent.safeGetAuthUser(ctx)) ?? null;
   },
 });

@@ -60,22 +60,6 @@ function encryptApiKey(apiKey: string): string {
   return combined.toString("base64");
 }
 
-function decryptApiKey(encryptedData: string): string {
-  const key = getEncryptionKey();
-  const combined = Buffer.from(encryptedData, "base64");
-  const iv = combined.subarray(0, 16);
-  const authTag = combined.subarray(16, 32);
-  const encrypted = combined.subarray(32);
-
-  const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-  decipher.setAAD(AAD);
-  decipher.setAuthTag(authTag);
-
-  let decrypted = decipher.update(encrypted, undefined, "utf8");
-  decrypted += decipher.final("utf8");
-  return decrypted;
-}
-
 function createApiKeyPreview(apiKey: string): string {
   if (apiKey.length <= 8) return "****";
   const start = apiKey.slice(0, 4);
@@ -150,27 +134,5 @@ export const create = action({
       keyName: args.keyName,
     });
     return created;
-  },
-});
-
-export const getActiveForProvider = action({
-  args: { provider },
-  returns: v.union(v.string(), v.null()),
-  handler: async (ctx, args): Promise<string | null> => {
-    const userId = await getOptionalUserId(ctx);
-    if (!userId) return null;
-
-    const key: { _id: Id<"apiKeys">; encryptedKey: string } | null = await ctx.runQuery(
-      internal.apiKeys.getActiveEncrypted,
-      {
-        userId,
-        provider: args.provider,
-      },
-    );
-
-    if (!key) return null;
-
-    await ctx.runMutation(internal.apiKeys.markUsed, { keyId: key._id });
-    return decryptApiKey(key.encryptedKey);
   },
 });

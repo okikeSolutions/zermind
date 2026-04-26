@@ -29,6 +29,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 import { useDeleteAccount, useExportData, useAccountStats } from "@/hooks/use-account";
 
 const DELETE_CONFIRMATION_TEXT = "DELETE MY ACCOUNT";
@@ -66,7 +67,7 @@ export function DangerZone({ className }: DangerZoneProps) {
       toast.success("Data export started! Your download should begin shortly.");
       setIsExportDialogOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to export data");
+      toast.error(getFriendlyErrorMessage(error, "Failed to export data"));
     }
   };
 
@@ -88,7 +89,7 @@ export function DangerZone({ className }: DangerZoneProps) {
       setIsDeleteDialogOpen(false);
       // The useDeleteAccount hook handles redirection
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete account");
+      toast.error(getFriendlyErrorMessage(error, "Failed to delete account"));
     }
   };
 

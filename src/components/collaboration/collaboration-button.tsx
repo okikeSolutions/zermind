@@ -41,6 +41,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 import { useMutation, useQuery } from "convex/react";
 import React from "react";
 import { api } from "../../../convex/_generated/api";
@@ -86,8 +87,7 @@ export function CollaborationButton({
       await startSession({ chatId: convexChatId });
       toast.success("Collaboration session started!");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to start collaboration";
-      toast.error(message);
+      toast.error(getFriendlyErrorMessage(error, "Failed to start collaboration"));
     }
   }, [convexChatId, startSession]);
 
@@ -97,8 +97,7 @@ export function CollaborationButton({
       await leaveSession({ sessionId: session.id });
       toast.success("Left collaboration session");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to leave collaboration";
-      toast.error(message);
+      toast.error(getFriendlyErrorMessage(error, "Failed to leave collaboration"));
     }
   }, [leaveSession, session]);
 
@@ -108,9 +107,7 @@ export function CollaborationButton({
       await endSession({ chatId: convexChatId, sessionId: session.id });
       toast.success("Collaboration session ended for all participants");
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to end collaboration session";
-      toast.error(message);
+      toast.error(getFriendlyErrorMessage(error, "Failed to end collaboration session"));
     }
   }, [convexChatId, endSession, session]);
 
@@ -140,8 +137,7 @@ export function CollaborationButton({
       setInviteEmail("");
       setIsDialogOpen(false);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to send invitation";
-      toast.error(errorMessage);
+      toast.error(getFriendlyErrorMessage(error, "Failed to send invitation"));
     }
   }, [chatTitle, convexChatId, inviteEmail, inviteRole, inviteToSession]);
 

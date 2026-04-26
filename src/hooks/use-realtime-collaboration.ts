@@ -84,10 +84,10 @@ export function useRealtimeCollaboration({
   onAction,
   onPresenceChange,
 }: UseRealtimeCollaborationProps) {
-  const roomId = chatId ? `chat-collaboration:${chatId}` : "";
+  const roomId = `chat-collaboration:${chatId}`;
   const userColor = useMemo(() => colorForUser(userId || userName), [userId, userName]);
   const updatePresenceData = useMutation(api.presence.updateData);
-  const presenceState = usePresence(api.presence, roomId, userId || "anonymous");
+  const presenceState = usePresence(api.presence, roomId, userId);
 
   const latestDataRef = useRef<PresenceData>({
     name: userName,

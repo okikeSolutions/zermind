@@ -5,6 +5,7 @@ import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { type Message, type Attachment } from "@/lib/schemas/chat";
+import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 
 interface UseChatOptions {
   chatId?: string;
@@ -46,8 +47,9 @@ export function useChat({
           })),
         });
       } catch (unknownError) {
-        const nextError =
-          unknownError instanceof Error ? unknownError : new Error("Failed to send message");
+        const nextError = new Error(
+          getFriendlyErrorMessage(unknownError, "Failed to send message"),
+        );
         setError(nextError);
         onError?.(nextError);
         throw nextError;

@@ -44,6 +44,8 @@ import { useUserChats, useCreateChat, useDeleteChat } from "@/hooks/use-chats-qu
 import { useChatModeStore } from "@/lib/store/chat-mode-store";
 import { useAuthUser } from "@/hooks/use-auth";
 import Link from "next/link";
+import { toast } from "sonner";
+import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 
 const navigationItems = [
   {
@@ -96,6 +98,7 @@ export function AppSidebar() {
       router.push(`/protected/chat/${newChat.id}`);
     } catch (error) {
       console.error("Error creating new chat:", error);
+      toast.error(getFriendlyErrorMessage(error, "Failed to create chat"));
     }
   };
 
@@ -112,6 +115,7 @@ export function AppSidebar() {
       }
     } catch (error) {
       console.error("Error deleting chat:", error);
+      toast.error(getFriendlyErrorMessage(error, "Failed to delete chat"));
     }
   };
 

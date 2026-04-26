@@ -22,6 +22,52 @@ const chatDoc = v.object({
   updatedAt: v.number(),
 });
 
+const uiAttachment = v.object({
+  id: v.string(),
+  name: v.string(),
+  mimeType: v.string(),
+  size: v.number(),
+  url: v.string(),
+  type: v.union(v.literal("image"), v.literal("document")),
+});
+
+const uiMessage = v.object({
+  _id: v.string(),
+  _creationTime: v.number(),
+  chatId: v.id("chats"),
+  parentId: v.optional(v.string()),
+  branchName: v.optional(v.string()),
+  role: v.union(v.literal("user"), v.literal("assistant")),
+  content: v.string(),
+  model: v.optional(v.string()),
+  attachments: v.array(uiAttachment),
+  xPosition: v.number(),
+  yPosition: v.number(),
+  nodeType: v.union(v.literal("conversation"), v.literal("branching_point"), v.literal("insight")),
+  isCollapsed: v.boolean(),
+  isLocked: v.boolean(),
+  lastEditedBy: v.optional(v.string()),
+  editedAt: v.optional(v.number()),
+  createdAt: v.number(),
+  status: v.string(),
+});
+
+const chatWithMessages = v.object({
+  ...chatDoc.fields,
+  messages: v.array(uiMessage),
+});
+
+const chatListItem = v.object({
+  ...chatDoc.fields,
+  messages: v.array(
+    v.object({
+      content: v.string(),
+      createdAt: v.number(),
+      attachments: v.array(uiAttachment),
+    }),
+  ),
+});
+
 async function requireOwnedChat(ctx: Parameters<typeof requireUserId>[0], chatId: Id<"chats">) {
   const userId = await requireUserId(ctx);
   const chat = await ctx.db.get(chatId);
@@ -87,7 +133,7 @@ function toUiAgentMessage(
     createdAt: number;
   },
 ) {
-  const role = messageDoc.message?.role === "user" ? "user" : "assistant";
+  const role: "user" | "assistant" = messageDoc.message?.role === "user" ? "user" : "assistant";
   return {
     _id: messageDoc._id,
     _creationTime: messageDoc._creationTime,
@@ -112,7 +158,7 @@ function toUiAgentMessage(
 
 export const listMine = query({
   args: {},
-  returns: v.any(),
+  returns: v.array(chatListItem),
   handler: async (ctx) => {
     const userId = await requireUserId(ctx);
     const chats = await ctx.db
@@ -182,7 +228,7 @@ async function chatWithAgentMessages(
 
 export const getWithMessages = query({
   args: { chatId: v.id("chats") },
-  returns: v.any(),
+  returns: v.union(chatWithMessages, v.null()),
   handler: async (ctx, args) => {
     const userId = await requireUserId(ctx);
     const chat = await ctx.db.get(args.chatId);
@@ -213,7 +259,7 @@ export const getWithMessages = query({
 
 export const getShared = query({
   args: { shareId: v.string() },
-  returns: v.any(),
+  returns: v.union(chatWithMessages, v.null()),
   handler: async (ctx, args) => {
     const chat = await ctx.db
       .query("chats")

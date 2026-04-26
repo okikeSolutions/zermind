@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { useCreateChat } from "@/hooks/use-chats-query";
 import { useAuthUser } from "@/hooks/use-auth";
+import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
+import { toast } from "sonner";
 
 export default function ProtectedPage() {
   const router = useRouter();
@@ -35,6 +37,7 @@ export default function ProtectedPage() {
       router.push(`/protected/chat/${newChat.id}`);
     } catch (error) {
       console.error("Error creating new chat:", error);
+      toast.error(getFriendlyErrorMessage(error, "Failed to create chat"));
     }
   };
 

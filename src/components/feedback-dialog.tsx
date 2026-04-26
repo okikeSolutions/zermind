@@ -34,6 +34,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 
 // Form schema
 const feedbackFormSchema = z.object({
@@ -78,9 +79,7 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
       handleOpenChange(false);
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to submit feedback. Please try again.",
-      );
+      toast.error(getFriendlyErrorMessage(error, "Failed to submit feedback. Please try again."));
     } finally {
       setIsSubmitting(false);
     }
