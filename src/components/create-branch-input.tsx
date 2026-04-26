@@ -64,7 +64,7 @@ function BranchingForm({
   onClose,
   onBranchCreated,
 }: BranchingFormProps) {
-  const [selectedModel, setSelectedModel] = useState("openai/gpt-4o-mini");
+  const [selectedModel, setSelectedModel] = useState("openai/gpt-5-mini");
 
   // Form setup
   const form = useForm<BranchFormData>({

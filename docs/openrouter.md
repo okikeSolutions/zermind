@@ -72,7 +72,7 @@ If a user has an active key for the detected provider, Zermind uses the direct p
 The UI model selector can include OpenRouter-compatible IDs, for example:
 
 ```txt
-openai/gpt-4o-mini
+openai/gpt-5-mini
 anthropic/claude-3.5-sonnet
 google/gemini-2.0-flash
 meta-llama/llama-3.1-70b-instruct

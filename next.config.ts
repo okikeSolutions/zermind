@@ -1,11 +1,26 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+const convexHostname = process.env.NEXT_PUBLIC_CONVEX_URL
+  ? new URL(process.env.NEXT_PUBLIC_CONVEX_URL).hostname
+  : undefined;
+
 const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
   outputFileTracingRoot: path.join(__dirname),
+  images: convexHostname
+    ? {
+        remotePatterns: [
+          {
+            protocol: "https",
+            hostname: convexHostname,
+            pathname: "/api/storage/**",
+          },
+        ],
+      }
+    : undefined,
   async rewrites() {
     return [
       {

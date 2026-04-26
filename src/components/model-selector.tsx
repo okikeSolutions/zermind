@@ -31,17 +31,17 @@ const MODELS = [
     tier: "standard",
   },
   {
-    id: "openai/gpt-4o",
-    name: "GPT-4o",
+    id: "openai/gpt-5",
+    name: "GPT-5",
     provider: "OpenAI",
     description: "Latest multimodal model from OpenAI",
     tier: "premium",
   },
   {
-    id: "openai/gpt-4o-mini",
-    name: "GPT-4o Mini",
+    id: "openai/gpt-5-mini",
+    name: "GPT-5 Mini",
     provider: "OpenAI",
-    description: "Faster and cheaper version of GPT-4o",
+    description: "Faster and cheaper version of GPT-5",
     tier: "standard",
   },
   {

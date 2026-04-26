@@ -84,8 +84,8 @@ export function getModelCapabilities(model: string): ModelCapabilities {
 
   switch (provider) {
     case "openai":
-      // GPT-4o and GPT-4o-mini support vision
-      if (model.includes("gpt-4o")) {
+      // GPT-5 and GPT-5-mini support vision
+      if (model.includes("gpt-5")) {
         return {
           supportsImages: true,
           supportsDocuments: false, // OpenAI doesn't support document upload via vision API
@@ -127,8 +127,8 @@ export function getModelCapabilities(model: string): ModelCapabilities {
       // Check for specific model patterns that support vision/files
       const lowerModel = model.toLowerCase();
 
-      // GPT-4o models via OpenRouter
-      if (lowerModel.includes("gpt-4o") || lowerModel.includes("openai/gpt-4o")) {
+      // GPT-5 models via OpenRouter
+      if (lowerModel.includes("gpt-5") || lowerModel.includes("openai/gpt-5")) {
         return {
           supportsImages: true,
           supportsDocuments: true, // OpenRouter adds PDF support

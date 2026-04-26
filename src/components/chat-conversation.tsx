@@ -76,7 +76,7 @@ export function ChatConversation({
   initialMessages,
   userId, // eslint-disable-line @typescript-eslint/no-unused-vars
   chatTitle,
-  model: initialModel = "openai/gpt-4o-mini",
+  model: initialModel = "openai/gpt-5-mini",
   isSharedView = false,
   isDemo = false,
   onSendMessage,
@@ -109,9 +109,12 @@ export function ChatConversation({
   });
 
   // Sort messages chronologically (oldest first) to ensure correct display order
-  const sortedMessages = [...messages].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-  );
+  const sortedMessages = [...messages].sort((a, b) => {
+    const createdAtDelta = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    if (createdAtDelta !== 0) return createdAtDelta;
+    if (a.role !== b.role) return a.role === "user" ? -1 : 1;
+    return a.id.localeCompare(b.id);
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

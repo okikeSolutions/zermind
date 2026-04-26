@@ -156,7 +156,14 @@ export const getForSend = internalQuery({
   handler: async (ctx, args) => {
     const chat = await ctx.db.get(args.chatId);
     if (!chat) return null;
-    if (chat.userId === args.userId) return chat;
+    const sendableChat = {
+      _id: chat._id,
+      userId: chat.userId,
+      agentThreadId: chat.agentThreadId,
+      title: chat.title,
+      isCollaborative: chat.isCollaborative,
+    };
+    if (chat.userId === args.userId) return sendableChat;
 
     const cutoff = Date.now() - 5 * 60 * 1000;
     const session = await ctx.db
@@ -174,6 +181,6 @@ export const getForSend = internalQuery({
       )
       .first();
     if (!participant || participant.role === "viewer") return null;
-    return chat;
+    return sendableChat;
   },
 });

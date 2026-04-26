@@ -1,5 +1,6 @@
 import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
+import { ConvexError } from "convex/values";
 import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
@@ -38,11 +39,19 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
   });
 };
 
-// Example function for getting the current user
-// Feel free to edit, omit, etc.
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
-    return authComponent.getAuthUser(ctx);
+    try {
+      return await authComponent.getAuthUser(ctx);
+    } catch (error) {
+      if (
+        error instanceof ConvexError &&
+        (error.data === "Unauthenticated" || error.message === "Unauthenticated")
+      ) {
+        return null;
+      }
+      throw error;
+    }
   },
 });

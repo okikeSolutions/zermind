@@ -19,7 +19,7 @@ interface UseChatOptions {
 export function useChat({
   chatId,
   initialMessages = [],
-  model = "openai/gpt-4o-mini",
+  model = "openai/gpt-5-mini",
   temperature = 0.7,
   onError,
 }: UseChatOptions = {}) {

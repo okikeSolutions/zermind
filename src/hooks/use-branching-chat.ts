@@ -20,7 +20,7 @@ export function useBranchingChat({
   chatId,
   parentNodeId,
   initialContext,
-  model = "openai/gpt-4o-mini",
+  model = "openai/gpt-5-mini",
   branchName,
   onError,
 }: UseBranchingChatOptions) {

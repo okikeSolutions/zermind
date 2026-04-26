@@ -41,10 +41,10 @@ import { type Message } from "@/lib/schemas/chat";
 
 // Available models for multi-model comparison
 const COMPARISON_MODELS = [
-  { id: "openai/gpt-4o", name: "GPT-4o", provider: "OpenAI", tier: "premium" },
+  { id: "openai/gpt-5", name: "GPT-5", provider: "OpenAI", tier: "premium" },
   {
-    id: "openai/gpt-4o-mini",
-    name: "GPT-4o Mini",
+    id: "openai/gpt-5-mini",
+    name: "GPT-5 Mini",
     provider: "OpenAI",
     tier: "standard",
   },
@@ -257,7 +257,7 @@ export function CreateMultiModelBranch({
     defaultValues: {
       branchName: "",
       message: "",
-      selectedModels: ["openai/gpt-4o-mini", "anthropic/claude-3-haiku"], // Default selection
+      selectedModels: ["openai/gpt-5-mini", "anthropic/claude-3-haiku"], // Default selection
     },
   });
 
