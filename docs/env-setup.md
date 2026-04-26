@@ -1,77 +1,128 @@
-# Environment Variables Setup
+# Environment Setup
 
-## Required Variables
+Zermind uses Convex for backend data/functions/auth and Convex Agent for AI threads/messages. There is no Prisma, Postgres, or Supabase configuration in the current setup.
 
-### Database (Required)
+## Local environment file
+
+Create `.env.local` from the example:
+
 ```bash
-# Supabase Database URLs
-DATABASE_URL="postgresql://..."
-DIRECT_URL="postgresql://..."
-
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
+cp env.example .env.local
 ```
 
-### API Key Encryption (Required for BYOK)
+## Required variables
+
+### Convex
+
 ```bash
-# Strong encryption secret for user API keys (32+ characters)
-# Generate with: openssl rand -base64 32
-API_KEY_ENCRYPTION_SECRET="your-very-strong-encryption-secret-here"
+NEXT_PUBLIC_CONVEX_URL="https://your-deployment.convex.cloud"
+NEXT_PUBLIC_CONVEX_SITE_URL="https://your-deployment.convex.site"
+SITE_URL="http://localhost:3000"
 ```
 
-## Provider API Keys (Fallback)
+- `NEXT_PUBLIC_CONVEX_URL` is used by the browser Convex client.
+- `NEXT_PUBLIC_CONVEX_SITE_URL` is used for Convex HTTP routes, including Better Auth routes.
+- `SITE_URL` is used by Better Auth for redirects/callbacks.
 
-When users don't have their own API keys, the app always falls back to OpenRouter:
+### AI fallback provider
 
-### OpenRouter (Required)
 ```bash
-# OpenRouter provides access to ALL AI models as fallback
-# This is the only system API key required
 OPENROUTER_API_KEY="sk-or-v1-..."
 ```
 
-**Note**: Direct provider API keys (OpenAI, Anthropic, Google) are NOT needed as environment variables. They are only used when users add their own keys in settings.
+OpenRouter is the system fallback when a user has not configured a BYOK key for the selected provider.
 
-### Other implemented Providers
-OPENAI_API_KEY=your_openai_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-GOOGLE_GENERATIVE_AI_API_KEY=your_google_generative_ai_api_key_here
-
-## How BYOK Works
-
-1. **User API Keys First**: When a user has added their own API key for a provider, it uses the direct provider API (better performance, user's credits)
-2. **OpenRouter Fallback**: If no user key exists, the app always uses OpenRouter (works with all models)
-3. **Simple Configuration**: Only requires one system API key (OpenRouter)
-
-## Example .env
+### BYOK encryption
 
 ```bash
-# Database
-DATABASE_URL="postgresql://postgres:password@localhost:5432/zermind"
-DIRECT_URL="postgresql://postgres:password@localhost:5432/zermind"
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
-
-# BYOK Encryption (REQUIRED)
-API_KEY_ENCRYPTION_SECRET="$(openssl rand -base64 32)"
-
-# Fallback API Key (Required)
-OPENROUTER_API_KEY="sk-or-v1-your-openrouter-key"
-
-# NODE ENV
-NODE_ENV=development
-
-# SEO
-NEXT_PUBLIC_SITE_URL=your-production-url
+API_KEY_ENCRYPTION_SECRET="your-strong-secret"
 ```
 
-## Security Notes
+Generate one with:
 
-⚠️ **Important**: 
-- Never commit `.env` to version control
-- Use strong, randomly generated secrets for `API_KEY_ENCRYPTION_SECRET`
-- Rotate API keys regularly
-- User API keys are encrypted and can only be decrypted by your application 
+```bash
+openssl rand -base64 32
+```
+
+This secret is used by Convex Node actions to encrypt/decrypt user API keys with AES-256-GCM.
+
+## Optional OAuth provider variables
+
+If using OAuth login, configure the relevant provider credentials:
+
+```bash
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+GITHUB_CLIENT_ID="..."
+GITHUB_CLIENT_SECRET="..."
+```
+
+Email/password auth works through Convex Better Auth without OAuth provider variables.
+
+## Convex deployment environment
+
+Secrets used by Convex actions must be set in Convex, not only in `.env.local`.
+
+```bash
+bunx convex env set OPENROUTER_API_KEY "sk-or-v1-..."
+bunx convex env set API_KEY_ENCRYPTION_SECRET "$(openssl rand -base64 32)"
+bunx convex env set SITE_URL "http://localhost:3000"
+```
+
+For OAuth:
+
+```bash
+bunx convex env set GOOGLE_CLIENT_ID "..."
+bunx convex env set GOOGLE_CLIENT_SECRET "..."
+bunx convex env set GITHUB_CLIENT_ID "..."
+bunx convex env set GITHUB_CLIENT_SECRET "..."
+```
+
+## Example `.env.local`
+
+```bash
+# Convex
+NEXT_PUBLIC_CONVEX_URL="https://your-deployment.convex.cloud"
+NEXT_PUBLIC_CONVEX_SITE_URL="https://your-deployment.convex.site"
+SITE_URL="http://localhost:3000"
+
+# AI fallback
+OPENROUTER_API_KEY="sk-or-v1-your-openrouter-key"
+
+# BYOK encryption
+API_KEY_ENCRYPTION_SECRET="your-generated-32-byte-secret"
+
+# Optional OAuth
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
+
+# Public site URL / SEO
+NEXT_PUBLIC_SITE_URL="http://localhost:3000"
+NODE_ENV="development"
+```
+
+## Removed legacy variables
+
+These are no longer used by the current app:
+
+```bash
+DATABASE_URL
+DIRECT_URL
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+```
+
+The app no longer uses Prisma, Supabase Auth, Supabase Realtime, or Supabase Storage.
+
+## Validation
+
+After configuring env vars, run:
+
+```bash
+bunx convex codegen
+bunx tsc --noEmit
+bun run fmt:check
+bun run lint
+```

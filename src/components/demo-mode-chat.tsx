@@ -9,10 +9,7 @@ interface DemoModeChatProps {
   selectedScenario?: string;
 }
 
-export function DemoModeChat({
-  onUpgrade,
-  selectedScenario,
-}: DemoModeChatProps) {
+export function DemoModeChat({ onUpgrade, selectedScenario }: DemoModeChatProps) {
   const selectedDemo = selectedScenario || null;
 
   const handleBackToSelection = useCallback(() => {

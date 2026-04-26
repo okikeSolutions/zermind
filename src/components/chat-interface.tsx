@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,15 +21,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { FAQItem } from "@/components/faq-item";
-import {
-  OnboardingTooltip,
-  useOnboarding,
-} from "@/components/onboarding-tooltip";
+import { OnboardingTooltip, useOnboarding } from "@/components/onboarding-tooltip";
 
 interface ChatInterfaceProps {
-  user: SupabaseUser | null;
+  isAuthenticated: boolean;
 }
 
 // GitHub Icon Component
@@ -55,14 +45,13 @@ const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export function ChatInterface({ user }: ChatInterfaceProps) {
+export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
   const [message, setMessage] = useState("");
   const router = useRouter();
-  const { showOnboarding, completeOnboarding, skipOnboarding } =
-    useOnboarding();
+  const { showOnboarding, completeOnboarding, skipOnboarding } = useOnboarding();
 
   const handleStartChat = async () => {
-    if (!user) {
+    if (!isAuthenticated) {
       router.push("/auth/login");
       return;
     }
@@ -87,8 +76,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
     {
       name: "Claude 3",
       provider: "Anthropic",
-      color:
-        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+      color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
     },
     {
       name: "Llama 3.1",
@@ -113,7 +101,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
         <p className="text-muted-foreground text-base sm:text-lg">
           Your open-source AI chat companion
         </p>
-        {!user && (
+        {!isAuthenticated && (
           <div className="space-y-3">
             <Button
               onClick={handleTryDemo}
@@ -138,7 +126,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
             <span>Start Chatting</span>
           </CardTitle>
           <CardDescription className="text-sm sm:text-base">
-            {user
+            {isAuthenticated
               ? "Choose from multiple AI models and start your conversation"
               : "Sign in to access multiple AI models and start chatting"}
           </CardDescription>
@@ -156,15 +144,13 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
                   key={index}
                   variant="secondary"
                   className={`${model.color} ${
-                    user
+                    isAuthenticated
                       ? "hover:scale-105 cursor-pointer"
                       : "opacity-60 cursor-not-allowed"
                   } transition-transform text-xs sm:text-sm`}
                 >
                   {model.name}
-                  <span className="ml-1 text-xs opacity-70">
-                    by {model.provider}
-                  </span>
+                  <span className="ml-1 text-xs opacity-70">by {model.provider}</span>
                 </Badge>
               ))}
             </div>
@@ -175,16 +161,16 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
             <div className="relative">
               <Input
                 placeholder={
-                  user
+                  isAuthenticated
                     ? "What would you like to chat about today?"
                     : "Sign in to start chatting..."
                 }
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                disabled={!user}
+                disabled={!isAuthenticated}
                 className="pr-12 h-10 sm:h-12 text-sm sm:text-base border-2 border-primary/20 focus:border-primary/40 transition-colors disabled:opacity-60"
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && (message.trim() || !user)) {
+                  if (e.key === "Enter" && (message.trim() || !isAuthenticated)) {
                     handleStartChat();
                   }
                 }}
@@ -196,11 +182,11 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
 
             <Button
               onClick={handleStartChat}
-              disabled={!!user && !message.trim()}
+              disabled={!!isAuthenticated && !message.trim()}
               className="w-full h-10 sm:h-12 text-sm sm:text-base font-medium bg-primary hover:bg-primary/80 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
             >
               <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              {!user ? "Sign In to Start Chatting" : "Start Conversation"}
+              {!isAuthenticated ? "Sign In to Start Chatting" : "Start Conversation"}
             </Button>
           </div>
         </CardContent>
@@ -209,12 +195,9 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
       {/* Enhanced Features */}
       <div className="space-y-6 sm:space-y-8 py-8 sm:py-16">
         <div className="text-center space-y-1 sm:space-y-2">
-          <h2 className="text-2xl sm:text-3xl font-bold">
-            Revolutionary AI Interaction
-          </h2>
+          <h2 className="text-2xl sm:text-3xl font-bold">Revolutionary AI Interaction</h2>
           <p className="text-muted-foreground text-base sm:text-lg">
-            The first platform to transform AI conversations into visual mind
-            maps
+            The first platform to transform AI conversations into visual mind maps
           </p>
         </div>
 
@@ -227,8 +210,8 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
               </div>
               <h3 className="font-bold text-base sm:text-lg">Mind Mode</h3>
               <p className="text-sm text-muted-foreground">
-                Transform conversations into interactive mind maps. Visualize
-                how ideas connect and evolve in real-time.
+                Transform conversations into interactive mind maps. Visualize how ideas connect and
+                evolve in real-time.
               </p>
             </CardContent>
           </Card>
@@ -238,12 +221,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
               <div className="relative">
                 <GitBranch className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto" />
               </div>
-              <h3 className="font-bold text-base sm:text-lg">
-                Multi-Model Branching
-              </h3>
+              <h3 className="font-bold text-base sm:text-lg">Multi-Model Branching</h3>
               <p className="text-sm text-muted-foreground">
-                Ask the same question to different AI models and see their
-                responses branch visually. Compare approaches side-by-side.
+                Ask the same question to different AI models and see their responses branch
+                visually. Compare approaches side-by-side.
               </p>
             </CardContent>
           </Card>
@@ -253,12 +234,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
               <div className="relative">
                 <RefreshCw className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto" />
               </div>
-              <h3 className="font-bold text-base sm:text-lg">
-                Resumable Conversations
-              </h3>
+              <h3 className="font-bold text-base sm:text-lg">Resumable Conversations</h3>
               <p className="text-sm text-muted-foreground">
-                Click any node in your conversation tree to continue from that
-                exact point. Never lose context again.
+                Click any node in your conversation tree to continue from that exact point. Never
+                lose context again.
               </p>
             </CardContent>
           </Card>
@@ -273,12 +252,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
               <div className="relative">
                 <Users className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto" />
               </div>
-              <h3 className="font-bold text-base sm:text-lg">
-                Real-time Collaboration
-              </h3>
+              <h3 className="font-bold text-base sm:text-lg">Real-time Collaboration</h3>
               <p className="text-sm text-muted-foreground">
-                Collaborate with your team in real-time. Build mind maps
-                together and explore ideas collectively.
+                Collaborate with your team in real-time. Build mind maps together and explore ideas
+                collectively.
               </p>
             </CardContent>
           </Card>
@@ -293,12 +270,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
               <div className="relative">
                 <Share2 className="h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto" />
               </div>
-              <h3 className="font-bold text-base sm:text-lg">
-                Shareable Mind Maps
-              </h3>
+              <h3 className="font-bold text-base sm:text-lg">Shareable Mind Maps</h3>
               <p className="text-sm text-muted-foreground">
-                Share your conversation trees as interactive mind maps. Perfect
-                for presentations and knowledge sharing.
+                Share your conversation trees as interactive mind maps. Perfect for presentations
+                and knowledge sharing.
               </p>
             </CardContent>
           </Card>
@@ -311,8 +286,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
               <span>Why Choose Zermind?</span>
             </CardTitle>
             <CardDescription className="text-sm sm:text-base">
-              The first platform to revolutionize AI interaction through visual
-              conversation trees
+              The first platform to revolutionize AI interaction through visual conversation trees
             </CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 px-4 sm:px-6">
@@ -322,12 +296,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
                   <GitBranch className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm sm:text-base">
-                    Category-Defining Innovation
-                  </h4>
+                  <h4 className="font-medium text-sm sm:text-base">Category-Defining Innovation</h4>
                   <p className="text-sm text-muted-foreground">
-                    We don&apos;t just clone ChatGPT - we redefine how humans
-                    interact with AI through visual conversation mapping.
+                    We don&apos;t just clone ChatGPT - we redefine how humans interact with AI
+                    through visual conversation mapping.
                   </p>
                 </div>
               </div>
@@ -336,12 +308,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
                   <Network className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm sm:text-base">
-                    Multi-Model Intelligence
-                  </h4>
+                  <h4 className="font-medium text-sm sm:text-base">Multi-Model Intelligence</h4>
                   <p className="text-sm text-muted-foreground">
-                    Compare responses from GPT-4, Claude, Llama, and more in the
-                    same conversation tree.
+                    Compare responses from GPT-4, Claude, Llama, and more in the same conversation
+                    tree.
                   </p>
                 </div>
               </div>
@@ -352,12 +322,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
                   <Eye className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm sm:text-base">
-                    Visual Thinking
-                  </h4>
+                  <h4 className="font-medium text-sm sm:text-base">Visual Thinking</h4>
                   <p className="text-sm text-muted-foreground">
-                    See how ideas connect, evolve, and branch. Perfect for
-                    research, brainstorming, and complex problem-solving.
+                    See how ideas connect, evolve, and branch. Perfect for research, brainstorming,
+                    and complex problem-solving.
                   </p>
                 </div>
               </div>
@@ -366,12 +334,10 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
                   <Heart className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-medium text-sm sm:text-base">
-                    Open Source & Privacy-First
-                  </h4>
+                  <h4 className="font-medium text-sm sm:text-base">Open Source & Privacy-First</h4>
                   <p className="text-sm text-muted-foreground">
-                    Fully open source with your privacy in mind. Use your own
-                    API keys and maintain control of your data.
+                    Fully open source with your privacy in mind. Use your own API keys and maintain
+                    control of your data.
                   </p>
                 </div>
               </div>
@@ -382,9 +348,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
         {/* FAQ Section */}
         <div className="space-y-4 sm:space-y-6 py-8 sm:py-16">
           <div className="text-center space-y-1 sm:space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold">
-              Frequently Asked Questions
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold">Frequently Asked Questions</h2>
             <p className="text-muted-foreground text-sm sm:text-base">
               Everything you need to know about Zermind
             </p>
@@ -504,7 +468,7 @@ export function ChatInterface({ user }: ChatInterfaceProps) {
 
       {/* Onboarding Tooltip */}
       <OnboardingTooltip
-        isVisible={showOnboarding && !user}
+        isVisible={showOnboarding && !isAuthenticated}
         onComplete={completeOnboarding}
         onSkip={skipOnboarding}
         steps={[]} // Use default steps

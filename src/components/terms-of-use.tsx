@@ -41,12 +41,13 @@ export default function TermsOfUse() {
           </CardHeader>
           <CardContent className="p-6 sm:p-10">
             <div className="mb-8 text-sm text-muted-foreground">
-              <p>Last updated: June 2025</p>
+              <p>Last updated: April 2026</p>
             </div>
 
             <div className="prose prose-neutral max-w-none mb-8">
               <p className="text-lg text-muted-foreground">
-                Welcome to Zermind! These Terms of Use govern your access to and use of our AI chat application. By using Zermind, you agree to these terms.
+                Welcome to Zermind! These Terms of Use govern your access to and use of our AI chat
+                application. By using Zermind, you agree to these terms.
               </p>
             </div>
 
@@ -55,14 +56,14 @@ export default function TermsOfUse() {
                 icon={FileText}
                 title="Service Description"
                 content={[
-                  "Zermind is an open-source AI chat application",
-                  "Provides access to multiple LLM providers",
-                  "Enables chat history synchronization",
-                  "Offers real-time streaming responses",
-                  "Built for educational and productivity use",
+                  "Zermind is an open-source AI chat and mind-map application",
+                  "Provides access to multiple LLM providers through Convex Agent workflows",
+                  "Enables synchronized chat history, branching, and mind-map metadata",
+                  "Supports real-time streaming responses and collaborative sessions",
+                  "Supports file attachments through Convex file storage",
                 ]}
               />
-              
+
               <InfoSection
                 icon={Users}
                 title="User Accounts"
@@ -92,10 +93,10 @@ export default function TermsOfUse() {
                 title="API Keys & BYOK"
                 content={[
                   "You may provide your own API keys (BYOK)",
-                  "You are responsible for API key security",
+                  "You are responsible for the accuracy, permissions, billing, and security of your keys",
                   "Usage costs with your keys are your responsibility",
-                  "We are not liable for unauthorized API key usage",
-                  "API key data is encrypted and not shared",
+                  "We are not liable for unauthorized API key usage outside our reasonable control",
+                  "API keys are encrypted before storage and are never returned to clients",
                 ]}
               />
 
@@ -103,10 +104,11 @@ export default function TermsOfUse() {
                 icon={Ban}
                 title="Prohibited Uses"
                 content={[
-                  "Illegal activities or content generation",
-                  "Harassment, hate speech, or harmful content",
-                  "Spamming or automated abuse",
-                  "Attempting to reverse engineer the service",
+                  "Illegal activities or unlawful content generation",
+                  "Harassment, hate speech, abuse, or harmful content",
+                  "Uploading malicious files or content that infringes others' rights",
+                  "Spamming, scraping, credential abuse, or automated misuse",
+                  "Attempting to bypass security controls or disrupt the service",
                   "Violating third-party AI provider terms",
                 ]}
               />
@@ -115,11 +117,12 @@ export default function TermsOfUse() {
                 icon={Shield}
                 title="Content & Privacy"
                 content={[
-                  "You retain ownership of your chat content",
-                  "Shared chats become publicly accessible",
+                  "You retain ownership of your prompts, chats, uploads, and generated content where legally permitted",
+                  "You grant us the limited rights needed to operate, store, transmit, and display your content",
+                  "Shared chats become publicly accessible to anyone with the share link",
                   "We do not train AI models on your data",
                   "Your data is processed according to our Privacy Policy",
-                  "You can delete your content anytime",
+                  "You can delete your content from the app, subject to provider and backup retention limits",
                 ]}
               />
 
@@ -128,10 +131,11 @@ export default function TermsOfUse() {
                 title="Disclaimers"
                 content={[
                   "Service provided 'as is' without warranties",
-                  "No guarantee of uninterrupted availability",
-                  "AI responses may contain inaccuracies or biases",
-                  "Third-party service dependencies may affect functionality",
-                  "Open source nature means community contributions",
+                  "No guarantee of uninterrupted availability or permanent storage",
+                  "AI responses may contain inaccuracies, unsafe suggestions, or biases",
+                  "Third-party service dependencies, including Convex, Vercel, and AI providers, may affect functionality",
+                  "Uploaded files and AI outputs should be reviewed before relying on them",
+                  "Open source nature means community contributions may evolve the service",
                 ]}
               />
 
@@ -151,11 +155,11 @@ export default function TermsOfUse() {
                 icon={RefreshCw}
                 title="Service Changes"
                 content={[
-                  "We may modify or discontinue features",
-                  "Terms may be updated with notice",
-                  "New features may have additional terms",
-                  "Open source nature allows community forks",
-                  "Breaking changes will be communicated in advance",
+                  "We may modify, limit, or discontinue features",
+                  "Terms may be updated with notice where required",
+                  "New features, providers, collaboration tools, or storage features may have additional terms",
+                  "Open source nature allows community forks subject to the project license",
+                  "Breaking changes will be communicated when reasonably possible",
                 ]}
               />
             </div>
@@ -174,20 +178,23 @@ export default function TermsOfUse() {
                   . You may fork, modify, and distribute the code under the license terms.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold text-primary mb-2">Third-Party Services</h4>
                 <p>
-                  Zermind integrates with various AI providers (OpenAI, Anthropic, Meta, etc.) and other services. 
-                  Your use of these integrations is subject to their respective terms of service.
+                  Zermind integrates with services including Convex, Vercel, Better Auth,
+                  OpenRouter, and AI providers such as OpenAI, Anthropic, Google, Meta-compatible
+                  models, and others. Your use of these integrations is subject to their respective
+                  terms of service.
                 </p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-primary mb-2">Governing Law</h4>
                 <p>
-                  These terms are governed by Austrian law. Disputes will be resolved in Austrian courts.
-                  For consumer disputes, you may also use the EU Online Dispute Resolution platform.
+                  These terms are governed by Austrian law. Disputes will be resolved in Austrian
+                  courts. For consumer disputes, you may also use the EU Online Dispute Resolution
+                  platform.
                 </p>
               </div>
 
@@ -202,17 +209,21 @@ export default function TermsOfUse() {
                     info@okike-solutions.com
                   </a>
                   . See our{" "}
-                  <Link href="/imprint" className="text-primary hover:text-primary/80 transition-colors">
+                  <Link
+                    href="/imprint"
+                    className="text-primary hover:text-primary/80 transition-colors"
+                  >
                     Imprint
-                  </Link>
-                  {" "}for full contact details.
+                  </Link>{" "}
+                  for full contact details.
                 </p>
               </div>
 
               <div>
                 <h4 className="font-semibold text-primary mb-2">Severability</h4>
                 <p>
-                  If any provision of these terms is found unenforceable, the remaining provisions will continue in full force and effect.
+                  If any provision of these terms is found unenforceable, the remaining provisions
+                  will continue in full force and effect.
                 </p>
               </div>
             </div>
@@ -221,4 +232,4 @@ export default function TermsOfUse() {
       </div>
     </main>
   );
-} 
+}

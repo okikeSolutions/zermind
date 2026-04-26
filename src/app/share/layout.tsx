@@ -1,11 +1,7 @@
 import { ZermindLogo } from "@/components/zermind-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
-export default function ShareLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ShareLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header with branding */}
@@ -18,11 +14,9 @@ export default function ShareLayout({
           </div>
         </div>
       </div>
-      
+
       {/* Main content */}
-      <main className="h-[calc(100vh-73px)]">
-        {children}
-      </main>
+      <main className="h-[calc(100vh-73px)]">{children}</main>
     </div>
   );
-} 
+}

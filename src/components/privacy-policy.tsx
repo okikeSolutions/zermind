@@ -41,14 +41,13 @@ export default function PrivacyPolicy() {
           </CardHeader>
           <CardContent className="p-6 sm:p-10">
             <div className="mb-8 text-sm text-muted-foreground">
-              <p>Last updated: June 2025</p>
+              <p>Last updated: April 2026</p>
             </div>
 
             <div className="prose prose-neutral max-w-none mb-8">
               <p className="text-lg text-muted-foreground">
-                At Zermind, we take your privacy seriously. This Privacy Policy
-                explains how we collect, use, and protect your information when
-                you use our AI chat application.
+                At Zermind, we take your privacy seriously. This Privacy Policy explains how we
+                collect, use, and protect your information when you use our AI chat application.
               </p>
             </div>
 
@@ -58,8 +57,9 @@ export default function PrivacyPolicy() {
                 title="Data We Collect"
                 content={[
                   "Account information (email address, username)",
-                  "Chat messages and conversation history",
-                  "Model preferences and settings",
+                  "Chat messages, conversation history, and mind-map metadata",
+                  "Uploaded file attachments and related metadata",
+                  "Model preferences, BYOK provider settings, and encrypted API-key references",
                   "Usage analytics and error logs",
                   "Device and browser information",
                 ]}
@@ -81,8 +81,9 @@ export default function PrivacyPolicy() {
                 icon={MessageSquare}
                 title="Chat Data Processing"
                 content={[
-                  "Messages are sent to selected AI providers (OpenAI, Anthropic, etc.)",
-                  "Conversations are stored in our Supabase database",
+                  "Messages and supported attachments are sent to your selected AI provider",
+                  "Conversations are stored in Convex Agent threads with mind-map metadata in Convex",
+                  "Uploaded attachments are stored in Convex file storage and referenced by storage IDs",
                   "Shared chats may be publicly accessible via share links",
                   "You can delete individual chats or your entire history",
                   "We do not train AI models on your conversations",
@@ -93,11 +94,11 @@ export default function PrivacyPolicy() {
                 icon={Shield}
                 title="Data Protection"
                 content={[
-                  "All data is encrypted in transit and at rest",
-                  "We use Supabase's secure authentication system",
-                  "Regular security audits and updates",
-                  "Access controls and monitoring in place",
-                  "EU GDPR and California CCPA compliant",
+                  "All data is encrypted in transit and at rest by our infrastructure providers",
+                  "We use Convex Better Auth for secure authentication",
+                  "User-provided API keys are encrypted before storage and are never returned to clients",
+                  "Access controls and monitoring are in place",
+                  "Regular security updates and privacy reviews",
                 ]}
               />
 
@@ -105,11 +106,11 @@ export default function PrivacyPolicy() {
                 icon={Users}
                 title="Third-Party Services"
                 content={[
-                  "Supabase (authentication and database)",
+                  "Convex (authentication integration, database, file storage, and realtime backend)",
+                  "Better Auth (account authentication flows)",
                   "Vercel (hosting and deployment)",
-                  "AI providers (OpenAI, Anthropic, Meta, etc.)",
-                  "OpenRouter (unified LLM access)",
-                  "Analytics services (anonymized usage data)",
+                  "AI providers selected by you, including OpenAI, Anthropic, Google, and OpenRouter-compatible models",
+                  "Analytics services, where enabled, using limited or anonymized usage data",
                 ]}
               />
 
@@ -154,22 +155,20 @@ export default function PrivacyPolicy() {
                 title="Data Retention"
                 content={[
                   "Account data: Until account deletion",
-                  "Chat history: Until manually deleted",
-                  "Shared chats: Until share link is revoked",
-                  "Analytics: Aggregated for 2 years max",
-                  "Logs: 90 days for security purposes",
+                  "Chat history and Agent threads: Until manually deleted or account deletion",
+                  "Uploaded files: Until the related chat, file, or account is deleted",
+                  "Shared chats: Until share link is revoked or the chat is deleted",
+                  "Analytics and security logs: Retained only as needed for service operation and abuse prevention",
                 ]}
               />
             </div>
 
             <div className="mt-8 border-t pt-6 text-sm text-muted-foreground space-y-4">
               <div>
-                <h4 className="font-semibold text-primary mb-2">
-                  Open Source Transparency
-                </h4>
+                <h4 className="font-semibold text-primary mb-2">Open Source Transparency</h4>
                 <p>
-                  Zermind is open source under the MIT license. You can review
-                  our code, security practices, and data handling on{" "}
+                  Zermind is open source under the MIT license. You can review our code, security
+                  practices, and data handling on{" "}
                   <a
                     href="https://github.com/okikeSolutions/zermind"
                     className="text-primary hover:text-primary/80 transition-colors"
@@ -195,12 +194,10 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-primary mb-2">
-                  Changes to This Policy
-                </h4>
+                <h4 className="font-semibold text-primary mb-2">Changes to This Policy</h4>
                 <p>
-                  We may update this Privacy Policy periodically. Significant
-                  changes will be communicated via email or app notification.
+                  We may update this Privacy Policy periodically. Significant changes will be
+                  communicated via email or app notification.
                 </p>
               </div>
             </div>

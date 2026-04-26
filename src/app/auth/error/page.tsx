@@ -2,11 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ZermindLogo } from "@/components/zermind-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<{ error: string }>;
-}) {
+export default async function Page({ searchParams }: { searchParams: Promise<{ error: string }> }) {
   const params = await searchParams;
 
   return (
@@ -29,19 +25,13 @@ export default async function Page({
           <div className="flex flex-col gap-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl">
-                  Sorry, something went wrong.
-                </CardTitle>
+                <CardTitle className="text-2xl">Sorry, something went wrong.</CardTitle>
               </CardHeader>
               <CardContent>
                 {params?.error ? (
-                  <p className="text-sm text-muted-foreground">
-                    Code error: {params.error}
-                  </p>
+                  <p className="text-sm text-muted-foreground">Code error: {params.error}</p>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    An unspecified error occurred.
-                  </p>
+                  <p className="text-sm text-muted-foreground">An unspecified error occurred.</p>
                 )}
               </CardContent>
             </Card>

@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { fetchAuthQuery, isAuthenticated } from "@/lib/auth-server";
 import { DualModeChat } from "@/components/dual-mode-chat";
-import { getChatWithMessages } from "@/lib/db/chats";
+import { api } from "../../../../../convex/_generated/api";
+import type { Id } from "../../../../../convex/_generated/dataModel";
 
 interface ChatPageProps {
   params: Promise<{
@@ -10,20 +11,18 @@ interface ChatPageProps {
 }
 
 export default async function ChatPage({ params }: ChatPageProps) {
-  const supabase = await createClient();
   const { id } = await params;
+  const signedIn = await isAuthenticated();
 
-  // Check authentication
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData?.user) {
+  if (!signedIn) {
     redirect("/auth/login");
   }
 
-  // Fetch chat data from database
-  const chatData = await getChatWithMessages(id, userData.user.id);
+  const chatData = await fetchAuthQuery(api.chats.getWithMessages, {
+    chatId: id as Id<"chats">,
+  });
 
-  // If chat doesn't exist or doesn't belong to user, redirect
-  if (!chatData || chatData.userId !== userData.user.id) {
+  if (!chatData) {
     redirect("/protected");
   }
 
@@ -32,17 +31,23 @@ export default async function ChatPage({ params }: ChatPageProps) {
       <DualModeChat
         chatId={id}
         initialMessages={chatData.messages.map((msg) => ({
-          ...msg,
-          role: msg.role as "user" | "assistant",
+          id: msg._id,
+          role: msg.role === "user" ? "user" : "assistant",
+          content: msg.content,
           model: msg.model || undefined,
           parentId: msg.parentId || undefined,
           branchName: msg.branchName || undefined,
           attachments: msg.attachments || [],
+          xPosition: msg.xPosition,
+          yPosition: msg.yPosition,
+          nodeType: msg.nodeType,
+          isCollapsed: msg.isCollapsed,
+          isLocked: msg.isLocked,
           lastEditedBy: msg.lastEditedBy || undefined,
-          editedAt: msg.editedAt ? msg.editedAt.toISOString() : undefined,
-          createdAt: msg.createdAt.toISOString(),
+          editedAt: msg.editedAt ? new Date(msg.editedAt).toISOString() : undefined,
+          createdAt: new Date(msg.createdAt).toISOString(),
         }))}
-        userId={userData.user.id}
+        userId={chatData.userId}
         chatTitle={chatData.title || undefined}
       />
     </div>

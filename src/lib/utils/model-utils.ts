@@ -55,11 +55,7 @@ export function getModelDisplayName(model: string): string {
  */
 export function isDirectProviderModel(model: string): boolean {
   // These models typically require direct API access
-  return (
-    model.startsWith("gpt-") ||
-    model.startsWith("claude-") ||
-    model.startsWith("gemini-")
-  );
+  return model.startsWith("gpt-") || model.startsWith("claude-") || model.startsWith("gemini-");
 }
 
 /**
@@ -88,18 +84,13 @@ export function getModelCapabilities(model: string): ModelCapabilities {
 
   switch (provider) {
     case "openai":
-      // GPT-4o and GPT-4o-mini support vision
-      if (model.includes("gpt-4o")) {
+      // GPT-5 and GPT-5-mini support vision
+      if (model.includes("gpt-5")) {
         return {
           supportsImages: true,
           supportsDocuments: false, // OpenAI doesn't support document upload via vision API
           maxImageSize: 20, // 20MB limit
-          supportedImageTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-          ],
+          supportedImageTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
         };
       }
       return defaultCapabilities;
@@ -111,12 +102,7 @@ export function getModelCapabilities(model: string): ModelCapabilities {
           supportsImages: true,
           supportsDocuments: false, // Claude doesn't support document upload directly
           maxImageSize: 5, // 5MB limit for Claude
-          supportedImageTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-          ],
+          supportedImageTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
         };
       }
       return defaultCapabilities;
@@ -129,12 +115,7 @@ export function getModelCapabilities(model: string): ModelCapabilities {
           supportsDocuments: true, // Gemini can handle PDFs
           maxImageSize: 20,
           maxDocumentSize: 10,
-          supportedImageTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-          ],
+          supportedImageTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
           supportedDocumentTypes: ["application/pdf"],
         };
       }
@@ -146,62 +127,38 @@ export function getModelCapabilities(model: string): ModelCapabilities {
       // Check for specific model patterns that support vision/files
       const lowerModel = model.toLowerCase();
 
-      // GPT-4o models via OpenRouter
-      if (
-        lowerModel.includes("gpt-4o") ||
-        lowerModel.includes("openai/gpt-4o")
-      ) {
+      // GPT-5 models via OpenRouter
+      if (lowerModel.includes("gpt-5") || lowerModel.includes("openai/gpt-5")) {
         return {
           supportsImages: true,
           supportsDocuments: true, // OpenRouter adds PDF support
           maxImageSize: 20,
           maxDocumentSize: 10,
-          supportedImageTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-          ],
+          supportedImageTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
           supportedDocumentTypes: ["application/pdf"],
         };
       }
 
       // Claude 3+ models via OpenRouter
-      if (
-        lowerModel.includes("claude-3") ||
-        lowerModel.includes("anthropic/claude-3")
-      ) {
+      if (lowerModel.includes("claude-3") || lowerModel.includes("anthropic/claude-3")) {
         return {
           supportsImages: true,
           supportsDocuments: true, // OpenRouter adds PDF support
           maxImageSize: 5,
           maxDocumentSize: 10,
-          supportedImageTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-          ],
+          supportedImageTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
           supportedDocumentTypes: ["application/pdf"],
         };
       }
 
       // Gemini models via OpenRouter
-      if (
-        lowerModel.includes("gemini") ||
-        lowerModel.includes("google/gemini")
-      ) {
+      if (lowerModel.includes("gemini") || lowerModel.includes("google/gemini")) {
         return {
           supportsImages: true,
           supportsDocuments: true,
           maxImageSize: 20,
           maxDocumentSize: 10,
-          supportedImageTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-          ],
+          supportedImageTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
           supportedDocumentTypes: ["application/pdf"],
         };
       }
@@ -219,12 +176,7 @@ export function getModelCapabilities(model: string): ModelCapabilities {
           supportsDocuments: true, // OpenRouter provides document parsing
           maxImageSize: 10,
           maxDocumentSize: 10,
-          supportedImageTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp",
-          ],
+          supportedImageTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
           supportedDocumentTypes: ["application/pdf"],
         };
       }

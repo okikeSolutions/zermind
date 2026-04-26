@@ -10,17 +10,11 @@ export async function generateMetadata({
   const { scenario } = await params;
 
   if (scenario && scenario in DEMO_SCENARIOS) {
-    const scenarioData =
-      DEMO_SCENARIOS[scenario as keyof typeof DEMO_SCENARIOS];
+    const scenarioData = DEMO_SCENARIOS[scenario as keyof typeof DEMO_SCENARIOS];
     return {
       title: `${scenarioData.title} | Zermind Demo`,
       description: `${scenarioData.description} - Experience Zermind's revolutionary AI mind mapping with this interactive demo. No signup required.`,
-      keywords: [
-        ...scenarioData.keywords,
-        "AI demo",
-        "mind mapping",
-        "conversation visualization",
-      ],
+      keywords: [...scenarioData.keywords, "AI demo", "mind mapping", "conversation visualization"],
       openGraph: {
         title: `${scenarioData.title} - Zermind Demo`,
         description: scenarioData.description,
@@ -73,11 +67,7 @@ export async function generateMetadata({
   };
 }
 
-export default function DemoLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DemoLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader />

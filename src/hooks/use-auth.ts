@@ -1,48 +1,52 @@
-import { useQuery } from "@tanstack/react-query";
-import { createClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+"use client";
 
-export interface AuthData {
-  user: User | null;
-  isAuthenticated: boolean;
-}
+import { useQuery, useConvexAuth } from "convex/react";
+import { api } from "../../convex/_generated/api";
+
+export type AuthUser = {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+  image?: string | null;
+  user_metadata: {
+    name?: string | null;
+    full_name?: string | null;
+  };
+};
 
 export function useAuth() {
-  return useQuery<AuthData, Error>({
-    queryKey: ["auth", "user"],
-    queryFn: async (): Promise<AuthData> => {
-      try {
-        const supabase = createClient();
-        const { data, error } = await supabase.auth.getUser();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const authUser = useQuery(api.auth.getCurrentUser, isAuthenticated ? {} : "skip");
 
-        if (error) {
-          console.error("Auth error:", error);
-          return { user: null, isAuthenticated: false };
-        }
-
-        return {
-          user: data.user,
-          isAuthenticated: !!data.user,
-        };
-      } catch (error) {
-        console.error("Error getting user:", error);
-        return { user: null, isAuthenticated: false };
+  const user: AuthUser | null = authUser
+    ? {
+        id: authUser.userId ?? authUser._id,
+        email: authUser.email,
+        name: authUser.name,
+        image: authUser.image,
+        user_metadata: {
+          name: authUser.name,
+          full_name: authUser.name,
+        },
       }
+    : null;
+
+  return {
+    data: {
+      user,
+      isAuthenticated,
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: 1,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
+    isLoading: isLoading || (isAuthenticated && authUser === undefined),
+    error: null,
+  };
 }
 
 export function useAuthUser() {
   const { data, isLoading, error } = useAuth();
 
   return {
-    user: data?.user || null,
-    isAuthenticated: data?.isAuthenticated || false,
+    user: data.user,
+    isAuthenticated: data.isAuthenticated,
     isLoading,
     error,
   };

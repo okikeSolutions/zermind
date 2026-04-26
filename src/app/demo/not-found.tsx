@@ -18,8 +18,8 @@ export default function DemoNotFound() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            The demo scenario you&apos;re looking for doesn&apos;t exist. Try
-            one of our available demos instead.
+            The demo scenario you&apos;re looking for doesn&apos;t exist. Try one of our available
+            demos instead.
           </p>
 
           <div className="space-y-2">

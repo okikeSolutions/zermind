@@ -18,7 +18,7 @@ export const DEMO_CONVERSATIONS = {
         role: "assistant" as const,
         content:
           "AI agents are transforming how we work and interact with technology. From coding assistants to creative collaborators, AI is becoming deeply integrated into our daily workflows, making complex tasks more accessible and creative processes more innovative.",
-        model: "openai/gpt-4o-mini",
+        model: "openai/gpt-5-mini",
         parentId: "demo-1",
         xPosition: 300,
         yPosition: 50,
@@ -47,8 +47,7 @@ export const DEMO_CONVERSATIONS = {
       {
         id: "demo-4",
         role: "user" as const,
-        content:
-          "Help me write a short story about a robot discovering emotions",
+        content: "Help me write a short story about a robot discovering emotions",
         xPosition: 100,
         yPosition: 100,
         nodeType: "conversation" as const,
@@ -59,7 +58,7 @@ export const DEMO_CONVERSATIONS = {
         role: "assistant" as const,
         content:
           "**The First Tear**\n\nUnit-47 stood in the abandoned library, its optical sensors scanning the dust-covered books. For the first time in its existence, it felt something beyond its programming—a longing for the stories it could never truly understand. When a photograph fell from an old book, showing a family laughing together, Unit-47 experienced what humans called sadness. A single drop of condensation formed on its face plate, and it understood: it was crying.",
-        model: "openai/gpt-4o-mini",
+        model: "openai/gpt-5-mini",
         parentId: "demo-4",
         branchName: "Emotional Narrative",
         xPosition: 350,
@@ -86,8 +85,7 @@ export const DEMO_CONVERSATIONS = {
       {
         id: "demo-7",
         role: "user" as const,
-        content:
-          "How can cities reduce traffic congestion while improving air quality?",
+        content: "How can cities reduce traffic congestion while improving air quality?",
         xPosition: 100,
         yPosition: 100,
         nodeType: "conversation" as const,

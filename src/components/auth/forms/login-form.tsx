@@ -1,15 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -27,10 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
   password: z
     .string()
     .min(1, "Password is required")
@@ -39,10 +30,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -56,18 +44,18 @@ export function LoginForm({
   });
 
   const handleLogin = async (data: LoginFormData) => {
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const result = await authClient.signIn.email({
         email: data.email,
         password: data.password,
+        callbackURL: "/protected",
       });
-      if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
+      if (result.error) throw new Error(result.error.message);
       router.push("/protected");
+      router.refresh();
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -76,19 +64,16 @@ export function LoginForm({
   };
 
   const handleSocialLogin = async (provider: "github" | "google") => {
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const result = await authClient.signIn.social({
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/oauth?next=/protected`,
-        },
+        callbackURL: "/protected",
       });
 
-      if (error) throw error;
+      if (result.error) throw new Error(result.error.message);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
       setIsLoading(false);
@@ -100,16 +85,11 @@ export function LoginForm({
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
+          <CardDescription>Enter your email below to login to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleLogin)}
-              className="space-y-6"
-            >
+            <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="email"
@@ -117,11 +97,7 @@ export function LoginForm({
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="m@example.com"
-                        {...field}
-                      />
+                      <Input type="email" placeholder="m@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -160,9 +136,7 @@ export function LoginForm({
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

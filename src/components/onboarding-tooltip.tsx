@@ -4,15 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  X,
-  ArrowRight,
-  Brain,
-  MessageSquare,
-  GitBranch,
-  Users,
-  Sparkles,
-} from "lucide-react";
+import { X, ArrowRight, Brain, MessageSquare, GitBranch, Users, Sparkles } from "lucide-react";
 
 interface OnboardingStep {
   id: string;
@@ -154,9 +146,7 @@ export function OnboardingTooltip({
                 <IconComponent className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">
-                  {currentStepData.title}
-                </h3>
+                <h3 className="font-semibold text-lg">{currentStepData.title}</h3>
                 {currentStepData.highlight && (
                   <Badge variant="secondary" className="text-xs mt-1">
                     {currentStepData.highlight}
@@ -164,20 +154,13 @@ export function OnboardingTooltip({
                 )}
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSkip}
-              className="p-1 hover:bg-muted"
-            >
+            <Button variant="ghost" size="sm" onClick={handleSkip} className="p-1 hover:bg-muted">
               <X className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Content */}
-          <p className="text-muted-foreground leading-relaxed">
-            {currentStepData.description}
-          </p>
+          <p className="text-muted-foreground leading-relaxed">{currentStepData.description}</p>
 
           {/* Progress Indicator */}
           <div className="flex items-center gap-2">
@@ -188,8 +171,8 @@ export function OnboardingTooltip({
                   index === currentStep
                     ? "bg-primary w-8"
                     : index < currentStep
-                    ? "bg-primary/60 w-2"
-                    : "bg-muted w-2"
+                      ? "bg-primary/60 w-2"
+                      : "bg-muted w-2"
                 }`}
               />
             ))}
@@ -208,11 +191,7 @@ export function OnboardingTooltip({
                 </Button>
               )}
 
-              <Button
-                onClick={handleNext}
-                size="sm"
-                className="bg-primary hover:bg-primary/80"
-              >
+              <Button onClick={handleNext} size="sm" className="bg-primary hover:bg-primary/80">
                 {isLastStep ? (
                   <>
                     Get Started

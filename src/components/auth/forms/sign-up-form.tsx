@@ -1,15 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -28,10 +22,7 @@ import { z } from "zod";
 
 const signUpSchema = z
   .object({
-    email: z
-      .string()
-      .min(1, "Email is required")
-      .email("Please enter a valid email address"),
+    email: z.email().min(1, "Email is required"),
     password: z
       .string()
       .min(1, "Password is required")
@@ -45,10 +36,7 @@ const signUpSchema = z
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -63,20 +51,19 @@ export function SignUpForm({
   });
 
   const handleSignUp = async (data: SignUpFormData) => {
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const result = await authClient.signUp.email({
         email: data.email,
         password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
-        },
+        name: data.email,
+        callbackURL: "/protected",
       });
-      if (error) throw error;
-      router.push("/auth/sign-up-success");
+      if (result.error) throw new Error(result.error.message);
+      router.push("/protected");
+      router.refresh();
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -93,10 +80,7 @@ export function SignUpForm({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSignUp)}
-              className="space-y-6"
-            >
+            <form onSubmit={form.handleSubmit(handleSignUp)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="email"
@@ -104,11 +88,7 @@ export function SignUpForm({
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="m@example.com"
-                        {...field}
-                      />
+                      <Input type="email" placeholder="m@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

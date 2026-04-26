@@ -1,450 +1,150 @@
-# Supabase Storage Setup for Zermind Chat Attachments
+# Convex File Storage and Attachments
 
-## Overview
+Zermind uses Convex file storage for chat attachments. Supabase Storage is no longer used.
 
-Zermind uses private Supabase storage buckets for secure chat attachment handling. This ensures user privacy and proper access control for uploaded files.
+## Current flow
 
-## Bucket Configuration
+Attachments are uploaded through Convex generated upload URLs:
 
-### 1. Create the Storage Bucket
-
-In your Supabase dashboard:
-
-1. Go to **Storage** → **Buckets**
-2. Click **New Bucket**
-3. Set the following configuration:
-
-```
-Bucket Name: chat-attachments
-Public: false (IMPORTANT - must be private)
-File size limit: 50MB
-Allowed MIME types:
-  - image/jpeg
-  - image/png
-  - image/gif
-  - image/webp
-  - application/pdf
+```txt
+client
+  → api.files.generateUploadUrl
+  → POST file bytes to Convex upload URL
+  → api.files.saveUploadedFile
+  → api.agentActions.send with attachment storage IDs
+  → zermindAgent.streamText with AI SDK file/image parts
 ```
 
-### 2. Set Up Row Level Security (RLS) Policies
+This gives Zermind durable file storage while keeping the AI conversation source of truth in Convex Agent.
 
-Navigate to **Storage** → **Policies** and create these policies for the `chat-attachments` bucket:
+## Backend files
 
-#### Policy 1: Upload Policy
-
-```sql
--- Users can upload files to the uploads folder structure
-CREATE POLICY "Allow authenticated uploads to chat-attachments"
-ON storage.objects
-FOR INSERT
-TO authenticated
-WITH CHECK (
-  bucket_id = 'chat-attachments'
-  AND (storage.foldername(name))[1] = 'uploads'
-);
+```txt
+convex/files.ts
+convex/schema.ts
+convex/agentActions.ts
 ```
 
-#### Policy 2: Select Policy
+`convex/files.ts` exposes:
 
-```sql
--- Users can view files they uploaded
-CREATE POLICY "Allow users to view their own chat attachments"
-ON storage.objects
-FOR SELECT
-TO authenticated
-USING (
-  bucket_id = 'chat-attachments'
-  AND (SELECT auth.uid()) = owner_id::uuid
-);
+```txt
+api.files.generateUploadUrl
+api.files.saveUploadedFile
+api.files.getUrl
+api.files.remove
 ```
 
-#### Policy 3: Update Policy
+## Schema
 
-```sql
--- Users can update their own files (for upsert functionality)
-CREATE POLICY "Allow users to update their own chat attachments"
-ON storage.objects
-FOR UPDATE
-TO authenticated
-USING (
-  bucket_id = 'chat-attachments'
-  AND (SELECT auth.uid()) = owner_id::uuid
-)
-WITH CHECK (
-  bucket_id = 'chat-attachments'
-  AND (SELECT auth.uid()) = owner_id::uuid
-);
+Stored file references live in the `fileAttachments` table:
+
+```ts
+fileAttachments: {
+  userId: string;
+  chatId?: Id<"chats">;
+  storageId: Id<"_storage">;
+  name: string;
+  mimeType: string;
+  size: number;
+  type: "image" | "document";
+  createdAt: number;
+}
 ```
 
-#### Policy 4: Delete Policy
+Message/node content is still modeled as:
 
-```sql
--- Users can delete their own uploaded files
-CREATE POLICY "Allow users to delete their own chat attachments"
-ON storage.objects
-FOR DELETE
-TO authenticated
-USING (
-  bucket_id = 'chat-attachments'
-  AND (SELECT auth.uid()) = owner_id::uuid
-);
+```txt
+Convex Agent messages = AI conversation content
+zermindNodes = mind-map metadata
+fileAttachments = Convex storage references for uploaded files
 ```
 
-### 3. Advanced Policies (Optional - for shared conversations)
+## Client integration
 
-If you want to implement shared conversations where multiple users can access the same attachments, you can replace the basic SELECT policy with this enhanced version:
+The attachment UI uses:
 
-```sql
--- Enhanced select policy for shared conversations
-DROP POLICY IF EXISTS "Allow users to view their own chat attachments" ON storage.objects;
-
-CREATE POLICY "Allow users to view shared chat attachments"
-ON storage.objects
-FOR SELECT
-TO authenticated
-USING (
-  bucket_id = 'chat-attachments'
-  AND (
-    -- User uploaded the file
-    (SELECT auth.uid()) = owner_id::uuid
-    OR
-    -- User has access to the chat containing this attachment
-    EXISTS (
-      SELECT 1 FROM chats c
-      JOIN messages m ON c.id = m.chat_id
-      JOIN jsonb_array_elements(m.attachments) AS att ON true
-      WHERE att->>'filePath' = name
-      AND (
-        c.user_id = auth.uid()
-        OR c.is_collaborative = true
-      )
-    )
-  )
-);
+```txt
+src/hooks/use-file-attachments.ts
+src/components/chat-conversation.tsx
+src/components/message-attachment.tsx
 ```
 
-### 4. User-Specific Folder Policy (Alternative)
+`useFileAttachments` validates files based on selected model capabilities, then uploads each file using a generated Convex upload URL.
 
-If you prefer to organize files by user ID folders, you can use this alternative upload policy:
+The hook returns attachments shaped like:
 
-```sql
--- Alternative: Users upload to their own user ID folder
-CREATE POLICY "Allow authenticated uploads to user folders"
-ON storage.objects
-FOR INSERT
-TO authenticated
-WITH CHECK (
-  bucket_id = 'chat-attachments'
-  AND (storage.foldername(name))[1] = 'uploads'
-  AND (storage.foldername(name))[2] = (SELECT auth.uid()::text)
-);
+```ts
+{
+  id: string;
+  name: string;
+  mimeType: string;
+  size: number;
+  url: string;
+  storageId: string;
+  type: "image" | "document";
+}
 ```
 
-This would create a folder structure like:
+## AI message integration
 
-```
-chat-attachments/
-├── uploads/
-│   ├── user-uuid-1/
-│   │   ├── file1.jpg
-│   │   └── file2.pdf
-│   ├── user-uuid-2/
-│   │   └── file3.png
+Uploaded files are passed to:
+
+```txt
+api.agentActions.send
 ```
 
-## File Structure
+`convex/agentActions.ts` converts attachments into AI SDK v6 message parts:
 
-The application organizes files in the following structure:
-
-```
-chat-attachments/
-├── uploads/
-│   ├── 2024/
-│   │   ├── 1/          # January
-│   │   ├── 2/          # February
-│   │   └── ...
-│   ├── 2025/
-│   │   └── ...
+```txt
+image attachments → { type: "image", image: signedUrl, mediaType }
+document attachments → { type: "file", data: signedUrl, mediaType, filename }
 ```
 
-**Note**: If you choose the user-specific folder approach, the structure would be:
+Then it calls:
 
-```
-chat-attachments/
-├── uploads/
-│   ├── user-uuid-1/
-│   ├── user-uuid-2/
-│   └── ...
+```ts
+zermindAgent.streamText(..., { saveStreamDeltas: true })
 ```
 
-## Security Benefits
+## Serving files
 
-### ✅ Private Storage
+Convex signed file URLs are generated with:
 
-- Files are not accessible via direct URLs
-- All access requires authentication
-- Signed URLs provide temporary, secure access
-
-### ✅ Access Control
-
-- Row Level Security policies enforce permissions based on file ownership
-- Users can only access files they uploaded (unless shared)
-- Prevents unauthorized file access
-
-### ✅ URL Expiration
-
-- Signed URLs expire after 1 hour
-- Reduces risk of URL sharing abuse
-- URLs are automatically refreshed when needed
-
-## Migration from Public Bucket
-
-If you're migrating from a public bucket:
-
-1. **Update bucket to private** in Supabase dashboard
-2. **Apply RLS policies** as shown above
-3. **Update existing attachment URLs** to use signed URLs:
-
-```typescript
-// Robust migration script with batch processing and error handling
-const migrateAttachments = async () => {
-  const BATCH_SIZE = 100; // Process messages in batches
-  const UPDATE_BATCH_SIZE = 50; // Update messages in smaller batches
-
-  // Regex pattern to extract file path from various URL formats
-  const URL_PATTERNS = [
-    /\/public\/chat-attachments\/(.+)$/, // Standard public URL
-    /\/storage\/v1\/object\/public\/chat-attachments\/(.+)$/, // Full storage URL
-    /\/chat-attachments\/(.+)$/, // Simple bucket path
-  ];
-
-  let totalProcessed = 0;
-  let totalErrors = 0;
-  let offset = 0;
-
-  console.log("🚀 Starting attachment migration...");
-
-  try {
-    while (true) {
-      // Fetch messages in batches
-      const { data: messages, error: fetchError } = await supabase
-        .from("messages")
-        .select("id, attachments")
-        .not("attachments", "is", null)
-        .range(offset, offset + BATCH_SIZE - 1)
-        .order("created_at", { ascending: true });
-
-      if (fetchError) {
-        console.error("❌ Error fetching messages:", fetchError);
-        throw fetchError;
-      }
-
-      if (!messages || messages.length === 0) {
-        console.log("✅ No more messages to process");
-        break;
-      }
-
-      console.log(
-        `📦 Processing batch: ${offset + 1}-${offset + messages.length}`
-      );
-
-      const processedMessages: Array<{ id: string; attachments: any[] }> = [];
-
-      // Process each message with error handling
-      for (const message of messages) {
-        try {
-          const updatedAttachments = message.attachments.map(
-            (attachment: any) => {
-              if (!attachment.filePath && attachment.url) {
-                const filePath = extractFilePathFromUrl(attachment.url);
-                if (filePath) {
-                  return { ...attachment, filePath };
-                } else {
-                  console.warn(
-                    `⚠️  Failed to extract file path from URL: ${attachment.url}`
-                  );
-                  return attachment; // Keep original if extraction fails
-                }
-              }
-              return attachment;
-            }
-          );
-
-          // Only include messages that had successful updates
-          if (
-            JSON.stringify(updatedAttachments) !==
-            JSON.stringify(message.attachments)
-          ) {
-            processedMessages.push({
-              id: message.id,
-              attachments: updatedAttachments,
-            });
-          }
-        } catch (error) {
-          console.error(`❌ Error processing message ${message.id}:`, error);
-          totalErrors++;
-          continue; // Skip this message and continue with others
-        }
-      }
-
-      // Update messages in smaller batches to avoid timeouts
-      if (processedMessages.length > 0) {
-        await updateMessagesInBatches(processedMessages, UPDATE_BATCH_SIZE);
-      }
-
-      totalProcessed += messages.length;
-      offset += BATCH_SIZE;
-
-      // Progress update
-      console.log(
-        `📊 Progress: ${totalProcessed} messages processed, ${totalErrors} errors`
-      );
-
-      // Small delay to avoid overwhelming the database
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
-    console.log(
-      `🎉 Migration completed! Processed: ${totalProcessed}, Errors: ${totalErrors}`
-    );
-  } catch (error) {
-    console.error("💥 Migration failed:", error);
-    throw error;
-  }
-};
-
-/**
- * Extract file path from URL using multiple regex patterns
- */
-const extractFilePathFromUrl = (url: string): string | null => {
-  if (!url || typeof url !== "string") {
-    return null;
-  }
-
-  try {
-    // Try each pattern until one matches
-    for (const pattern of URL_PATTERNS) {
-      const match = url.match(pattern);
-      if (match && match[1]) {
-        return decodeURIComponent(match[1]); // Decode URL-encoded characters
-      }
-    }
-
-    // Fallback: try to parse as URL and extract pathname
-    try {
-      const urlObj = new URL(url);
-      const pathParts = urlObj.pathname.split("/chat-attachments/");
-      if (pathParts.length > 1 && pathParts[1]) {
-        return decodeURIComponent(pathParts[1]);
-      }
-    } catch {
-      // URL parsing failed, continue to return null
-    }
-
-    return null;
-  } catch (error) {
-    console.error(`Error extracting file path from URL ${url}:`, error);
-    return null;
-  }
-};
-
-/**
- * Update messages in batches with error handling
- */
-const updateMessagesInBatches = async (
-  messages: Array<{ id: string; attachments: any[] }>,
-  batchSize: number
-) => {
-  for (let i = 0; i < messages.length; i += batchSize) {
-    const batch = messages.slice(i, i + batchSize);
-
-    try {
-      // Process batch updates in parallel but with individual error handling
-      const updatePromises = batch.map(async (message) => {
-        try {
-          const { error } = await supabase
-            .from("messages")
-            .update({ attachments: message.attachments })
-            .eq("id", message.id);
-
-          if (error) {
-            console.error(`❌ Error updating message ${message.id}:`, error);
-            return { success: false, id: message.id, error };
-          }
-
-          return { success: true, id: message.id };
-        } catch (err) {
-          console.error(`❌ Exception updating message ${message.id}:`, err);
-          return { success: false, id: message.id, error: err };
-        }
-      });
-
-      const results = await Promise.allSettled(updatePromises);
-      const successful = results.filter(
-        (r) => r.status === "fulfilled" && r.value.success
-      ).length;
-      const failed = results.length - successful;
-
-      if (failed > 0) {
-        console.warn(
-          `⚠️  Batch update completed with ${failed} failures out of ${results.length}`
-        );
-      }
-    } catch (error) {
-      console.error(
-        `❌ Batch update failed for batch starting at index ${i}:`,
-        error
-      );
-      // Continue with next batch instead of failing completely
-    }
-  }
-};
+```ts
+ctx.storage.getUrl(storageId);
 ```
 
-## Environment Variables
+The app generates URLs when files are saved and when files need to be read from storage. If a file is deleted or unavailable, `getUrl` returns `null`.
 
-Ensure your `.env` includes:
+## Deleting files
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+Files are deleted in three places:
+
+```txt
+api.files.remove                 deletes an individual uploaded file
+api.chats.remove                 deletes files attached to the deleted chat
+api.account.deleteMyData         deletes all user file attachments
 ```
 
-## Troubleshooting
+Deletion removes both:
 
-### Common Issues
+```txt
+Convex storage object
+fileAttachments table row
+```
 
-1. **"Access Denied" errors**
+## Limits
 
-   - Verify RLS policies are correctly set up
-   - Check that bucket is marked as private
-   - Ensure user is authenticated
-   - Verify `owner_id` is set correctly on uploaded files
+Convex generated upload URLs support large file uploads, but the upload POST request has a 2 minute timeout. Upload URLs expire after 1 hour and should be generated shortly before upload.
 
-2. **Signed URL generation fails**
+## Removed legacy setup
 
-   - Verify file path format matches bucket structure
-   - Check bucket permissions in Supabase dashboard
-   - Ensure adequate Supabase plan limits
+These are no longer used:
 
-3. **Files not uploading**
-   - Check file size limits
-   - Verify MIME type restrictions
-   - Review bucket policies for INSERT permissions
-   - Ensure folder structure matches policy expectations
-
-### Testing Your Policies
-
-You can test your policies by trying to:
-
-1. **Upload a file** (should work for authenticated users)
-2. **View your own file** (should work)
-3. **View another user's file** (should fail unless shared)
-4. **Delete your own file** (should work)
-5. **Delete another user's file** (should fail)
-
-### Support Resources
-
-- [Supabase Storage Documentation](https://supabase.com/docs/guides/storage)
-- [Row Level Security Guide](https://supabase.com/docs/guides/auth/row-level-security)
-- [Storage Policies](https://supabase.com/docs/guides/storage/security/access-control)
+```txt
+Supabase Storage buckets
+Supabase Storage RLS policies
+chat-attachments Supabase bucket
+public/signed Supabase object URLs
+data-URL-only attachment flow
+```

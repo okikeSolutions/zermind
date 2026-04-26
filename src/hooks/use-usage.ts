@@ -1,25 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
-import { type UsageStats, UsageStatsSchema } from "@/lib/schemas/usage";
+"use client";
+
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { type UsageStats } from "@/lib/schemas/usage";
 
 export function useUsageStats() {
-  return useQuery<UsageStats, Error>({
-    queryKey: ["usage", "stats"],
-    queryFn: async (): Promise<UsageStats> => {
-      const response = await fetch("/api/usage");
+  const stats = useQuery(api.usage.myStats, {});
 
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch usage statistics: ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-      return UsageStatsSchema.parse(data);
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes - usage stats don't change frequently
-    gcTime: 15 * 60 * 1000, // 15 minutes
-    retry: 2,
-    refetchOnWindowFocus: false,
-    refetchOnMount: true,
-  });
+  return {
+    data: (stats ?? {
+      totalRequests: 0,
+      modelUsage: {},
+      dailyUsage: {},
+      userCount: 0,
+    }) satisfies UsageStats,
+    isLoading: stats === undefined,
+    error: null as Error | null,
+  };
 }

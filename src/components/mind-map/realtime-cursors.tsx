@@ -48,11 +48,7 @@ export function RealtimeCursors({ users, className }: RealtimeCursorsProps) {
 }
 
 // Component for showing user avatars in a presence indicator
-export function CollaborationPresence({
-  users,
-}: {
-  users: CollaborativeUser[];
-}) {
+export function CollaborationPresence({ users }: { users: CollaborativeUser[] }) {
   if (users.length === 0) return null;
 
   return (

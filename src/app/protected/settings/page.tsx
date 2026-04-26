@@ -1,11 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { fetchAuthQuery } from "@/lib/auth-server";
+import { api } from "../../../../convex/_generated/api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ApiKeyManagement } from "@/components/api-key-management";
 import { DangerZone } from "@/components/danger-zone";
@@ -13,8 +8,7 @@ import { CollaborationSettings } from "@/components/collaboration-settings";
 import { User, Settings, Shield, Database } from "lucide-react";
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
+  const user = await fetchAuthQuery(api.auth.getCurrentUser);
 
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
@@ -39,28 +33,24 @@ export default async function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-muted-foreground">
-                Email
-              </label>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground">Email</p>
               <p className="text-sm font-mono bg-muted px-3 py-2 rounded-md break-all">
-                {data?.user?.email}
+                {user?.email ?? "Unknown"}
               </p>
             </div>
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-muted-foreground">
-                User ID
-              </label>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground">User ID</p>
               <p className="text-sm font-mono bg-muted px-3 py-2 rounded-md truncate">
-                {data?.user?.id}
+                {user?.userId ?? user?._id ?? "Unknown"}
               </p>
             </div>
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-muted-foreground">
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Account Created
-              </label>
+              </p>
               <p className="text-sm bg-muted px-3 py-2 rounded-md">
-                {data?.user?.created_at
-                  ? new Date(data.user.created_at).toLocaleDateString("en-US", {
+                {user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
@@ -69,17 +59,13 @@ export default async function SettingsPage() {
               </p>
             </div>
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-muted-foreground">
-                Email Verified
-              </label>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground">Email Verified</p>
               <div className="flex items-center gap-2 mt-1">
                 <Badge
-                  variant={
-                    data?.user?.email_confirmed_at ? "secondary" : "destructive"
-                  }
+                  variant={user?.emailVerified ? "secondary" : "destructive"}
                   className="text-xs"
                 >
-                  {data?.user?.email_confirmed_at ? "Verified" : "Not Verified"}
+                  {user?.emailVerified ? "Verified" : "Not Verified"}
                 </Badge>
               </div>
             </div>
@@ -99,10 +85,7 @@ export default async function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-6">
-          {/* API Key Management */}
           <ApiKeyManagement />
-
-          {/* Other Chat Preferences */}
           <div className="pt-4 sm:pt-6 border-t">
             <h4 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">
               Other Preferences{" "}
@@ -112,19 +95,11 @@ export default async function SettingsPage() {
             </h4>
             <div className="text-xs sm:text-sm text-muted-foreground mb-2">
               Additional chat preferences will be implemented in future updates.
-              This will include:
             </div>
-            <ul className="text-xs sm:text-sm space-y-1.5 sm:space-y-2 ml-3 sm:ml-4">
-              <li>• Default AI model selection</li>
-              <li>• Message history settings</li>
-              <li>• Notification preferences</li>
-              <li>• Theme customization</li>
-            </ul>
           </div>
         </CardContent>
       </Card>
 
-      {/* Collaboration Settings */}
       <CollaborationSettings />
 
       {/* Privacy & Security */}
@@ -143,15 +118,8 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
           <div className="text-xs sm:text-sm text-muted-foreground">
-            Privacy controls will be implemented in future updates. This will
-            include:
+            Privacy controls will be implemented in future updates.
           </div>
-          <ul className="text-xs sm:text-sm space-y-1.5 sm:space-y-2 ml-3 sm:ml-4">
-            <li>• Two-factor authentication</li>
-            <li>• Session management</li>
-            <li>• Privacy preferences</li>
-            <li>• Security audit logs</li>
-          </ul>
         </CardContent>
       </Card>
 
@@ -165,25 +133,15 @@ export default async function SettingsPage() {
               Soon
             </Badge>
           </CardTitle>
-          <CardDescription className="text-sm">
-            Manage your chat data and storage
-          </CardDescription>
+          <CardDescription className="text-sm">Manage your chat data and storage</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
           <div className="text-xs sm:text-sm text-muted-foreground">
-            Data management features will be implemented in future updates. This
-            will include:
+            Data management features will be implemented in future updates.
           </div>
-          <ul className="text-xs sm:text-sm space-y-1.5 sm:space-y-2 ml-3 sm:ml-4">
-            <li>• Bulk message deletion</li>
-            <li>• Storage usage analytics</li>
-            <li>• Data retention settings</li>
-            <li>• Automatic cleanup rules</li>
-          </ul>
         </CardContent>
       </Card>
 
-      {/* Danger Zone */}
       <DangerZone />
     </div>
   );

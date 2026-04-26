@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+"use client";
+
+import { useCallback, useMemo, useState } from "react";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 import {
   type PublicApiKey,
   type CreateApiKey,
@@ -6,108 +11,104 @@ import {
   type Provider,
 } from "@/lib/schemas/api-keys";
 
-// Query keys
 export const apiKeysKeys = {
   all: ["api-keys"] as const,
   lists: () => [...apiKeysKeys.all, "list"] as const,
   list: () => [...apiKeysKeys.lists()] as const,
 };
 
-// Fetch user's API keys
+type MutationFn<Args, Result> = (args: Args) => Promise<Result>;
+
+function useMutationCompat<Args, Result>(mutationFn: MutationFn<Args, Result>) {
+  const [isPending, setIsPending] = useState(false);
+
+  const mutateAsync = useCallback(
+    async (args: Args) => {
+      setIsPending(true);
+      try {
+        return await mutationFn(args);
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [mutationFn],
+  );
+
+  const mutate = useCallback(
+    (args: Args) => {
+      void mutateAsync(args);
+    },
+    [mutateAsync],
+  );
+
+  return { mutate, mutateAsync, isPending };
+}
+
+function toPublicApiKey(key: {
+  _id: Id<"apiKeys">;
+  provider: Provider;
+  keyName: string;
+  isActive: boolean;
+  createdAt: number;
+  updatedAt: number;
+  lastUsedAt?: number;
+  keyPreview: string;
+}): PublicApiKey {
+  return {
+    id: key._id,
+    provider: key.provider,
+    keyName: key.keyName,
+    isActive: key.isActive,
+    createdAt: new Date(key.createdAt),
+    updatedAt: new Date(key.updatedAt),
+    lastUsedAt: key.lastUsedAt ? new Date(key.lastUsedAt) : null,
+    keyPreview: key.keyPreview,
+  };
+}
+
 export function useApiKeys() {
-  return useQuery({
-    queryKey: apiKeysKeys.list(),
-    queryFn: async (): Promise<PublicApiKey[]> => {
-      const response = await fetch("/api/user/api-keys");
-      if (!response.ok) {
-        throw new Error("Failed to fetch API keys");
-      }
-      const data = await response.json();
-      return data.apiKeys;
-    },
-  });
+  const apiKeys = useQuery(api.apiKeys.listMine, {});
+
+  return {
+    data: useMemo(() => apiKeys?.map((key) => toPublicApiKey(key)) ?? [], [apiKeys]),
+    isLoading: apiKeys === undefined,
+    error: null as Error | null,
+  };
 }
 
-// Create API key mutation
 export function useCreateApiKey() {
-  const queryClient = useQueryClient();
+  const createApiKey = useAction(api.apiKeyActions.create);
 
-  return useMutation({
-    mutationFn: async (data: CreateApiKey): Promise<PublicApiKey> => {
-      const response = await fetch("/api/user/api-keys", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to create API key");
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: apiKeysKeys.list() });
-    },
+  return useMutationCompat(async (data: CreateApiKey): Promise<PublicApiKey> => {
+    const key = await createApiKey(data);
+    return toPublicApiKey(key);
   });
 }
 
-// Update API key mutation
 export function useUpdateApiKey() {
-  const queryClient = useQueryClient();
+  const updateApiKey = useMutation(api.apiKeys.update);
 
-  return useMutation({
-    mutationFn: async ({
-      keyId,
-      data,
-    }: {
-      keyId: string;
-      data: UpdateApiKey;
-    }): Promise<PublicApiKey> => {
-      const response = await fetch(`/api/user/api-keys/${keyId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+  return useMutationCompat(
+    async ({ keyId, data }: { keyId: string; data: UpdateApiKey }): Promise<PublicApiKey> => {
+      const key = await updateApiKey({
+        keyId: keyId as Id<"apiKeys">,
+        keyName: data.keyName,
+        isActive: data.isActive,
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to update API key");
-      }
-
-      return response.json();
+      return toPublicApiKey(key);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: apiKeysKeys.list() });
-    },
-  });
+  );
 }
 
-// Delete API key mutation
 export function useDeleteApiKey() {
-  const queryClient = useQueryClient();
+  const deleteApiKey = useMutation(api.apiKeys.remove);
 
-  return useMutation({
-    mutationFn: async (keyId: string): Promise<void> => {
-      const response = await fetch(`/api/user/api-keys/${keyId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to delete API key");
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: apiKeysKeys.list() });
-    },
+  return useMutationCompat(async (keyId: string): Promise<void> => {
+    await deleteApiKey({ keyId: keyId as Id<"apiKeys"> });
   });
 }
 
-// Check if user has an active API key for a specific provider
 export function useHasApiKey(provider: Provider) {
   const { data: apiKeys = [] } = useApiKeys();
-
   return apiKeys.some((key) => key.provider === provider && key.isActive);
 }

@@ -9,4 +9,4 @@ export default function TermsPage() {
       <TermsOfUse />
     </div>
   );
-} 
+}

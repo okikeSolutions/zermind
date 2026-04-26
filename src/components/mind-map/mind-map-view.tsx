@@ -62,18 +62,14 @@ function detectMultiModelBranches(messages: Message[]): Map<string, string[]> {
 
   // Find groups where multiple AI models responded to the same parent
   parentToChildren.forEach((children) => {
-    const aiChildren = children.filter(
-      (child) => child.role === "assistant" && child.model
-    );
+    const aiChildren = children.filter((child) => child.role === "assistant" && child.model);
     if (aiChildren.length > 1) {
       const models = aiChildren.map((child) => child.model!);
       const uniqueModels = [...new Set(models)];
       if (uniqueModels.length > 1) {
         // This is a multi-model comparison
         aiChildren.forEach((child) => {
-          const siblingModels = uniqueModels.filter(
-            (model) => model !== child.model
-          );
+          const siblingModels = uniqueModels.filter((model) => model !== child.model);
           siblingGroups.set(child.id, siblingModels);
         });
       }
@@ -84,10 +80,7 @@ function detectMultiModelBranches(messages: Message[]): Map<string, string[]> {
 }
 
 // Enhanced layout algorithm for multi-model branches
-function calculateNodePositions(
-  messages: Message[],
-  multiModelGroups: Map<string, string[]>
-) {
+function calculateNodePositions(messages: Message[], multiModelGroups: Map<string, string[]>) {
   const positioned = new Map<string, { x: number; y: number }>();
   const processed = new Set<string>();
 
@@ -138,17 +131,13 @@ function calculateNodePositions(
     const nextLevel: Message[] = [];
 
     currentLevel.forEach((parent) => {
-      const children = unpositionedMessages.filter(
-        (msg) => msg.parentId === parent.id
-      );
+      const children = unpositionedMessages.filter((msg) => msg.parentId === parent.id);
 
       if (children.length === 0) return;
 
       // Check if this is a multi-model comparison
       const aiChildren = children.filter((child) => child.role === "assistant");
-      const hasMultiModel = aiChildren.some((child) =>
-        multiModelGroups.has(child.id)
-      );
+      const hasMultiModel = aiChildren.some((child) => multiModelGroups.has(child.id));
 
       if (hasMultiModel && aiChildren.length > 1) {
         // Arrange multi-model responses side by side
@@ -209,15 +198,12 @@ export function MindMapView({
   onNodePositionChange,
 }: MindMapViewProps) {
   // Detect multi-model branches
-  const multiModelGroups = useMemo(
-    () => detectMultiModelBranches(messages),
-    [messages]
-  );
+  const multiModelGroups = useMemo(() => detectMultiModelBranches(messages), [messages]);
 
   // Calculate enhanced positions
   const nodePositions = useMemo(
     () => calculateNodePositions(messages, multiModelGroups),
-    [messages, multiModelGroups]
+    [messages, multiModelGroups],
   );
 
   // Convert messages to React Flow nodes with enhanced positioning
@@ -300,21 +286,13 @@ export function MindMapView({
       if (onNodePositionChange) {
         changes.forEach((change) => {
           // Handle position changes
-          if (
-            change.type === "position" &&
-            "position" in change &&
-            change.position
-          ) {
-            onNodePositionChange(
-              change.id,
-              change.position.x,
-              change.position.y
-            );
+          if (change.type === "position" && "position" in change && change.position) {
+            onNodePositionChange(change.id, change.position.x, change.position.y);
           }
         });
       }
     },
-    [onNodesChange, onNodePositionChange]
+    [onNodesChange, onNodePositionChange],
   );
 
   // Update nodes when messages change - preserve user-dragged positions
@@ -332,9 +310,7 @@ export function MindMapView({
       // Merge new nodes with existing positions to preserve user-dragged positions
       const updatedNodes = nodes.map((newNode) => {
         const existingNode = reactFlowNodes.find((n) => n.id === newNode.id);
-        return existingNode
-          ? { ...newNode, position: existingNode.position }
-          : newNode;
+        return existingNode ? { ...newNode, position: existingNode.position } : newNode;
       });
       setNodes(updatedNodes);
     }
@@ -358,7 +334,7 @@ export function MindMapView({
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    [setEdges],
   );
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -374,7 +350,7 @@ export function MindMapView({
         onNodePositionChange(node.id, node.position.x, node.position.y);
       }
     },
-    [onNodePositionChange]
+    [onNodePositionChange],
   );
 
   // Statistics
@@ -382,9 +358,7 @@ export function MindMapView({
   const userNodes = messages.filter((m) => m.role === "user").length;
   const assistantNodes = messages.filter((m) => m.role === "assistant").length;
   const multiModelComparisons = Array.from(multiModelGroups.keys()).length;
-  const uniqueModels = new Set(
-    messages.filter((m) => m.model).map((m) => m.model)
-  ).size;
+  const uniqueModels = new Set(messages.filter((m) => m.model).map((m) => m.model)).size;
 
   return (
     <div className="w-full h-full bg-background">
@@ -485,9 +459,7 @@ export function MindMapView({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() =>
-                  selectedNodeId && onCreateMultiModelBranch(selectedNodeId)
-                }
+                onClick={() => selectedNodeId && onCreateMultiModelBranch(selectedNodeId)}
                 disabled={!selectedNodeId}
                 className="w-full min-h-[36px] sm:min-h-auto text-xs sm:text-sm px-2 sm:px-3 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/50 dark:hover:bg-purple-950/70"
                 title="Compare multiple AI models"
@@ -501,9 +473,7 @@ export function MindMapView({
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                selectedNodeId && onResumeConversation(selectedNodeId)
-              }
+              onClick={() => selectedNodeId && onResumeConversation(selectedNodeId)}
               disabled={!selectedNodeId}
               className="w-full min-h-[36px] sm:min-h-auto text-xs sm:text-sm px-2 sm:px-3"
             >

@@ -41,8 +41,11 @@ import {
   WifiOff,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
+import { useMutation, useQuery } from "convex/react";
 import React from "react";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 interface CollaborationButtonProps {
   chatId: string;
@@ -51,15 +54,6 @@ interface CollaborationButtonProps {
   currentUserRole?: "owner" | "collaborator" | "viewer";
   className?: string;
   isRealtimeConnected?: boolean;
-}
-
-interface CollaborationSession {
-  id: string;
-  chatId: string;
-  activeSince: string;
-  lastActivity: string;
-  participantCount: number;
-  isParticipant: boolean;
 }
 
 export function CollaborationButton({
@@ -71,166 +65,51 @@ export function CollaborationButton({
 }: CollaborationButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"collaborator" | "viewer">(
-    "collaborator"
+  const [inviteRole, setInviteRole] = useState<"collaborator" | "viewer">("collaborator");
+  const convexChatId = chatId as Id<"chats">;
+  const session = useQuery(
+    api.collaboration.getSession,
+    chatId ? { chatId: convexChatId } : "skip",
   );
-  const [hasActiveSession, setHasActiveSession] = useState(false);
-  const queryClient = useQueryClient();
+  const startSession = useMutation(api.collaboration.start);
+  const leaveSession = useMutation(api.collaboration.leave);
+  const endSession = useMutation(api.collaboration.end);
+  const inviteToSession = useMutation(api.collaboration.invite);
+  const isLoading = session === undefined;
+  const isStarting = false;
+  const isLeaving = false;
+  const isEnding = false;
+  const effectiveUserRole = session?.userRole ?? currentUserRole;
+  const hasActiveSession = Boolean(session);
 
-  // Only fetch session if we think there might be one active
-  // This prevents the premature API calls that cause the button to get stuck
-  const {
-    data: session,
-    isLoading,
-  } = useQuery({
-    queryKey: ["collaboration-session", chatId],
-    queryFn: async (): Promise<CollaborationSession | null> => {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // Shorter timeout
-
-      try {
-        const response = await fetch(`/api/collaboration/${chatId}`, {
-          signal: controller.signal,
-          headers: {
-            'Cache-Control': 'no-cache',
-          },
-        });
-
-        clearTimeout(timeoutId);
-
-        if (response.status === 404) {
-          // No session found - update our state
-          setHasActiveSession(false);
-          return null;
-        }
-
-        if (!response.ok) {
-          console.warn(`Collaboration API returned ${response.status}`);
-          setHasActiveSession(false);
-          return null;
-        }
-
-        const data = await response.json();
-        const sessionData = data.session || null;
-        
-        // Update our state based on whether we found a session
-        setHasActiveSession(!!sessionData);
-        
-        return sessionData;
-      } catch (error) {
-        clearTimeout(timeoutId);
-        console.warn('Collaboration query failed:', error);
-        setHasActiveSession(false);
-        return null;
-      }
-    },
-    // Key change: Only enable the query if we think there might be a session
-    enabled: hasActiveSession && !!chatId,
-    refetchInterval: hasActiveSession ? 30000 : false, // Only refetch if session is active
-    retry: false,
-    staleTime: 15000,
-    gcTime: 30000,
-    meta: {
-      errorMessage: false,
-    },
-  });
-
-  // Start collaboration session
-  const startCollaboration = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`/api/collaboration/${chatId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: "owner" }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to start collaboration");
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
-      // Mark that we now have an active session
-      setHasActiveSession(true);
-      
-      // Invalidate and refetch the session query
-      queryClient.invalidateQueries({
-        queryKey: ["collaboration-session", chatId],
-      });
-      
+  const startCollaboration = useCallback(async () => {
+    try {
+      await startSession({ chatId: convexChatId });
       toast.success("Collaboration session started!");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to start collaboration: ${error.message}`);
-    },
-  });
+    } catch (error) {
+      toast.error(getFriendlyErrorMessage(error, "Failed to start collaboration"));
+    }
+  }, [convexChatId, startSession]);
 
-  // Leave collaboration session
-  const leaveCollaboration = useMutation({
-    mutationFn: async () => {
-      if (!session) throw new Error("No active session");
-
-      const response = await fetch(
-        `/api/collaboration/${chatId}?sessionId=${session.id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to leave collaboration");
-      }
-    },
-    onSuccess: () => {
-      // Mark that we no longer have an active session
-      setHasActiveSession(false);
-      
-      queryClient.invalidateQueries({
-        queryKey: ["collaboration-session", chatId],
-      });
-      
+  const leaveCollaboration = useCallback(async () => {
+    if (!session) return;
+    try {
+      await leaveSession({ sessionId: session.id });
       toast.success("Left collaboration session");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to leave collaboration: ${error.message}`);
-    },
-  });
+    } catch (error) {
+      toast.error(getFriendlyErrorMessage(error, "Failed to leave collaboration"));
+    }
+  }, [leaveSession, session]);
 
-  // End collaboration session for all participants (owner only)
-  const endCollaboration = useMutation({
-    mutationFn: async () => {
-      if (!session) throw new Error("No active session");
-
-      const response = await fetch(`/api/collaboration/${chatId}/end`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: session.id }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.error || "Failed to end collaboration session"
-        );
-      }
-    },
-    onSuccess: () => {
-      // Mark that we no longer have an active session
-      setHasActiveSession(false);
-      
-      queryClient.invalidateQueries({
-        queryKey: ["collaboration-session", chatId],
-      });
-      
+  const endCollaboration = useCallback(async () => {
+    if (!session) return;
+    try {
+      await endSession({ chatId: convexChatId, sessionId: session.id });
       toast.success("Collaboration session ended for all participants");
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to end collaboration: ${error.message}`);
-    },
-  });
+    } catch (error) {
+      toast.error(getFriendlyErrorMessage(error, "Failed to end collaboration session"));
+    }
+  }, [convexChatId, endSession, session]);
 
   // Copy collaboration link
   const copyCollaborationLink = useCallback(() => {
@@ -247,31 +126,20 @@ export function CollaborationButton({
     }
 
     try {
-      const response = await fetch("/api/collaboration/invite", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chatId,
-          inviteeEmail: inviteEmail,
-          role: inviteRole,
-          chatTitle,
-        }),
+      await inviteToSession({
+        chatId: convexChatId,
+        inviteeEmail: inviteEmail,
+        role: inviteRole,
+        chatTitle,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to send invitation");
-      }
-
-      toast.success(`Invitation sent to ${inviteEmail}!`);
+      toast.success(`Invitation recorded for ${inviteEmail}!`);
       setInviteEmail("");
       setIsDialogOpen(false);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to send invitation";
-      toast.error(errorMessage);
+      toast.error(getFriendlyErrorMessage(error, "Failed to send invitation"));
     }
-  }, [chatId, inviteEmail, inviteRole, chatTitle]);
+  }, [chatTitle, convexChatId, inviteEmail, inviteRole, inviteToSession]);
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -303,19 +171,15 @@ export function CollaborationButton({
   if (!hasActiveSession && !isLoading) {
     return (
       <Button
-        onClick={() => startCollaboration.mutate()}
-        disabled={startCollaboration.isPending}
+        onClick={() => void startCollaboration()}
+        disabled={isStarting}
         size="sm"
         variant="outline"
         className={className}
       >
         <Users className="h-4 w-4 mr-2" />
-        <span className="hidden sm:inline">
-          {startCollaboration.isPending ? "Starting..." : "Collaborate"}
-        </span>
-        <span className="sm:hidden">
-          {startCollaboration.isPending ? "..." : "Collab"}
-        </span>
+        <span className="hidden sm:inline">{isStarting ? "Starting..." : "Collaborate"}</span>
+        <span className="sm:hidden">{isStarting ? "..." : "Collab"}</span>
       </Button>
     );
   }
@@ -346,7 +210,7 @@ export function CollaborationButton({
                     {session.participantCount === 1 ? " user" : " users"}
                   </span>
                   <span className="sm:hidden">{session.participantCount}</span>
-                  {getRoleIcon(currentUserRole)}
+                  {getRoleIcon(effectiveUserRole)}
                 </span>
                 {/* Realtime connection indicator */}
                 {isRealtimeConnected ? (
@@ -365,12 +229,9 @@ export function CollaborationButton({
                 {session.participantCount} participants
               </p>
               <div className="flex items-center justify-between mt-1">
-                <Badge
-                  variant="secondary"
-                  className={`${getRoleColor(currentUserRole)}`}
-                >
-                  {getRoleIcon(currentUserRole)}
-                  <span className="ml-1 capitalize">{currentUserRole}</span>
+                <Badge variant="secondary" className={`${getRoleColor(effectiveUserRole)}`}>
+                  {getRoleIcon(effectiveUserRole)}
+                  <span className="ml-1 capitalize">{effectiveUserRole}</span>
                 </Badge>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   {isRealtimeConnected ? (
@@ -398,26 +259,24 @@ export function CollaborationButton({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             {/* Owner-only: End session for everyone */}
-            {currentUserRole === "owner" && (
+            {effectiveUserRole === "owner" && (
               <DropdownMenuItem
-                onClick={() => endCollaboration.mutate()}
-                disabled={endCollaboration.isPending}
+                onClick={() => void endCollaboration()}
+                disabled={isEnding}
                 className="text-destructive"
               >
                 <X className="h-4 w-4 mr-2" />
-                {endCollaboration.isPending
-                  ? "Ending..."
-                  : "End Session for All"}
+                {isEnding ? "Ending..." : "End Session for All"}
               </DropdownMenuItem>
             )}
             {/* Individual leave option */}
             <DropdownMenuItem
-              onClick={() => leaveCollaboration.mutate()}
-              disabled={leaveCollaboration.isPending}
-              className={currentUserRole === "owner" ? "" : "text-destructive"}
+              onClick={() => void leaveCollaboration()}
+              disabled={isLeaving}
+              className={effectiveUserRole === "owner" ? "" : "text-destructive"}
             >
               <LogOut className="h-4 w-4 mr-2" />
-              {leaveCollaboration.isPending ? "Leaving..." : "Leave Session"}
+              {isLeaving ? "Leaving..." : "Leave Session"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -452,9 +311,7 @@ export function CollaborationButton({
                 <Label htmlFor="role">Role</Label>
                 <Select
                   value={inviteRole}
-                  onValueChange={(value: "collaborator" | "viewer") =>
-                    setInviteRole(value)
-                  }
+                  onValueChange={(value: "collaborator" | "viewer") => setInviteRole(value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -465,9 +322,7 @@ export function CollaborationButton({
                         <Edit className="h-4 w-4" />
                         <div>
                           <p className="font-medium">Collaborator</p>
-                          <p className="text-xs text-muted-foreground">
-                            Can edit and add content
-                          </p>
+                          <p className="text-xs text-muted-foreground">Can edit and add content</p>
                         </div>
                       </div>
                     </SelectItem>
@@ -476,9 +331,7 @@ export function CollaborationButton({
                         <Eye className="h-4 w-4" />
                         <div>
                           <p className="font-medium">Viewer</p>
-                          <p className="text-xs text-muted-foreground">
-                            Can view but not edit
-                          </p>
+                          <p className="text-xs text-muted-foreground">Can view but not edit</p>
                         </div>
                       </div>
                     </SelectItem>
@@ -486,11 +339,7 @@ export function CollaborationButton({
                 </Select>
               </div>
               <div className="flex justify-between gap-3">
-                <Button
-                  variant="outline"
-                  onClick={copyCollaborationLink}
-                  className="flex-1"
-                >
+                <Button variant="outline" onClick={copyCollaborationLink} className="flex-1">
                   <Share2 className="h-4 w-4 mr-2" />
                   Copy Link
                 </Button>
@@ -509,19 +358,15 @@ export function CollaborationButton({
   // Fallback: show start button if something went wrong
   return (
     <Button
-      onClick={() => startCollaboration.mutate()}
-      disabled={startCollaboration.isPending}
+      onClick={() => void startCollaboration()}
+      disabled={isStarting}
       size="sm"
       variant="outline"
       className={className}
     >
       <Users className="h-4 w-4 mr-2" />
-      <span className="hidden sm:inline">
-        {startCollaboration.isPending ? "Starting..." : "Collaborate"}
-      </span>
-      <span className="sm:hidden">
-        {startCollaboration.isPending ? "..." : "Collab"}
-      </span>
+      <span className="hidden sm:inline">{isStarting ? "Starting..." : "Collaborate"}</span>
+      <span className="sm:hidden">{isStarting ? "..." : "Collab"}</span>
     </Button>
   );
 }

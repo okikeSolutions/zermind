@@ -1,72 +1,51 @@
-import { useQuery } from "@tanstack/react-query";
+"use client";
+
+import { useMemo } from "react";
+import { useChatWithMessages } from "@/hooks/use-chats-query";
 import { type Message } from "@/lib/schemas/chat";
 
-// Query Keys
 export const conversationContextKeys = {
   all: ["conversationContext"] as const,
   context: (chatId: string | undefined, parentNodeId: string | undefined) => {
     const baseKey = ["conversationContext"] as const;
-    if (chatId !== undefined && parentNodeId !== undefined) {
+    if (chatId !== undefined && parentNodeId !== undefined)
       return [...baseKey, chatId, parentNodeId] as const;
-    }
-    if (chatId !== undefined) {
-      return [...baseKey, "partial", chatId] as const;
-    }
-    if (parentNodeId !== undefined) {
-      return [...baseKey, "partial", parentNodeId] as const;
-    }
+    if (chatId !== undefined) return [...baseKey, "partial", chatId] as const;
+    if (parentNodeId !== undefined) return [...baseKey, "partial", parentNodeId] as const;
     return [...baseKey, "empty"] as const;
   },
 } as const;
 
-// API Function
-async function fetchConversationContext(
-  chatId: string,
-  parentNodeId: string
-): Promise<Message[]> {
-  const response = await fetch(
-    `/api/chats/${encodeURIComponent(chatId)}/context/${encodeURIComponent(
-      parentNodeId
-    )}`
-  );
+function buildContext(messages: Message[], parentNodeId: string) {
+  const byId = new Map(messages.map((message) => [message.id, message]));
+  const context: Message[] = [];
+  let current: Message | undefined = byId.get(parentNodeId);
+  const seen = new Set<string>();
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch conversation context");
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id);
+    context.unshift(current);
+    current = current.parentId ? byId.get(current.parentId) : undefined;
   }
 
-  const data = await response.json();
-
-  // Transform the data to match Message schema
-  return data.context.map(
-    (msg: {
-      id: string;
-      role: string;
-      content: string;
-      model: string | null;
-      createdAt: string;
-    }) => ({
-      ...msg,
-      role:
-        msg.role === "user" || msg.role === "assistant"
-          ? msg.role
-          : "assistant",
-      createdAt: new Date(msg.createdAt),
-      attachments: [],
-    })
-  );
+  return context.length > 0 ? context : messages.filter((message) => message.id === parentNodeId);
 }
 
-// Hook
 export function useConversationContext(
   chatId: string | undefined,
-  parentNodeId: string | undefined
+  parentNodeId: string | undefined,
 ) {
-  return useQuery({
-    queryKey: conversationContextKeys.context(chatId, parentNodeId),
-    queryFn: () => fetchConversationContext(chatId!, parentNodeId!),
-    enabled: !!chatId && !!parentNodeId,
-    staleTime: 5 * 60 * 1000, // 5 minutes - context doesn't change often
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-  });
+  const { data, isLoading, refetch } = useChatWithMessages(chatId, chatId ? "current" : undefined);
+
+  const typedError = null as Error | null;
+
+  return {
+    data: useMemo(() => {
+      if (!data || !parentNodeId) return undefined;
+      return buildContext(data.messages, parentNodeId);
+    }, [data, parentNodeId]),
+    isLoading: !!chatId && !!parentNodeId && isLoading,
+    error: typedError,
+    refetch,
+  };
 }
