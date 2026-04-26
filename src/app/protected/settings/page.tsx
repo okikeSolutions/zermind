@@ -33,23 +33,21 @@ export default async function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-muted-foreground">Email</label>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground">Email</p>
               <p className="text-sm font-mono bg-muted px-3 py-2 rounded-md break-all">
                 {user?.email ?? "Unknown"}
               </p>
             </div>
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-muted-foreground">
-                User ID
-              </label>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground">User ID</p>
               <p className="text-sm font-mono bg-muted px-3 py-2 rounded-md truncate">
                 {user?.userId ?? user?._id ?? "Unknown"}
               </p>
             </div>
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-muted-foreground">
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Account Created
-              </label>
+              </p>
               <p className="text-sm bg-muted px-3 py-2 rounded-md">
                 {user?.createdAt
                   ? new Date(user.createdAt).toLocaleDateString("en-US", {
@@ -61,9 +59,7 @@ export default async function SettingsPage() {
               </p>
             </div>
             <div className="space-y-1.5 sm:space-y-2">
-              <label className="text-xs sm:text-sm font-medium text-muted-foreground">
-                Email Verified
-              </label>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground">Email Verified</p>
               <div className="flex items-center gap-2 mt-1">
                 <Badge
                   variant={user?.emailVerified ? "secondary" : "destructive"}

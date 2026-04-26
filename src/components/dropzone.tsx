@@ -160,7 +160,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
                 </p>
               ) : loading && !isSuccessfullyUploaded ? (
                 <p className="text-xs text-muted-foreground">Uploading file...</p>
-              ) : !!fileError ? (
+              ) : fileError ? (
                 <p className="text-xs text-destructive">Failed to upload: {fileError.message}</p>
               ) : isSuccessfullyUploaded ? (
                 <p className="text-xs text-primary">Successfully uploaded file</p>
@@ -227,12 +227,13 @@ const DropzoneEmptyState = ({ className }: { className?: string }) => {
       <div className="flex flex-col items-center gap-y-1">
         <p className="text-xs text-muted-foreground">
           Drag and drop or{" "}
-          <a
+          <button
+            type="button"
             onClick={() => inputRef.current?.click()}
             className="underline cursor-pointer transition hover:text-foreground"
           >
             select {maxFiles === 1 ? `file` : "files"}
-          </a>{" "}
+          </button>{" "}
           to upload
         </p>
         {maxFileSize !== Number.POSITIVE_INFINITY && (

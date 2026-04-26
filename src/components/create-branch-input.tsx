@@ -117,7 +117,7 @@ function BranchingForm({
         {/* Context Preview */}
         <div className="space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0">
-            <label className="text-xs text-muted-foreground">Branching from:</label>
+            <p className="text-xs text-muted-foreground">Branching from:</p>
             <Badge variant="outline" className="text-xs w-fit">
               {context.length} message{context.length !== 1 ? "s" : ""} in context
             </Badge>
@@ -152,7 +152,7 @@ function BranchingForm({
         {/* Branch Messages */}
         {messages.length > context.length && (
           <div className="space-y-2 max-h-32 sm:max-h-40 overflow-y-auto">
-            <label className="text-xs text-muted-foreground">New branch messages:</label>
+            <p className="text-xs text-muted-foreground">New branch messages:</p>
             {messages.slice(context.length).map((message) => {
               const msg = message as unknown as { content?: string };
               const messageContent =

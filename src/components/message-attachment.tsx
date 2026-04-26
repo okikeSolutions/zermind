@@ -307,11 +307,15 @@ export function MessageAttachment({
 
       {/* Expanded image modal */}
       {expandedImage && (
-        <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-          onClick={() => setExpandedImage(null)}
-        >
-          <div className="relative max-w-4xl max-h-full">
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <Button
+            type="button"
+            variant="ghost"
+            aria-label="Close expanded image"
+            className="absolute inset-0 h-full w-full cursor-default rounded-none p-0 hover:bg-transparent focus-visible:ring-0"
+            onClick={() => setExpandedImage(null)}
+          />
+          <div className="relative max-w-4xl max-h-full z-10">
             <Button
               variant="secondary"
               size="sm"

@@ -354,7 +354,7 @@ export function CreateMultiModelBranch({
         {/* Context Preview */}
         {context.length > 0 && (
           <div className="space-y-2">
-            <label className="text-xs text-muted-foreground font-medium">Branching from:</label>
+            <p className="text-xs text-muted-foreground font-medium">Branching from:</p>
             <div className="bg-muted rounded-md p-2 max-h-20 overflow-y-auto">
               <div className="text-xs text-muted-foreground space-y-1">
                 {context.slice(-1).map((msg) => (
@@ -458,9 +458,7 @@ export function CreateMultiModelBranch({
             {/* Model Status Display */}
             {modelStatuses.length > 0 && (
               <div className="space-y-2">
-                <label className="text-xs text-muted-foreground font-medium">
-                  Processing Status:
-                </label>
+                <p className="text-xs text-muted-foreground font-medium">Processing Status:</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {modelStatuses.map((status) => (
                     <div
