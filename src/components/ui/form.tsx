@@ -1,8 +1,5 @@
-"use client";
-
 import * as React from "react";
-import * as LabelPrimitive from "@radix-ui/react-label";
-import { Slot } from "@radix-ui/react-slot";
+import { mergeProps, useRender } from "@base-ui/react";
 import {
   Controller,
   FormProvider,
@@ -15,6 +12,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { sx } from "@/styles/sx";
 
 const Form = FormProvider;
 
@@ -74,12 +72,12 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
 
   return (
     <FormItemContext.Provider value={{ id }}>
-      <div data-slot="form-item" className={cn("grid gap-2", className)} {...props} />
+      <div data-slot="form-item" {...sx(cn("grid gap-2", className))} {...props} />
     </FormItemContext.Provider>
   );
 }
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, ...props }: React.ComponentProps<typeof Label>) {
   const { error, formItemId } = useFormField();
 
   return (
@@ -93,18 +91,21 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
   );
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
+function FormControl({ render, children, ...props }: useRender.ComponentProps<"div">) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+  const composedRender = render ?? (React.isValidElement(children) ? children : undefined);
+  const controlProps = {
+    "data-slot": "form-control",
+    id: formItemId,
+    "aria-describedby": !error ? formDescriptionId : `${formDescriptionId} ${formMessageId}`,
+    "aria-invalid": !!error,
+  } as React.ComponentProps<"div">;
 
-  return (
-    <Slot
-      data-slot="form-control"
-      id={formItemId}
-      aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
-      aria-invalid={!!error}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: "div",
+    render: composedRender,
+    props: mergeProps<"div">(controlProps, props),
+  });
 }
 
 function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
@@ -114,7 +115,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("text-muted-foreground text-sm", className)}
+      {...sx(cn("text-muted-foreground text-sm", className))}
       {...props}
     />
   );
@@ -132,7 +133,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
+      {...sx(cn("text-destructive text-sm", className))}
       {...props}
     >
       {body}

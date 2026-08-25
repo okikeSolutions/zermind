@@ -1,10 +1,9 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X, ArrowRight, Brain, MessageSquare, GitBranch, Users, Sparkles } from "lucide-react";
+import { sx } from "@/styles/sx";
 
 interface OnboardingStep {
   id: string;
@@ -132,7 +131,11 @@ export function OnboardingTooltip({
   const IconComponent = currentStepData.icon;
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      {...sx(
+        "fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4",
+      )}
+    >
       <Card
         className={`w-full max-w-md border-2 border-primary/20 shadow-2xl transition-all duration-200 ${
           isAnimating ? "scale-95 opacity-70" : "scale-100 opacity-100"
@@ -140,13 +143,13 @@ export function OnboardingTooltip({
       >
         <CardContent className="p-6 space-y-4">
           {/* Header */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <IconComponent className="h-5 w-5 text-primary" />
+          <div {...sx("flex items-start justify-between")}>
+            <div {...sx("flex items-center gap-3")}>
+              <div {...sx("p-2 bg-primary/10 rounded-lg")}>
+                <IconComponent {...sx("h-5 w-5 text-primary")} />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">{currentStepData.title}</h3>
+                <h3 {...sx("font-semibold text-lg")}>{currentStepData.title}</h3>
                 {currentStepData.highlight && (
                   <Badge variant="secondary" className="text-xs mt-1">
                     {currentStepData.highlight}
@@ -155,36 +158,38 @@ export function OnboardingTooltip({
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={handleSkip} className="p-1 hover:bg-muted">
-              <X className="h-4 w-4" />
+              <X {...sx("h-4 w-4")} />
             </Button>
           </div>
 
           {/* Content */}
-          <p className="text-muted-foreground leading-relaxed">{currentStepData.description}</p>
+          <p {...sx("text-muted-foreground leading-relaxed")}>{currentStepData.description}</p>
 
           {/* Progress Indicator */}
-          <div className="flex items-center gap-2">
+          <div {...sx("flex items-center gap-2")}>
             {steps.map((_, index) => (
               <div
                 key={index}
-                className={`h-2 rounded-full transition-all duration-200 ${
-                  index === currentStep
-                    ? "bg-primary w-8"
-                    : index < currentStep
-                      ? "bg-primary/60 w-2"
-                      : "bg-muted w-2"
-                }`}
+                {...sx(
+                  `h-2 rounded-full transition-all duration-200 ${
+                    index === currentStep
+                      ? "bg-primary w-8"
+                      : index < currentStep
+                        ? "bg-primary/60 w-2"
+                        : "bg-muted w-2"
+                  }`,
+                )}
               />
             ))}
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-2">
-            <div className="text-sm text-muted-foreground">
+          <div {...sx("flex items-center justify-between pt-2")}>
+            <div {...sx("text-sm text-muted-foreground")}>
               {currentStep + 1} of {steps.length}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div {...sx("flex items-center gap-2")}>
               {currentStep > 0 && (
                 <Button variant="outline" size="sm" onClick={handlePrevious}>
                   Previous
@@ -195,12 +200,12 @@ export function OnboardingTooltip({
                 {isLastStep ? (
                   <>
                     Get Started
-                    <Sparkles className="h-3 w-3 ml-1" />
+                    <Sparkles {...sx("h-3 w-3 ml-1")} />
                   </>
                 ) : (
                   <>
                     Next
-                    <ArrowRight className="h-3 w-3 ml-1" />
+                    <ArrowRight {...sx("h-3 w-3 ml-1")} />
                   </>
                 )}
               </Button>
@@ -208,7 +213,7 @@ export function OnboardingTooltip({
           </div>
 
           {/* Skip Option */}
-          <div className="text-center pt-2 border-t">
+          <div {...sx("text-center pt-2 border-t")}>
             <Button
               variant="ghost"
               size="sm"

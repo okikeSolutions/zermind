@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback } from "react";
 import { DemoSelection } from "./demo/demo-selection";
 import { DemoConversationView } from "./demo/demo-conversation-view";

@@ -1,43 +1,36 @@
-"use client";
-
-import Link from "next/link";
-import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
+import Link from "@/lib/navigation";
 import { Button } from "../ui/button";
 import { LogoutButton } from "./logout-button";
 import { useAuthUser } from "@/hooks/use-auth";
+import { sx } from "@/styles/sx";
 
 function SignedInAuthButton() {
   const { user } = useAuthUser();
 
   return (
-    <div className="flex items-center gap-4">
+    <div {...sx("flex items-center gap-4")}>
       {user?.email ? `Hey, ${user.email}!` : "Signed in"}
       <LogoutButton />
     </div>
   );
 }
 
-export function AuthButton() {
+export function AuthButton({ isAuthenticated }: Readonly<{ isAuthenticated: boolean }>) {
+  if (isAuthenticated) return <SignedInAuthButton />;
+
   return (
-    <>
-      <Authenticated>
-        <SignedInAuthButton />
-      </Authenticated>
-      <Unauthenticated>
-        <div className="flex gap-2">
-          <Button asChild size="sm" variant="outline">
-            <Link href="/auth/login">Sign in</Link>
-          </Button>
-          <Button asChild size="sm" variant="default">
-            <Link href="/auth/sign-up">Sign up</Link>
-          </Button>
-        </div>
-      </Unauthenticated>
-      <AuthLoading>
-        <Button size="sm" variant="outline" disabled>
-          Loading...
-        </Button>
-      </AuthLoading>
-    </>
+    <div {...sx("flex gap-2")}>
+      <Button render={<Link href="/auth/login" />} nativeButton={false} size="sm" variant="outline">
+        Sign in
+      </Button>
+      <Button
+        render={<Link href="/auth/sign-up" />}
+        nativeButton={false}
+        size="sm"
+        variant="default"
+      >
+        Sign up
+      </Button>
+    </div>
   );
 }

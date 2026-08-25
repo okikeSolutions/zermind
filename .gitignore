@@ -13,9 +13,9 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
+# generated application output
+/.output/
+/dist/
 
 # production
 /build
@@ -38,5 +38,4 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 /prisma/generated

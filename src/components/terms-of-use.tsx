@@ -1,8 +1,6 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import Link from "next/link";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import Link from "@/lib/navigation";
 import {
   FileText,
   Users,
@@ -15,43 +13,41 @@ import {
   RefreshCw,
 } from "lucide-react";
 import InfoSection from "@/components/info-section";
+import { sx } from "@/styles/sx";
 
 export default function TermsOfUse() {
   return (
-    <main className="flex-auto px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl mt-6">
+    <main {...sx("flex-auto px-4 py-12 sm:px-6 lg:px-8")}>
+      <div {...sx("mx-auto max-w-5xl mt-6")}>
         <Button
-          asChild
+          render={<Link href="/" />}
+          nativeButton={false}
           variant="ghost"
           className="mb-8 text-primary hover:text-primary/80 transition-colors"
         >
-          <Link href="/">
-            <span className="mr-2" aria-hidden="true">
-              &larr;
-            </span>{" "}
-            Back to home
-          </Link>
+          <span {...sx("mr-2")} aria-hidden="true">
+            &larr;
+          </span>{" "}
+          Back to home
         </Button>
 
         <Card className="overflow-hidden shadow-lg border-none">
           <CardHeader className="bg-primary text-neutral-50">
-            <CardTitle className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Terms of Use
-            </CardTitle>
+            <h1 {...sx("text-3xl font-bold tracking-tight sm:text-4xl")}>Terms of Use</h1>
           </CardHeader>
           <CardContent className="p-6 sm:p-10">
-            <div className="mb-8 text-sm text-muted-foreground">
+            <div {...sx("mb-8 text-sm text-muted-foreground")}>
               <p>Last updated: April 2026</p>
             </div>
 
-            <div className="prose prose-neutral max-w-none mb-8">
-              <p className="text-lg text-muted-foreground">
+            <div {...sx("prose prose-neutral max-w-none mb-8")}>
+              <p {...sx("text-lg text-muted-foreground")}>
                 Welcome to Zermind! These Terms of Use govern your access to and use of our AI chat
                 application. By using Zermind, you agree to these terms.
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+            <div {...sx("grid gap-6 sm:grid-cols-1 lg:grid-cols-2")}>
               <InfoSection
                 icon={FileText}
                 title="Service Description"
@@ -164,14 +160,14 @@ export default function TermsOfUse() {
               />
             </div>
 
-            <div className="mt-8 border-t pt-6 text-sm text-muted-foreground space-y-4">
+            <div {...sx("mt-8 border-t pt-6 text-sm text-muted-foreground space-y-4")}>
               <div>
-                <h4 className="font-semibold text-primary mb-2">Open Source License</h4>
+                <h2 {...sx("font-semibold text-primary mb-2")}>Open Source License</h2>
                 <p>
                   Zermind is licensed under the MIT License. The source code is available on{" "}
                   <a
                     href="https://github.com/okikeSolutions/zermind"
-                    className="text-primary hover:text-primary/80 transition-colors"
+                    {...sx("text-primary hover:text-primary/80 transition-colors")}
                   >
                     GitHub
                   </a>
@@ -180,7 +176,7 @@ export default function TermsOfUse() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-primary mb-2">Third-Party Services</h4>
+                <h2 {...sx("font-semibold text-primary mb-2")}>Third-Party Services</h2>
                 <p>
                   Zermind integrates with services including Convex, Vercel, Better Auth,
                   OpenRouter, and AI providers such as OpenAI, Anthropic, Google, Meta-compatible
@@ -190,7 +186,7 @@ export default function TermsOfUse() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-primary mb-2">Governing Law</h4>
+                <h2 {...sx("font-semibold text-primary mb-2")}>Governing Law</h2>
                 <p>
                   These terms are governed by Austrian law. Disputes will be resolved in Austrian
                   courts. For consumer disputes, you may also use the EU Online Dispute Resolution
@@ -199,19 +195,19 @@ export default function TermsOfUse() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-primary mb-2">Contact Information</h4>
+                <h2 {...sx("font-semibold text-primary mb-2")}>Contact Information</h2>
                 <p>
                   For questions about these terms, contact us at{" "}
                   <a
                     href="mailto:info@okike-solutions.com"
-                    className="text-primary hover:text-primary/80 transition-colors"
+                    {...sx("text-primary hover:text-primary/80 transition-colors")}
                   >
                     info@okike-solutions.com
                   </a>
                   . See our{" "}
                   <Link
                     href="/imprint"
-                    className="text-primary hover:text-primary/80 transition-colors"
+                    {...sx("text-primary hover:text-primary/80 transition-colors")}
                   >
                     Imprint
                   </Link>{" "}
@@ -220,7 +216,7 @@ export default function TermsOfUse() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-primary mb-2">Severability</h4>
+                <h2 {...sx("font-semibold text-primary mb-2")}>Severability</h2>
                 <p>
                   If any provision of these terms is found unenforceable, the remaining provisions
                   will continue in full force and effect.

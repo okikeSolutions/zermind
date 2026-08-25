@@ -1,0 +1,32 @@
+# Zermind
+
+> Zermind is an open-source AI conversation application that displays branching chats as interactive mind maps.
+
+Canonical site: https://zermind.ai/
+Source code: https://github.com/okikeSolutions/zermind
+Publisher: okike Solutions e.U.
+Contact: info@okike-solutions.com
+
+## Public pages
+
+- Home and product information: https://zermind.ai/
+- Interactive demo: https://zermind.ai/demo
+- AI model comparison demo: https://zermind.ai/demo/ai-comparison
+- Creative writing demo: https://zermind.ai/demo/creative-writing
+- Problem-solving demo: https://zermind.ai/demo/problem-solving
+- Privacy policy: https://zermind.ai/privacy
+- Terms of use: https://zermind.ai/terms
+- Legal provider information: https://zermind.ai/imprint
+- Sitemap: https://zermind.ai/sitemap.xml
+
+## Product facts
+
+- Conversations can branch from earlier messages.
+- Mind Mode displays messages and branches as a visual tree.
+- Users can configure their own API keys.
+- Zermind supports direct AI-provider integrations and models available through OpenRouter.
+- Public share links expose a conversation until the owner revokes the link or deletes the chat.
+- Collaboration is a beta feature.
+- Zermind is released under the MIT License.
+
+Private account, chat, settings, and collaboration routes are not public documentation and should not be indexed.

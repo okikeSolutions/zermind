@@ -1,13 +1,12 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, LogIn, Heart } from "lucide-react";
-import Link from "next/link";
+import Link from "@/lib/navigation";
 
 // GitHub Icon Component
+import { sx } from "@/styles/sx";
 const GitHubIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
     <path
@@ -70,36 +69,44 @@ export function DemoSelection({ onUpgrade }: DemoSelectionProps) {
   }, [currentStep, demoSteps.length]);
 
   return (
-    <div className="flex flex-col bg-background py-16 sm:py-16 lg:py-20 min-h-screen">
-      <div className="flex-1 overflow-y-auto px-3 sm:px-4 lg:px-6 space-y-4 sm:space-y-6">
+    <div {...sx("flex flex-col bg-background py-16 sm:py-16 lg:py-20 min-h-screen")}>
+      <div {...sx("flex-1 overflow-y-auto px-3 sm:px-4 lg:px-6 space-y-4 sm:space-y-6")}>
         {/* Demo Conversations */}
-        <div className="space-y-3 sm:space-y-4">
-          <div className="text-center px-2">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-1 sm:mb-2">
+        <div {...sx("space-y-3 sm:space-y-4")}>
+          <div {...sx("text-center px-2")}>
+            <h1 {...sx("text-lg sm:text-xl lg:text-2xl font-semibold mb-1 sm:mb-2")}>
               Interactive Demos
-            </h2>
-            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base max-w-2xl mx-auto">
+            </h1>
+            <p {...sx("text-muted-foreground text-xs sm:text-sm lg:text-base max-w-2xl mx-auto")}>
               Experience both Chat and Mind modes with pre-built conversations
             </p>
           </div>
 
-          <div className="grid gap-3 sm:gap-4 max-w-4xl mx-auto">
+          <div {...sx("grid gap-3 sm:gap-4 max-w-4xl mx-auto")}>
             {Object.entries(DEMO_CONVERSATIONS).map(([key, demo]) => (
               <Link key={key} href={`/demo/${key}`}>
                 <Card className="cursor-pointer transition-all duration-200 border-2 border-primary/10 hover:border-primary/30 active:scale-[0.98] sm:hover:shadow-lg sm:hover:scale-[1.02] touch-manipulation">
                   <CardHeader className="pb-2 sm:pb-3">
-                    <div className="flex items-start sm:items-center justify-between gap-3">
+                    <div {...sx("flex items-start sm:items-center justify-between gap-3")}>
                       <CardTitle className="text-base sm:text-lg lg:text-xl leading-tight">
                         {demo.title}
                       </CardTitle>
-                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0" />
+                      <ArrowRight
+                        {...sx(
+                          "h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0 mt-0.5 sm:mt-0",
+                        )}
+                      />
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-xs sm:text-sm lg:text-base text-muted-foreground mb-3 leading-relaxed">
+                    <p
+                      {...sx(
+                        "text-xs sm:text-sm lg:text-base text-muted-foreground mb-3 leading-relaxed",
+                      )}
+                    >
                       {demo.description}
                     </p>
-                    <div className="flex items-center justify-between gap-2">
+                    <div {...sx("flex items-center justify-between gap-2")}>
                       <Badge variant="outline" className="text-xs sm:text-sm px-2 py-1">
                         {demo.messageCount} messages
                       </Badge>
@@ -122,96 +129,119 @@ export function DemoSelection({ onUpgrade }: DemoSelectionProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-3 sm:space-y-4">
-            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base leading-relaxed max-w-2xl mx-auto px-2">
+            <p
+              {...sx(
+                "text-muted-foreground text-xs sm:text-sm lg:text-base leading-relaxed max-w-2xl mx-auto px-2",
+              )}
+            >
               Sign in to unlock unlimited conversations, real-time collaboration, and advanced
               features
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:gap-2 justify-center px-2">
+            <div {...sx("flex flex-col gap-3 sm:flex-row sm:gap-2 justify-center px-2")}>
               <Button
                 onClick={onUpgrade}
                 className="bg-primary hover:bg-primary/80 w-full sm:w-auto min-h-[44px] text-sm sm:text-base px-6 py-3 touch-manipulation"
               >
-                <LogIn className="h-4 w-4 mr-2" />
+                <LogIn {...sx("h-4 w-4 mr-2")} />
                 Sign In to Continue
               </Button>
               <Button
                 variant="outline"
-                asChild
+                render={
+                  <Link
+                    href="https://github.com/okikeSolutions/zermind"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                }
+                nativeButton={false}
                 className="w-full sm:w-auto min-h-[44px] text-sm sm:text-base px-6 py-3 touch-manipulation"
               >
-                <Link
-                  href="https://github.com/okikeSolutions/zermind"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View Source Code
-                </Link>
+                View Source Code
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Footer */}
-        <div className="text-center text-xs sm:text-sm text-muted-foreground space-y-3 sm:space-y-4 max-w-4xl mx-auto px-2 pb-4 sm:pb-6">
+        <div
+          {...sx(
+            "text-center text-xs sm:text-sm text-muted-foreground space-y-3 sm:space-y-4 max-w-4xl mx-auto px-2 pb-4 sm:pb-6",
+          )}
+        >
           <p>
             Open source • Privacy-focused • Built by{" "}
             <Link
               href="https://x.com/NickelanddimeO"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline"
+              {...sx(
+                "text-primary font-bold hover:text-primary/80 transition-colors hover:underline",
+              )}
             >
               NickelanddimeO
             </Link>
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4">
+          <div {...sx("flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4")}>
             <Link
               href="/privacy"
-              className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline touch-manipulation min-h-[44px] flex items-center"
+              {...sx(
+                "text-primary font-bold hover:text-primary/80 transition-colors hover:underline touch-manipulation min-h-[44px] flex items-center",
+              )}
             >
               Privacy Policy
             </Link>
-            <span className="hidden sm:inline">•</span>
+            <span {...sx("hidden sm:inline")}>•</span>
             <Link
               href="/terms"
-              className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline touch-manipulation min-h-[44px] flex items-center"
+              {...sx(
+                "text-primary font-bold hover:text-primary/80 transition-colors hover:underline touch-manipulation min-h-[44px] flex items-center",
+              )}
             >
               Terms of Use
             </Link>
-            <span className="hidden sm:inline">•</span>
+            <span {...sx("hidden sm:inline")}>•</span>
             <Link
               href="/imprint"
-              className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline touch-manipulation min-h-[44px] flex items-center"
+              {...sx(
+                "text-primary font-bold hover:text-primary/80 transition-colors hover:underline touch-manipulation min-h-[44px] flex items-center",
+              )}
             >
               Imprint
             </Link>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4">
+          <div {...sx("flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4")}>
             <Link
               href="https://x.com/NickelanddimeO"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1.5 touch-manipulation min-h-[44px]"
+              {...sx(
+                "text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1.5 touch-manipulation min-h-[44px]",
+              )}
             >
-              <TwitterIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <TwitterIcon {...sx("h-3 w-3 sm:h-4 sm:w-4")} />
               Twitter
             </Link>
-            <span className="hidden sm:inline">•</span>
+            <span {...sx("hidden sm:inline")}>•</span>
             <Link
               href="https://github.com/okikeSolutions/zermind"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1.5 touch-manipulation min-h-[44px]"
+              {...sx(
+                "text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1.5 touch-manipulation min-h-[44px]",
+              )}
             >
-              <GitHubIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <GitHubIcon {...sx("h-3 w-3 sm:h-4 sm:w-4")} />
               GitHub Repo
             </Link>
-            <span className="hidden sm:inline">•</span>
+            <span {...sx("hidden sm:inline")}>•</span>
             <Link
               href="https://github.com/sponsors/okikeSolutions"
-              className="text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1.5 touch-manipulation min-h-[44px]"
+              {...sx(
+                "text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1.5 touch-manipulation min-h-[44px]",
+              )}
             >
-              <Heart className="h-3 w-3 sm:h-4 sm:w-4 fill-primary" />
+              <Heart {...sx("h-3 w-3 sm:h-4 sm:w-4 fill-primary")} />
               Support Zermind
             </Link>
           </div>

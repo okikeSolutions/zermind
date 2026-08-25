@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -13,12 +11,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link, { useRouter } from "@/lib/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { sx } from "@/styles/sx";
 
 const signUpSchema = z
   .object({
@@ -72,7 +70,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div {...sx(cn("flex flex-col gap-6", className))} {...props}>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Sign up</CardTitle>
@@ -80,7 +78,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSignUp)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(handleSignUp)} {...sx("space-y-6")}>
               <FormField
                 control={form.control}
                 name="email"
@@ -94,6 +92,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="password"
@@ -107,6 +106,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="repeatPassword"
@@ -120,15 +120,16 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   </FormItem>
                 )}
               />
-              {error && <p className="text-sm text-red-500">{error}</p>}
+
+              {error && <p {...sx("text-sm text-red-500")}>{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating an account..." : "Sign up"}
               </Button>
             </form>
           </Form>
-          <div className="mt-4 text-center text-sm">
+          <div {...sx("mt-4 text-center text-sm")}>
             Already have an account?{" "}
-            <Link href="/auth/login" className="underline underline-offset-4">
+            <Link href="/auth/login" {...sx("underline underline-offset-4")}>
               Login
             </Link>
           </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +14,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -43,6 +42,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { sx } from "@/styles/sx";
 
 const providers = ["openrouter", "openai", "anthropic", "meta", "google"] as const;
 
@@ -138,44 +138,46 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
   ];
 
   return (
-    <div className={className}>
+    <div {...sx(className)}>
       {/* Alerts */}
       {error && (
         <Alert variant="destructive" className="mb-3 sm:mb-4">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle {...sx("h-4 w-4")} />
           <AlertDescription className="text-sm">{error}</AlertDescription>
         </Alert>
       )}
 
       {success && (
         <Alert className="mb-3 sm:mb-4 border-green-200 bg-green-50 text-green-800">
-          <CheckCircle className="h-4 w-4" />
+          <CheckCircle {...sx("h-4 w-4")} />
           <AlertDescription className="text-sm">{success}</AlertDescription>
         </Alert>
       )}
 
       {formError && (
         <Alert variant="destructive" className="mb-3 sm:mb-4">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle {...sx("h-4 w-4")} />
           <AlertDescription className="text-sm">{formError}</AlertDescription>
         </Alert>
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-        <div className="space-y-1">
-          <h3 className="text-base sm:text-lg font-medium">API Keys</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+      <div
+        {...sx(
+          "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4",
+        )}
+      >
+        <div {...sx("space-y-1")}>
+          <h3 {...sx("text-base sm:text-lg font-medium")}>API Keys</h3>
+          <p {...sx("text-xs sm:text-sm text-muted-foreground")}>
             Manage your API keys for different AI providers
           </p>
         </div>
 
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              Add API Key
-            </Button>
+          <DialogTrigger render={<Button className="w-full sm:w-auto" />}>
+            <Plus {...sx("h-4 w-4 mr-2")} />
+            Add API Key
           </DialogTrigger>
           <DialogContent className="mx-4 max-w-md sm:max-w-lg">
             <DialogHeader>
@@ -187,33 +189,36 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
             </DialogHeader>
 
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(handleAddApiKey)}
-                className="space-y-3 sm:space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(handleAddApiKey)} {...sx("space-y-3 sm:space-y-4")}>
                 <FormField
                   control={form.control}
                   name="provider"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm">Provider</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        items={providers}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a provider" />
+                            <SelectValue />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {providers.map((provider) => (
-                            <SelectItem key={provider.value} value={provider.value}>
-                              <div>
-                                <div className="font-medium text-sm">{provider.label}</div>
-                                <div className="text-xs text-muted-foreground">
-                                  {provider.description}
+                          <SelectGroup>
+                            {providers.map((provider) => (
+                              <SelectItem key={provider.value} value={provider.value}>
+                                <div>
+                                  <div {...sx("font-medium text-sm")}>{provider.label}</div>
+                                  <div {...sx("text-xs text-muted-foreground")}>
+                                    {provider.description}
+                                  </div>
                                 </div>
-                              </div>
-                            </SelectItem>
-                          ))}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -249,13 +254,14 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                     <FormItem>
                       <FormLabel className="text-sm">API Key</FormLabel>
                       <FormControl>
-                        <div className="relative">
+                        <div {...sx("relative")}>
                           <Input
                             type={showApiKey ? "text" : "password"}
                             placeholder="Enter your API key"
                             {...field}
                             className="text-sm pr-10"
                           />
+
                           <Button
                             type="button"
                             variant="ghost"
@@ -264,9 +270,9 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                             onClick={() => setShowApiKey(!showApiKey)}
                           >
                             {showApiKey ? (
-                              <EyeOff className="h-4 w-4" />
+                              <EyeOff {...sx("h-4 w-4")} />
                             ) : (
-                              <Eye className="h-4 w-4" />
+                              <Eye {...sx("h-4 w-4")} />
                             )}
                           </Button>
                         </div>
@@ -308,37 +314,39 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
 
       {/* API Keys List */}
       {loading ? (
-        <div className="space-y-3">
+        <div {...sx("space-y-3")}>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-muted rounded-md animate-pulse" />
+            <div key={i} {...sx("h-16 bg-muted rounded-md animate-pulse")} />
           ))}
         </div>
       ) : apiKeys.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
-            <Key className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4" />
-            <h3 className="font-medium mb-1 sm:mb-2 text-sm sm:text-base">No API Keys</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 px-4">
+            <Key {...sx("h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4")} />
+            <h3 {...sx("font-medium mb-1 sm:mb-2 text-sm sm:text-base")}>No API Keys</h3>
+            <p {...sx("text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 px-4")}>
               Add your API keys to use your own credits with AI providers
             </p>
             <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus {...sx("h-4 w-4 mr-2")} />
               Add Your First API Key
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2 sm:space-y-3">
+        <div {...sx("space-y-2 sm:space-y-3")}>
           {apiKeys.map((apiKey) => (
             <Card key={apiKey.id}>
               <CardContent className="p-3 sm:p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                      <h4 className="font-medium text-sm sm:text-base truncate">
-                        {apiKey.keyName}
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                <div
+                  {...sx(
+                    "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4",
+                  )}
+                >
+                  <div {...sx("flex-1 min-w-0")}>
+                    <div {...sx("flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2")}>
+                      <h4 {...sx("font-medium text-sm sm:text-base truncate")}>{apiKey.keyName}</h4>
+                      <div {...sx("flex flex-wrap gap-1.5 sm:gap-2")}>
                         <Badge
                           variant={apiKey.provider === "openrouter" ? "default" : "secondary"}
                           className="text-xs"
@@ -354,8 +362,8 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                         </Badge>
                       </div>
                     </div>
-                    <div className="text-xs sm:text-sm text-muted-foreground space-y-0.5">
-                      <p className="break-all">Key: {apiKey.keyPreview}</p>
+                    <div {...sx("text-xs sm:text-sm text-muted-foreground space-y-0.5")}>
+                      <p {...sx("break-all")}>Key: {apiKey.keyPreview}</p>
                       <p>Added: {new Date(apiKey.createdAt).toLocaleDateString()}</p>
                       {apiKey.lastUsedAt && (
                         <p>Last used: {new Date(apiKey.lastUsedAt).toLocaleDateString()}</p>
@@ -363,9 +371,9 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs sm:text-sm text-muted-foreground">
+                  <div {...sx("flex items-center justify-between sm:justify-end gap-3 sm:gap-2")}>
+                    <div {...sx("flex items-center gap-2")}>
+                      <span {...sx("text-xs sm:text-sm text-muted-foreground")}>
                         {apiKey.isActive ? "Active" : "Inactive"}
                       </span>
                       <Switch
@@ -379,7 +387,7 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                       onClick={() => handleDeleteApiKey(apiKey.id)}
                       className="h-9 w-9 p-0"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 {...sx("h-4 w-4")} />
                     </Button>
                   </div>
                 </div>

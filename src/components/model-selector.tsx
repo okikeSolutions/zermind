@@ -1,10 +1,9 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
@@ -15,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { getModelCapabilities, modelSupportsAttachments } from "@/lib/utils/model-utils";
 
 // Popular OpenRouter models
+import { sx } from "@/styles/sx";
 const MODELS = [
   {
     id: "anthropic/claude-3.5-sonnet",
@@ -94,20 +94,20 @@ export function ModelSelector({
     if (capabilities.supportsImages && capabilities.supportsDocuments) {
       icons.push(
         <div key="image" title="Supports images and documents">
-          <ImageIcon className="h-3 w-3 text-primary" />
-          <FileText className="h-3 w-3 text-primary" />
+          <ImageIcon {...sx("h-3 w-3 text-primary")} />
+          <FileText {...sx("h-3 w-3 text-primary")} />
         </div>,
       );
     } else if (capabilities.supportsImages) {
       icons.push(
         <div key="image" title="Supports images">
-          <ImageIcon className="h-3 w-3 text-primary" />
+          <ImageIcon {...sx("h-3 w-3 text-primary")} />
         </div>,
       );
     } else if (capabilities.supportsDocuments) {
       icons.push(
         <div key="document" title="Supports documents">
-          <FileText className="h-3 w-3 text-primary" />
+          <FileText {...sx("h-3 w-3 text-primary")} />
         </div>,
       );
     }
@@ -117,7 +117,7 @@ export function ModelSelector({
     }
 
     return (
-      <div className="flex items-center space-x-1" title="Supports file attachments">
+      <div {...sx("flex items-center space-x-1")} title="Supports file attachments">
         {icons}
       </div>
     );
@@ -125,27 +125,29 @@ export function ModelSelector({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          disabled={disabled}
-          className={cn(
-            "justify-between min-w-0 w-full sm:min-w-[200px] h-9 sm:h-10 text-sm",
-            className,
-          )}
-        >
-          <div className="flex items-center space-x-1.5 sm:space-x-2 min-w-0">
-            <Bot className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="truncate text-xs sm:text-sm">{currentModel.name}</span>
-            {modelSupportsAttachments(selectedModel) && (
-              <Paperclip className="h-3 w-3 text-primary flex-shrink-0" />
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="outline"
+            disabled={disabled}
+            className={cn(
+              "justify-between min-w-0 w-full sm:min-w-[200px] h-9 sm:h-10 text-sm",
+              className,
             )}
-          </div>
-          <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 opacity-50 flex-shrink-0" />
-        </Button>
+          />
+        }
+      >
+        <div {...sx("flex items-center space-x-1.5 sm:space-x-2 min-w-0")}>
+          <Bot {...sx("h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0")} />
+          <span {...sx("truncate text-xs sm:text-sm")}>{currentModel.name}</span>
+          {modelSupportsAttachments(selectedModel) && (
+            <Paperclip {...sx("h-3 w-3 text-primary flex-shrink-0")} />
+          )}
+        </div>
+        <ChevronDown {...sx("h-3 w-3 sm:h-4 sm:w-4 opacity-50 flex-shrink-0")} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72 sm:w-80 max-h-[70vh] overflow-y-auto">
-        <DropdownMenuLabel className="text-sm">Select AI Model</DropdownMenuLabel>
+        <div {...sx("px-2 py-1.5 text-sm font-medium")}>Select AI Model</div>
         <DropdownMenuSeparator />
 
         {/* Group by provider */}
@@ -154,7 +156,7 @@ export function ModelSelector({
           if (providerModels.length === 0) return null;
 
           return (
-            <div key={provider}>
+            <DropdownMenuGroup key={provider}>
               <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1">
                 {provider}
               </DropdownMenuLabel>
@@ -167,11 +169,9 @@ export function ModelSelector({
                     selectedModel === model.id && "bg-accent",
                   )}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      <span className="font-medium text-sm sm:text-base truncate">
-                        {model.name}
-                      </span>
+                  <div {...sx("flex items-center justify-between w-full")}>
+                    <div {...sx("flex items-center space-x-2 flex-1 min-w-0")}>
+                      <span {...sx("font-medium text-sm sm:text-base truncate")}>{model.name}</span>
                       {getAttachmentIcons(model.id)}
                     </div>
                     <Badge
@@ -181,35 +181,35 @@ export function ModelSelector({
                       {model.tier}
                     </Badge>
                   </div>
-                  <span className="text-xs text-muted-foreground mt-1 line-clamp-2 sm:line-clamp-1">
+                  <span {...sx("text-xs text-muted-foreground mt-1 line-clamp-2 sm:line-clamp-1")}>
                     {model.description}
                   </span>
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
-            </div>
+            </DropdownMenuGroup>
           );
         })}
 
-        <div className="px-2 py-1">
-          <p className="text-xs text-muted-foreground">
+        <div {...sx("px-2 py-1")}>
+          <p {...sx("text-xs text-muted-foreground")}>
             Powered by{" "}
             <a
               href="https://openrouter.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-foreground"
+              {...sx("underline hover:text-foreground")}
             >
               OpenRouter
             </a>
           </p>
-          <div className="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
-            <div className="flex items-center space-x-1">
-              <ImageIcon className="h-3 w-3 text-primary" />
+          <div {...sx("flex items-center space-x-4 mt-2 text-xs text-muted-foreground")}>
+            <div {...sx("flex items-center space-x-1")}>
+              <ImageIcon {...sx("h-3 w-3 text-primary")} />
               <span>Images</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <FileText className="h-3 w-3 text-primary" />
+            <div {...sx("flex items-center space-x-1")}>
+              <FileText {...sx("h-3 w-3 text-primary")} />
               <span>Documents</span>
             </div>
           </div>
