@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -13,11 +11,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "@/lib/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { sx } from "@/styles/sx";
 
 const updatePasswordSchema = z.object({
   password: z
@@ -62,7 +61,7 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div {...sx(cn("flex flex-col gap-6", className))} {...props}>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Reset Your Password</CardTitle>
@@ -70,7 +69,7 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleUpdatePassword)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(handleUpdatePassword)} {...sx("space-y-6")}>
               <FormField
                 control={form.control}
                 name="password"
@@ -84,7 +83,8 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
                   </FormItem>
                 )}
               />
-              {error && <p className="text-sm text-red-500">{error}</p>}
+
+              {error && <p {...sx("text-sm text-red-500")}>{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save new password"}
               </Button>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo } from "react";
 import { useChatWithMessages } from "@/hooks/use-chats-query";
 import { type Message } from "@/lib/schemas/chat";

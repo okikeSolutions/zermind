@@ -1,11 +1,10 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, File, Loader2, Upload, X } from "lucide-react";
 import { createContext, type PropsWithChildren, useCallback, useContext } from "react";
 import { useDropzone, type Accept, type FileRejection } from "react-dropzone";
-import Image from "next/image";
+import Image from "@/components/app-image";
+import { sx } from "@/styles/sx";
 
 export const formatBytes = (
   bytes: number,
@@ -110,15 +109,17 @@ const Dropzone = ({
       }}
     >
       <div
-        {...getRootProps({
-          className: cn(
-            "border-2 border-gray-300 rounded-lg p-6 text-center bg-card transition-colors duration-300 text-foreground",
-            className,
-            isSuccess ? "border-solid" : "border-dashed",
-            isActive && "border-primary bg-primary/10",
-            isInvalid && "border-destructive bg-destructive/10",
+        {...getRootProps(
+          sx(
+            cn(
+              "border-2 border-gray-300 rounded-lg p-6 text-center bg-card transition-colors duration-300 text-foreground",
+              className,
+              isSuccess ? "border-solid" : "border-dashed",
+              isActive && "border-primary bg-primary/10",
+              isInvalid && "border-destructive bg-destructive/10",
+            ),
           ),
-        })}
+        )}
       >
         <input {...getInputProps(inputProps)} />
         {children}
@@ -150,9 +151,9 @@ const DropzoneContent = ({ className }: { className?: string }) => {
 
   if (isSuccess) {
     return (
-      <div className={cn("flex flex-row items-center gap-x-2 justify-center", className)}>
-        <CheckCircle size={16} className="text-primary" />
-        <p className="text-primary text-sm">
+      <div {...sx(cn("flex flex-row items-center gap-x-2 justify-center", className))}>
+        <CheckCircle size={16} {...sx("text-primary")} />
+        <p {...sx("text-primary text-sm")}>
           Successfully uploaded {files.length} file{files.length > 1 ? "s" : ""}
         </p>
       </div>
@@ -160,7 +161,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
   }
 
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div {...sx(cn("flex flex-col", className))}>
       {files.map((file, idx) => {
         const fileError = errors.find((e) => e.name === file.name);
         const isSuccessfullyUploaded = !!successes.find((e) => e === file.name);
@@ -168,30 +169,34 @@ const DropzoneContent = ({ className }: { className?: string }) => {
         return (
           <div
             key={`${file.name}-${idx}`}
-            className="flex items-center gap-x-4 border-b py-2 first:mt-4 last:mb-4 "
+            {...sx("flex items-center gap-x-4 border-b py-2 first:mt-4 last:mb-4 ")}
           >
             {file.type.startsWith("image/") ? (
-              <div className="h-10 w-10 rounded border overflow-hidden shrink-0 bg-muted flex items-center justify-center">
+              <div
+                {...sx(
+                  "h-10 w-10 rounded border overflow-hidden shrink-0 bg-muted flex items-center justify-center",
+                )}
+              >
                 <Image
                   src={file.preview || ""}
                   alt={file.name}
                   width={40}
                   height={40}
-                  className="object-cover"
+                  {...sx("object-cover")}
                 />
               </div>
             ) : (
-              <div className="h-10 w-10 rounded border bg-muted flex items-center justify-center">
+              <div {...sx("h-10 w-10 rounded border bg-muted flex items-center justify-center")}>
                 <File size={18} />
               </div>
             )}
 
-            <div className="shrink grow flex flex-col items-start truncate">
-              <p title={file.name} className="text-sm truncate max-w-full">
+            <div {...sx("shrink grow flex flex-col items-start truncate")}>
+              <p title={file.name} {...sx("text-sm truncate max-w-full")}>
                 {file.name}
               </p>
               {file.errors.length > 0 ? (
-                <p className="text-xs text-destructive">
+                <p {...sx("text-xs text-destructive")}>
                   {file.errors
                     .map((e) =>
                       e.message.startsWith("File is larger than")
@@ -204,13 +209,13 @@ const DropzoneContent = ({ className }: { className?: string }) => {
                     .join(", ")}
                 </p>
               ) : loading && !isSuccessfullyUploaded ? (
-                <p className="text-xs text-muted-foreground">Uploading file...</p>
+                <p {...sx("text-xs text-muted-foreground")}>Uploading file...</p>
               ) : fileError ? (
-                <p className="text-xs text-destructive">Failed to upload: {fileError.message}</p>
+                <p {...sx("text-xs text-destructive")}>Failed to upload: {fileError.message}</p>
               ) : isSuccessfullyUploaded ? (
-                <p className="text-xs text-primary">Successfully uploaded file</p>
+                <p {...sx("text-xs text-primary")}>Successfully uploaded file</p>
               ) : (
-                <p className="text-xs text-muted-foreground">{formatBytes(file.size, 2)}</p>
+                <p {...sx("text-xs text-muted-foreground")}>{formatBytes(file.size, 2)}</p>
               )}
             </div>
 
@@ -228,13 +233,13 @@ const DropzoneContent = ({ className }: { className?: string }) => {
         );
       })}
       {exceedMaxFiles && (
-        <p className="text-sm text-left mt-2 text-destructive">
+        <p {...sx("text-sm text-left mt-2 text-destructive")}>
           You may upload only up to {maxFiles} files, please remove {files.length - maxFiles} file
           {files.length - maxFiles > 1 ? "s" : ""}.
         </p>
       )}
       {files.length > 0 && !exceedMaxFiles && (
-        <div className="mt-2">
+        <div {...sx("mt-2")}>
           <Button
             variant="outline"
             onClick={onUpload}
@@ -242,7 +247,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 {...sx("mr-2 h-4 w-4 animate-spin")} />
                 Uploading...
               </>
             ) : (
@@ -263,26 +268,26 @@ const DropzoneEmptyState = ({ className }: { className?: string }) => {
   }
 
   return (
-    <div className={cn("flex flex-col items-center gap-y-2", className)}>
-      <Upload size={20} className="text-muted-foreground" />
-      <p className="text-sm">
+    <div {...sx(cn("flex flex-col items-center gap-y-2", className))}>
+      <Upload size={20} {...sx("text-muted-foreground")} />
+      <p {...sx("text-sm")}>
         Upload{!!maxFiles && maxFiles > 1 ? ` ${maxFiles}` : ""} file
         {!maxFiles || maxFiles > 1 ? "s" : ""}
       </p>
-      <div className="flex flex-col items-center gap-y-1">
-        <p className="text-xs text-muted-foreground">
+      <div {...sx("flex flex-col items-center gap-y-1")}>
+        <p {...sx("text-xs text-muted-foreground")}>
           Drag and drop or{" "}
           <button
             type="button"
             onClick={() => openFileDialog?.() ?? inputRef?.current?.click()}
-            className="underline cursor-pointer transition hover:text-foreground"
+            {...sx("underline cursor-pointer transition hover:text-foreground")}
           >
             select {maxFiles === 1 ? `file` : "files"}
           </button>{" "}
           to upload
         </p>
         {maxFileSize !== Number.POSITIVE_INFINITY && (
-          <p className="text-xs text-muted-foreground">
+          <p {...sx("text-xs text-muted-foreground")}>
             Maximum file size: {formatBytes(maxFileSize, 2)}
           </p>
         )}

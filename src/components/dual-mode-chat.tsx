@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useCallback, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { ChatConversation } from "@/components/chat-conversation";
@@ -17,6 +15,7 @@ import { Brain, MessageSquare, X } from "lucide-react";
 import { CollaborationButton } from "@/components/collaboration/collaboration-button";
 import { CollaborationPresenceWrapper } from "@/components/collaboration/collaboration-presence-wrapper";
 import { RealtimeCursors, CollaborationPresence } from "@/components/mind-map/realtime-cursors";
+import { sx } from "@/styles/sx";
 
 interface Message {
   id: string;
@@ -110,7 +109,6 @@ export function DualModeChat({
     setResumeFromNodeId(nodeId);
     setCreateBranchFromNodeId(null); // Clear branch creation if active
     setCreateMultiModelFromNodeId(null); // Clear multi-model creation if active
-    console.log("Resuming conversation from node:", nodeId);
   }, []);
 
   // Handle creating a new branch from a node
@@ -118,7 +116,6 @@ export function DualModeChat({
     setCreateBranchFromNodeId(parentNodeId);
     setResumeFromNodeId(null); // Clear resume if active
     setCreateMultiModelFromNodeId(null); // Clear multi-model creation if active
-    console.log("Creating branch from node:", parentNodeId);
   }, []);
 
   // Handle creating a multi-model comparison branch
@@ -126,20 +123,13 @@ export function DualModeChat({
     setCreateMultiModelFromNodeId(parentNodeId);
     setResumeFromNodeId(null); // Clear resume if active
     setCreateBranchFromNodeId(null); // Clear single branch creation if active
-    console.log("Creating multi-model branch from node:", parentNodeId);
   }, []);
 
-  const handleResumeMessageSent = useCallback(() => {
-    console.log("Resume message sent successfully");
-  }, []);
+  const handleResumeMessageSent = useCallback(() => {}, []);
 
-  const handleBranchCreated = useCallback(() => {
-    console.log("Branch created successfully");
-  }, []);
+  const handleBranchCreated = useCallback(() => {}, []);
 
-  const handleMultiModelBranchCreated = useCallback(() => {
-    console.log("Multi-model branch created successfully");
-  }, []);
+  const handleMultiModelBranchCreated = useCallback(() => {}, []);
 
   // Clear all active actions
   const clearAllActions = useCallback(() => {
@@ -211,26 +201,30 @@ export function DualModeChat({
       {({ collaborativeUsers, isConnected: isRealtimeConnected }) => {
         if (mode === "mind") {
           return (
-            <div className="flex flex-col h-full">
+            <div {...sx("flex flex-col h-full")}>
               {/* Mind Mode Header */}
-              <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="flex items-center justify-between px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <Brain className="h-5 w-5 text-purple-500" />
+              <div
+                {...sx(
+                  "border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+                )}
+              >
+                <div {...sx("flex items-center justify-between px-4 py-3")}>
+                  <div {...sx("flex items-center gap-3")}>
+                    <Brain {...sx("h-5 w-5 text-purple-500")} />
                     <div>
-                      <h2 className="font-semibold">{currentChatTitle || "Mind Map Chat"}</h2>
-                      <p className="text-xs text-muted-foreground">
+                      <h2 {...sx("font-semibold")}>{currentChatTitle || "Mind Map Chat"}</h2>
+                      <p {...sx("text-xs text-muted-foreground")}>
                         Interactive conversation visualization
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div {...sx("flex items-center gap-2")}>
                     <Badge
                       variant="secondary"
                       className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
                     >
-                      <Brain className="h-3 w-3 mr-1" />
+                      <Brain {...sx("h-3 w-3 mr-1")} />
                       Mind Mode
                     </Badge>
 
@@ -255,9 +249,9 @@ export function DualModeChat({
                         onClick={clearAllActions}
                         className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white"
                       >
-                        <X className="h-3 w-3" />
-                        <span className="hidden sm:inline">Close {getActiveActionName()}</span>
-                        <span className="sm:hidden">Close</span>
+                        <X {...sx("h-3 w-3")} />
+                        <span {...sx("hidden sm:inline")}>Close {getActiveActionName()}</span>
+                        <span {...sx("sm:hidden")}>Close</span>
                       </Button>
                     )}
                   </div>
@@ -270,14 +264,14 @@ export function DualModeChat({
                   FallbackComponent={CollaborationErrorFallback}
                   onError={handleCollaborationError}
                 >
-                  <div className="px-4 py-2 border-b bg-muted/30">
+                  <div {...sx("px-4 py-2 border-b bg-muted/30")}>
                     <CollaborationPresence users={collaborativeUsers} />
                   </div>
                 </ErrorBoundary>
               )}
 
               {/* Mind Map View */}
-              <div className="flex-1 overflow-hidden relative">
+              <div {...sx("flex-1 overflow-hidden relative")}>
                 <MindMapView
                   messages={mindMapMessages}
                   onResumeConversation={handleResumeConversation}
@@ -299,16 +293,16 @@ export function DualModeChat({
 
               {/* Resume Conversation Panel */}
               {resumeFromNodeId && (
-                <div className="relative">
+                <div {...sx("relative")}>
                   {/* Panel Header with Close Button */}
-                  <div className="absolute top-2 right-2 z-10">
+                  <div {...sx("absolute top-2 right-2 z-10")}>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => setResumeFromNodeId(null)}
                       className="h-6 w-6 p-0 rounded-full bg-background/80 hover:bg-background border shadow-sm"
                     >
-                      <X className="h-3 w-3" />
+                      <X {...sx("h-3 w-3")} />
                     </Button>
                   </div>
                   <ResumeMessageInput
@@ -322,16 +316,16 @@ export function DualModeChat({
 
               {/* Create Branch Panel */}
               {createBranchFromNodeId && (
-                <div className="relative">
+                <div {...sx("relative")}>
                   {/* Panel Header with Close Button */}
-                  <div className="absolute top-2 right-2 z-10">
+                  <div {...sx("absolute top-2 right-2 z-10")}>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => setCreateBranchFromNodeId(null)}
                       className="h-6 w-6 p-0 rounded-full bg-background/80 hover:bg-background border shadow-sm"
                     >
-                      <X className="h-3 w-3" />
+                      <X {...sx("h-3 w-3")} />
                     </Button>
                   </div>
                   <CreateBranchInput
@@ -345,16 +339,16 @@ export function DualModeChat({
 
               {/* Create Multi-Model Branch Panel */}
               {createMultiModelFromNodeId && (
-                <div className="relative">
+                <div {...sx("relative")}>
                   {/* Panel Header with Close Button */}
-                  <div className="absolute top-2 right-2 z-10">
+                  <div {...sx("absolute top-2 right-2 z-10")}>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => setCreateMultiModelFromNodeId(null)}
                       className="h-6 w-6 p-0 rounded-full bg-background/80 hover:bg-background border shadow-sm"
                     >
-                      <X className="h-3 w-3" />
+                      <X {...sx("h-3 w-3")} />
                     </Button>
                   </div>
                   <CreateMultiModelBranch
@@ -371,24 +365,28 @@ export function DualModeChat({
 
         // Traditional Chat Mode
         return (
-          <div className="flex flex-col h-full">
+          <div {...sx("flex flex-col h-full")}>
             {/* Chat Mode Header */}
-            <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <MessageSquare className="h-5 w-5 text-blue-500" />
+            <div
+              {...sx(
+                "border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+              )}
+            >
+              <div {...sx("flex items-center justify-between px-4 py-3")}>
+                <div {...sx("flex items-center gap-3")}>
+                  <MessageSquare {...sx("h-5 w-5 text-blue-500")} />
                   <div>
-                    <h2 className="font-semibold">{currentChatTitle || "Chat"}</h2>
-                    <p className="text-xs text-muted-foreground">Traditional linear conversation</p>
+                    <h2 {...sx("font-semibold")}>{currentChatTitle || "Chat"}</h2>
+                    <p {...sx("text-xs text-muted-foreground")}>Traditional linear conversation</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div {...sx("flex items-center gap-2")}>
                   <Badge
                     variant="secondary"
                     className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
                   >
-                    <MessageSquare className="h-3 w-3 mr-1" />
+                    <MessageSquare {...sx("h-3 w-3 mr-1")} />
                     Chat Mode
                   </Badge>
 
@@ -409,7 +407,7 @@ export function DualModeChat({
             </div>
 
             {/* Traditional Chat Interface */}
-            <div className="flex-1 overflow-hidden">
+            <div {...sx("flex-1 overflow-hidden")}>
               <ChatConversation
                 chatId={chatId}
                 initialMessages={messages.map((msg) => ({

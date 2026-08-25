@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -46,6 +45,12 @@ import { useMutation, useQuery } from "convex/react";
 import React from "react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { sx } from "@/styles/sx";
+
+const collaborationRoleItems = [
+  { value: "collaborator", label: "Collaborator" },
+  { value: "viewer", label: "Viewer" },
+] as const;
 
 interface CollaborationButtonProps {
   chatId: string;
@@ -144,11 +149,11 @@ export function CollaborationButton({
   const getRoleIcon = (role: string) => {
     switch (role) {
       case "owner":
-        return <Crown className="h-3 w-3" />;
+        return <Crown {...sx("h-3 w-3")} />;
       case "collaborator":
-        return <Edit className="h-3 w-3" />;
+        return <Edit {...sx("h-3 w-3")} />;
       case "viewer":
-        return <Eye className="h-3 w-3" />;
+        return <Eye {...sx("h-3 w-3")} />;
       default:
         return null;
     }
@@ -177,9 +182,9 @@ export function CollaborationButton({
         variant="outline"
         className={className}
       >
-        <Users className="h-4 w-4 mr-2" />
-        <span className="hidden sm:inline">{isStarting ? "Starting..." : "Collaborate"}</span>
-        <span className="sm:hidden">{isStarting ? "..." : "Collab"}</span>
+        <Users {...sx("h-4 w-4 mr-2")} />
+        <span {...sx("hidden sm:inline")}>{isStarting ? "Starting..." : "Collaborate"}</span>
+        <span {...sx("sm:hidden")}>{isStarting ? "..." : "Collab"}</span>
       </Button>
     );
   }
@@ -188,9 +193,9 @@ export function CollaborationButton({
   if (isLoading) {
     return (
       <Button disabled size="sm" variant="outline" className={className}>
-        <Users className="h-4 w-4 mr-2" />
-        <span className="hidden sm:inline">Loading...</span>
-        <span className="sm:hidden">...</span>
+        <Users {...sx("h-4 w-4 mr-2")} />
+        <span {...sx("hidden sm:inline")}>Loading...</span>
+        <span {...sx("sm:hidden")}>...</span>
       </Button>
     );
   }
@@ -200,48 +205,48 @@ export function CollaborationButton({
     return (
       <>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="sm" variant="outline" className={className}>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span className="flex items-center gap-1">
-                  <span className="hidden sm:inline">
-                    {session.participantCount}
-                    {session.participantCount === 1 ? " user" : " users"}
-                  </span>
-                  <span className="sm:hidden">{session.participantCount}</span>
-                  {getRoleIcon(effectiveUserRole)}
+          <DropdownMenuTrigger
+            render={<Button size="sm" variant="outline" className={className} />}
+          >
+            <div {...sx("flex items-center gap-2")}>
+              <Users {...sx("h-4 w-4")} />
+              <span {...sx("flex items-center gap-1")}>
+                <span {...sx("hidden sm:inline")}>
+                  {session.participantCount}
+                  {session.participantCount === 1 ? " user" : " users"}
                 </span>
-                {/* Realtime connection indicator */}
-                {isRealtimeConnected ? (
-                  <Wifi className="h-3 w-3 text-green-500" />
-                ) : (
-                  <WifiOff className="h-3 w-3 text-orange-500" />
-                )}
-                <MoreHorizontal className="h-4 w-4" />
-              </div>
-            </Button>
+                <span {...sx("sm:hidden")}>{session.participantCount}</span>
+                {getRoleIcon(effectiveUserRole)}
+              </span>
+              {/* Realtime connection indicator */}
+              {isRealtimeConnected ? (
+                <Wifi {...sx("h-3 w-3 text-green-500")} />
+              ) : (
+                <WifiOff {...sx("h-3 w-3 text-orange-500")} />
+              )}
+              <MoreHorizontal {...sx("h-4 w-4")} />
+            </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
-            <div className="px-2 py-1.5">
-              <p className="text-sm font-medium">Collaboration Active</p>
-              <p className="text-xs text-muted-foreground">
+            <div {...sx("px-2 py-1.5")}>
+              <p {...sx("text-sm font-medium")}>Collaboration Active</p>
+              <p {...sx("text-xs text-muted-foreground")}>
                 {session.participantCount} participants
               </p>
-              <div className="flex items-center justify-between mt-1">
+              <div {...sx("flex items-center justify-between mt-1")}>
                 <Badge variant="secondary" className={`${getRoleColor(effectiveUserRole)}`}>
                   {getRoleIcon(effectiveUserRole)}
-                  <span className="ml-1 capitalize">{effectiveUserRole}</span>
+                  <span {...sx("ml-1 capitalize")}>{effectiveUserRole}</span>
                 </Badge>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div {...sx("flex items-center gap-1 text-xs text-muted-foreground")}>
                   {isRealtimeConnected ? (
                     <>
-                      <Wifi className="h-3 w-3 text-green-500" />
+                      <Wifi {...sx("h-3 w-3 text-green-500")} />
                       <span>Connected</span>
                     </>
                   ) : (
                     <>
-                      <WifiOff className="h-3 w-3 text-orange-500" />
+                      <WifiOff {...sx("h-3 w-3 text-orange-500")} />
                       <span>Reconnecting...</span>
                     </>
                   )}
@@ -250,11 +255,11 @@ export function CollaborationButton({
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
-              <UserPlus className="h-4 w-4 mr-2" />
+              <UserPlus {...sx("h-4 w-4 mr-2")} />
               Invite Users
             </DropdownMenuItem>
             <DropdownMenuItem onClick={copyCollaborationLink}>
-              <Copy className="h-4 w-4 mr-2" />
+              <Copy {...sx("h-4 w-4 mr-2")} />
               Copy Link
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -265,7 +270,7 @@ export function CollaborationButton({
                 disabled={isEnding}
                 className="text-destructive"
               >
-                <X className="h-4 w-4 mr-2" />
+                <X {...sx("h-4 w-4 mr-2")} />
                 {isEnding ? "Ending..." : "End Session for All"}
               </DropdownMenuItem>
             )}
@@ -275,7 +280,7 @@ export function CollaborationButton({
               disabled={isLeaving}
               className={effectiveUserRole === "owner" ? "" : "text-destructive"}
             >
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut {...sx("h-4 w-4 mr-2")} />
               {isLeaving ? "Leaving..." : "Leave Session"}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -290,8 +295,8 @@ export function CollaborationButton({
                 Invite others to collaborate on &ldquo;{chatTitle}&rdquo;
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div {...sx("space-y-4")}>
+              <div {...sx("space-y-2")}>
                 <Label htmlFor="email">Email Address</Label>
                 <Input
                   id="email"
@@ -307,44 +312,49 @@ export function CollaborationButton({
                   }}
                 />
               </div>
-              <div className="space-y-2">
+              <div {...sx("space-y-2")}>
                 <Label htmlFor="role">Role</Label>
                 <Select
+                  items={collaborationRoleItems}
                   value={inviteRole}
-                  onValueChange={(value: "collaborator" | "viewer") => setInviteRole(value)}
+                  onValueChange={(value) => {
+                    if (value !== null) setInviteRole(value);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="collaborator">
-                      <div className="flex items-center gap-2">
-                        <Edit className="h-4 w-4" />
-                        <div>
-                          <p className="font-medium">Collaborator</p>
-                          <p className="text-xs text-muted-foreground">Can edit and add content</p>
+                    <SelectGroup>
+                      <SelectItem value="collaborator">
+                        <div {...sx("flex items-center gap-2")}>
+                          <Edit {...sx("h-4 w-4")} />
+                          <div>
+                            <p {...sx("font-medium")}>Collaborator</p>
+                            <p {...sx("text-xs text-muted-foreground")}>Can edit and add content</p>
+                          </div>
                         </div>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="viewer">
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4" />
-                        <div>
-                          <p className="font-medium">Viewer</p>
-                          <p className="text-xs text-muted-foreground">Can view but not edit</p>
+                      </SelectItem>
+                      <SelectItem value="viewer">
+                        <div {...sx("flex items-center gap-2")}>
+                          <Eye {...sx("h-4 w-4")} />
+                          <div>
+                            <p {...sx("font-medium")}>Viewer</p>
+                            <p {...sx("text-xs text-muted-foreground")}>Can view but not edit</p>
+                          </div>
                         </div>
-                      </div>
-                    </SelectItem>
+                      </SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex justify-between gap-3">
+              <div {...sx("flex justify-between gap-3")}>
                 <Button variant="outline" onClick={copyCollaborationLink} className="flex-1">
-                  <Share2 className="h-4 w-4 mr-2" />
+                  <Share2 {...sx("h-4 w-4 mr-2")} />
                   Copy Link
                 </Button>
                 <Button onClick={sendInvitation} className="flex-1">
-                  <UserPlus className="h-4 w-4 mr-2" />
+                  <UserPlus {...sx("h-4 w-4 mr-2")} />
                   Send Invite
                 </Button>
               </div>
@@ -364,9 +374,9 @@ export function CollaborationButton({
       variant="outline"
       className={className}
     >
-      <Users className="h-4 w-4 mr-2" />
-      <span className="hidden sm:inline">{isStarting ? "Starting..." : "Collaborate"}</span>
-      <span className="sm:hidden">{isStarting ? "..." : "Collab"}</span>
+      <Users {...sx("h-4 w-4 mr-2")} />
+      <span {...sx("hidden sm:inline")}>{isStarting ? "Starting..." : "Collaborate"}</span>
+      <span {...sx("sm:hidden")}>{isStarting ? "..." : "Collab"}</span>
     </Button>
   );
 }

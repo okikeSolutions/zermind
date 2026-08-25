@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /auth/
+Disallow: /api/
+Disallow: /protected/
+Disallow: /collaborate/
+
+Sitemap: https://zermind.ai/sitemap.xml

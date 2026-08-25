@@ -1,8 +1,6 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import Link from "next/link";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import Link from "@/lib/navigation";
 import {
   Shield,
   Database,
@@ -15,43 +13,41 @@ import {
   AlertCircle,
 } from "lucide-react";
 import InfoSection from "@/components/info-section";
+import { sx } from "@/styles/sx";
 
 export default function PrivacyPolicy() {
   return (
-    <main className="flex-auto px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl mt-6">
+    <main {...sx("flex-auto px-4 py-12 sm:px-6 lg:px-8")}>
+      <div {...sx("mx-auto max-w-5xl mt-6")}>
         <Button
-          asChild
+          render={<Link href="/" />}
+          nativeButton={false}
           variant="ghost"
           className="mb-8 text-primary hover:text-primary/80 transition-colors"
         >
-          <Link href="/">
-            <span className="mr-2" aria-hidden="true">
-              &larr;
-            </span>{" "}
-            Back to home
-          </Link>
+          <span {...sx("mr-2")} aria-hidden="true">
+            &larr;
+          </span>{" "}
+          Back to home
         </Button>
 
         <Card className="overflow-hidden shadow-lg border-none">
           <CardHeader className="bg-primary text-neutral-50">
-            <CardTitle className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Privacy Policy
-            </CardTitle>
+            <h1 {...sx("text-3xl font-bold tracking-tight sm:text-4xl")}>Privacy Policy</h1>
           </CardHeader>
           <CardContent className="p-6 sm:p-10">
-            <div className="mb-8 text-sm text-muted-foreground">
+            <div {...sx("mb-8 text-sm text-muted-foreground")}>
               <p>Last updated: April 2026</p>
             </div>
 
-            <div className="prose prose-neutral max-w-none mb-8">
-              <p className="text-lg text-muted-foreground">
+            <div {...sx("prose prose-neutral max-w-none mb-8")}>
+              <p {...sx("text-lg text-muted-foreground")}>
                 At Zermind, we take your privacy seriously. This Privacy Policy explains how we
                 collect, use, and protect your information when you use our AI chat application.
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+            <div {...sx("grid gap-6 sm:grid-cols-1 lg:grid-cols-2")}>
               <InfoSection
                 icon={Database}
                 title="Data We Collect"
@@ -163,15 +159,15 @@ export default function PrivacyPolicy() {
               />
             </div>
 
-            <div className="mt-8 border-t pt-6 text-sm text-muted-foreground space-y-4">
+            <div {...sx("mt-8 border-t pt-6 text-sm text-muted-foreground space-y-4")}>
               <div>
-                <h4 className="font-semibold text-primary mb-2">Open Source Transparency</h4>
+                <h2 {...sx("font-semibold text-primary mb-2")}>Open Source Transparency</h2>
                 <p>
                   Zermind is open source under the MIT license. You can review our code, security
                   practices, and data handling on{" "}
                   <a
                     href="https://github.com/okikeSolutions/zermind"
-                    className="text-primary hover:text-primary/80 transition-colors"
+                    {...sx("text-primary hover:text-primary/80 transition-colors")}
                   >
                     GitHub
                   </a>
@@ -180,12 +176,12 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-primary mb-2">Contact Us</h4>
+                <h2 {...sx("font-semibold text-primary mb-2")}>Contact Us</h2>
                 <p>
                   For privacy questions or data requests, contact us at{" "}
                   <a
                     href="mailto:info@okike-solutions.com"
-                    className="text-primary hover:text-primary/80 transition-colors"
+                    {...sx("text-primary hover:text-primary/80 transition-colors")}
                   >
                     info@okike-solutions.com
                   </a>
@@ -194,7 +190,7 @@ export default function PrivacyPolicy() {
               </div>
 
               <div>
-                <h4 className="font-semibold text-primary mb-2">Changes to This Policy</h4>
+                <h2 {...sx("font-semibold text-primary mb-2")}>Changes to This Policy</h2>
                 <p>
                   We may update this Privacy Policy periodically. Significant changes will be
                   communicated via email or app notification.

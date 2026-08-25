@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Home,
   MessageSquarePlus,
@@ -12,7 +10,7 @@ import {
   Brain,
   GitBranch,
 } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/lib/navigation";
 
 import {
   Sidebar,
@@ -43,9 +41,10 @@ import { FeedbackDialog } from "./feedback-dialog";
 import { useUserChats, useCreateChat, useDeleteChat } from "@/hooks/use-chats-query";
 import { useChatModeStore } from "@/lib/store/chat-mode-store";
 import { useAuthUser } from "@/hooks/use-auth";
-import Link from "next/link";
+import Link from "@/lib/navigation";
 import { toast } from "sonner";
 import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
+import { sx } from "@/styles/sx";
 
 const navigationItems = [
   {
@@ -142,26 +141,30 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="border-b">
-        <div className="p-3 sm:p-4">
-          <div className=" border rounded-lg p-1.5 sm:p-2">
-            <Button asChild variant="ghost" size="sm" className="hover:bg-transparent">
-              <Link href="/protected" className="flex items-center space-x-2">
-                <span className="font-bold text-lg bg-primary bg-clip-text text-transparent">
-                  Zermind
-                </span>
-              </Link>
+        <div {...sx("p-3 sm:p-4")}>
+          <div {...sx(" border rounded-lg p-1.5 sm:p-2")}>
+            <Button
+              render={<Link href="/protected" {...sx("flex items-center space-x-2")} />}
+              nativeButton={false}
+              variant="ghost"
+              size="sm"
+              className="hover:bg-transparent"
+            >
+              <span {...sx("font-bold text-lg bg-primary bg-clip-text text-transparent")}>
+                Zermind
+              </span>
             </Button>
           </div>
         </div>
-        <div className="p-3 sm:p-4">
+        <div {...sx("p-3 sm:p-4")}>
           <Button
             onClick={createNewChat}
             className="w-full justify-start gap-2 h-9 sm:h-10"
             size="sm"
             disabled={!user?.id || createChatMutation.isPending}
           >
-            <MessageSquarePlus className="h-4 w-4" />
-            <span className="text-sm">New Chat</span>
+            <MessageSquarePlus {...sx("h-4 w-4")} />
+            <span {...sx("text-sm")}>New Chat</span>
           </Button>
         </div>
       </SidebarHeader>
@@ -175,11 +178,9 @@ export function AppSidebar() {
               <SidebarMenu>
                 {navigationItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className="h-9 sm:h-10">
-                      <Link href={item.url}>
-                        <item.icon className="h-4 w-4" />
-                        <span className="text-sm">{item.title}</span>
-                      </Link>
+                    <SidebarMenuButton render={<Link href={item.url} />} className="h-9 sm:h-10">
+                      <item.icon {...sx("h-4 w-4")} />
+                      <span {...sx("text-sm")}>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
@@ -196,17 +197,17 @@ export function AppSidebar() {
                   // Loading skeleton
                   Array.from({ length: 3 }).map((_, index) => (
                     <SidebarMenuItem key={`skeleton-${index}`}>
-                      <div className="flex items-center space-x-2 p-2">
-                        <div className="w-4 h-4 bg-muted animate-pulse rounded"></div>
-                        <div className="flex-1 space-y-1">
-                          <div className="w-3/4 h-3 bg-muted animate-pulse rounded"></div>
-                          <div className="w-1/2 h-2 bg-muted animate-pulse rounded"></div>
+                      <div {...sx("flex items-center space-x-2 p-2")}>
+                        <div {...sx("w-4 h-4 bg-muted animate-pulse rounded")}></div>
+                        <div {...sx("flex-1 space-y-1")}>
+                          <div {...sx("w-3/4 h-3 bg-muted animate-pulse rounded")}></div>
+                          <div {...sx("w-1/2 h-2 bg-muted animate-pulse rounded")}></div>
                         </div>
                       </div>
                     </SidebarMenuItem>
                   ))
                 ) : chatSessions.length === 0 ? (
-                  <div className="p-3 sm:p-4 text-center text-xs sm:text-sm text-muted-foreground">
+                  <div {...sx("p-3 sm:p-4 text-center text-xs sm:text-sm text-muted-foreground")}>
                     No chats yet. Create your first chat!
                   </div>
                 ) : (
@@ -215,24 +216,22 @@ export function AppSidebar() {
                     return (
                       <SidebarMenuItem key={chat.id}>
                         <SidebarMenuButton
-                          asChild
+                          render={
+                            <Link href={`/protected/chat/${chat.id}`} {...sx("flex-1 m-2")} />
+                          }
                           className="h-auto min-h-[2.5rem] sm:min-h-[3rem] py-2"
                         >
-                          <Link href={`/protected/chat/${chat.id}`} className="flex-1 m-2">
-                            <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1 overflow-hidden min-w-0">
-                              <div className="truncate font-medium text-sm">{title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {formatDate(chat.updatedAt)}
-                              </div>
+                          <MessageSquare {...sx("h-4 w-4 mt-0.5 flex-shrink-0")} />
+                          <div {...sx("flex-1 overflow-hidden min-w-0")}>
+                            <div {...sx("truncate font-medium text-sm")}>{title}</div>
+                            <div {...sx("text-xs text-muted-foreground")}>
+                              {formatDate(chat.updatedAt)}
                             </div>
-                          </Link>
+                          </div>
                         </SidebarMenuButton>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <SidebarMenuAction className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </SidebarMenuAction>
+                          <DropdownMenuTrigger render={<SidebarMenuAction className="h-8 w-8" />}>
+                            <MoreHorizontal {...sx("h-4 w-4")} />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent side="right" align="start">
                             <DropdownMenuItem
@@ -240,7 +239,7 @@ export function AppSidebar() {
                               className="text-destructive focus:text-destructive text-sm"
                               disabled={deleteChatMutation.isPending}
                             >
-                              <Trash2 className="h-4 w-4 mr-2" />
+                              <Trash2 {...sx("h-4 w-4 mr-2")} />
                               Delete Chat
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -258,19 +257,19 @@ export function AppSidebar() {
       {/* Mode Switcher */}
       <SidebarGroup>
         <SidebarGroupContent>
-          <div className="px-2 sm:px-2">
+          <div {...sx("px-2 sm:px-2")}>
             {/* Mobile: Compact switch only */}
-            <div className="sm:hidden">
-              <div className="flex items-center justify-between p-3 border border-dashed rounded-lg">
-                <div className="flex items-center gap-2 text-sm font-medium">
+            <div {...sx("sm:hidden")}>
+              <div {...sx("flex items-center justify-between p-3 border border-dashed rounded-lg")}>
+                <div {...sx("flex items-center gap-2 text-sm font-medium")}>
                   {isMindMode ? (
                     <>
-                      <Brain className="h-4 w-4 text-purple-500" />
+                      <Brain {...sx("h-4 w-4 text-purple-500")} />
                       Mind
                     </>
                   ) : (
                     <>
-                      <MessageSquare className="h-4 w-4 text-blue-500" />
+                      <MessageSquare {...sx("h-4 w-4 text-blue-500")} />
                       Chat
                     </>
                   )}
@@ -289,12 +288,12 @@ export function AppSidebar() {
                 <CardTitle className="flex items-center gap-2 text-sm">
                   {isMindMode ? (
                     <>
-                      <Brain className="h-4 w-4 text-purple-500" />
+                      <Brain {...sx("h-4 w-4 text-purple-500")} />
                       Mind Mode
                     </>
                   ) : (
                     <>
-                      <MessageSquare className="h-4 w-4 text-blue-500" />
+                      <MessageSquare {...sx("h-4 w-4 text-blue-500")} />
                       Chat Mode
                     </>
                   )}
@@ -306,9 +305,9 @@ export function AppSidebar() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0 px-4 pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <MessageSquare className="h-3 w-3" />
+                <div {...sx("flex items-center justify-between")}>
+                  <div {...sx("flex items-center gap-1.5 text-xs text-muted-foreground")}>
+                    <MessageSquare {...sx("h-3 w-3")} />
                     <span>Chat</span>
                   </div>
                   <Switch
@@ -316,15 +315,20 @@ export function AppSidebar() {
                     onCheckedChange={(checked) => setMode(checked ? "mind" : "chat")}
                     className="data-[state=checked]:bg-purple-500"
                   />
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Brain className="h-3 w-3" />
+
+                  <div {...sx("flex items-center gap-1.5 text-xs text-muted-foreground")}>
+                    <Brain {...sx("h-3 w-3")} />
                     <span>Mind</span>
                   </div>
                 </div>
                 {isMindMode && (
-                  <div className="mt-3 p-2 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                    <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300">
-                      <GitBranch className="h-3 w-3" />
+                  <div {...sx("mt-3 p-2 bg-purple-50 dark:bg-purple-950/20 rounded-lg")}>
+                    <div
+                      {...sx(
+                        "flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300",
+                      )}
+                    >
+                      <GitBranch {...sx("h-3 w-3")} />
                       <span>Branch with multiple AI models</span>
                     </div>
                   </div>
@@ -338,24 +342,24 @@ export function AppSidebar() {
       <SidebarFooter className="border-t p-2 sm:p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="mb-2">
+            <div {...sx("mb-2")}>
               <FeedbackDialog>
                 <Button variant="outline" className="w-full h-9 sm:h-10 px-2 sm:px-3" size="sm">
-                  <MessageSquare className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-sm ml-1.5 sm:ml-2 truncate">Feedback</span>
+                  <MessageSquare {...sx("h-4 w-4 flex-shrink-0")} />
+                  <span {...sx("text-sm ml-1.5 sm:ml-2 truncate")}>Feedback</span>
                 </Button>
               </FeedbackDialog>
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <div className="mb-2">
+            <div {...sx("mb-2")}>
               <ThemeSwitcher />
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={logout} className="w-full h-9 sm:h-10">
-              <LogOut className="h-4 w-4" />
-              <span className="text-sm">Logout</span>
+              <LogOut {...sx("h-4 w-4")} />
+              <span {...sx("text-sm")}>Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

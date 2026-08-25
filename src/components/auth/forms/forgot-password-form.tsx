@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -13,11 +11,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Link from "next/link";
+import Link from "@/lib/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { sx } from "@/styles/sx";
 
 const forgotPasswordSchema = z.object({
   email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
@@ -56,7 +55,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div {...sx(cn("flex flex-col gap-6", className))} {...props}>
       {success ? (
         <Card>
           <CardHeader>
@@ -64,7 +63,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
             <CardDescription>Password reset instructions sent</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <p {...sx("text-sm text-muted-foreground")}>
               If you registered using your email and password, you will receive a password reset
               email.
             </p>
@@ -80,7 +79,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleForgotPassword)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(handleForgotPassword)} {...sx("space-y-6")}>
                 <FormField
                   control={form.control}
                   name="email"
@@ -94,15 +93,16 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                     </FormItem>
                   )}
                 />
-                {error && <p className="text-sm text-red-500">{error}</p>}
+
+                {error && <p {...sx("text-sm text-red-500")}>{error}</p>}
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Sending..." : "Send reset email"}
                 </Button>
               </form>
             </Form>
-            <div className="mt-4 text-center text-sm">
+            <div {...sx("mt-4 text-center text-sm")}>
               Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
+              <Link href="/auth/login" {...sx("underline underline-offset-4")}>
                 Login
               </Link>
             </div>

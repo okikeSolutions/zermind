@@ -15,13 +15,13 @@ cp env.example .env.local
 ### Convex
 
 ```bash
-NEXT_PUBLIC_CONVEX_URL="https://your-deployment.convex.cloud"
-NEXT_PUBLIC_CONVEX_SITE_URL="https://your-deployment.convex.site"
+VITE_CONVEX_URL="https://your-deployment.convex.cloud"
+VITE_CONVEX_SITE_URL="https://your-deployment.convex.site"
 SITE_URL="http://localhost:3000"
 ```
 
-- `NEXT_PUBLIC_CONVEX_URL` is used by the browser Convex client.
-- `NEXT_PUBLIC_CONVEX_SITE_URL` is used for Convex HTTP routes, including Better Auth routes.
+- `VITE_CONVEX_URL` is used by the browser Convex client.
+- `VITE_CONVEX_SITE_URL` is used for Convex HTTP routes, including Better Auth routes.
 - `SITE_URL` is used by Better Auth for redirects/callbacks.
 
 ### AI fallback provider
@@ -82,8 +82,8 @@ bunx convex env set GITHUB_CLIENT_SECRET "..."
 
 ```bash
 # Convex
-NEXT_PUBLIC_CONVEX_URL="https://your-deployment.convex.cloud"
-NEXT_PUBLIC_CONVEX_SITE_URL="https://your-deployment.convex.site"
+VITE_CONVEX_URL="https://your-deployment.convex.cloud"
+VITE_CONVEX_SITE_URL="https://your-deployment.convex.site"
 SITE_URL="http://localhost:3000"
 
 # AI fallback
@@ -99,8 +99,7 @@ GITHUB_CLIENT_ID=""
 GITHUB_CLIENT_SECRET=""
 
 # Public site URL / SEO
-NEXT_PUBLIC_SITE_URL="http://localhost:3000"
-NODE_ENV="development"
+VITE_SITE_URL="http://localhost:3000"
 ```
 
 ## Removed legacy variables
@@ -116,13 +115,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 The app no longer uses Prisma, Supabase Auth, Supabase Realtime, or Supabase Storage.
 
+The old `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, and
+`NEXT_PUBLIC_SITE_URL` names remain accepted during deployment migration. New
+environments should use the `VITE_*` names above.
+
 ## Validation
 
 After configuring env vars, run:
 
 ```bash
 bunx convex codegen
-bunx tsc --noEmit
+bun run typecheck
 bun run fmt:check
 bun run lint
 ```

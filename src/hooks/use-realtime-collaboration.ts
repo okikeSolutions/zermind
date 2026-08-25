@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import usePresence from "@convex-dev/presence/react";
 import { useMutation } from "convex/react";

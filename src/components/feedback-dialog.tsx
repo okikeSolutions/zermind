@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +20,7 @@ import { api } from "../../convex/_generated/api";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -37,6 +36,7 @@ import {
 import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 
 // Form schema
+import { sx } from "@/styles/sx";
 const feedbackFormSchema = z.object({
   message: z
     .string()
@@ -45,10 +45,19 @@ const feedbackFormSchema = z.object({
   type: z.enum(["general", "bug", "feature", "improvement", "complaint", "compliment"]),
 });
 
+const feedbackTypeItems = [
+  { value: "general", label: "General Feedback" },
+  { value: "bug", label: "Bug Report" },
+  { value: "feature", label: "Feature Request" },
+  { value: "improvement", label: "Improvement" },
+  { value: "complaint", label: "Complaint" },
+  { value: "compliment", label: "Compliment" },
+] as const;
+
 type FeedbackFormValues = z.infer<typeof feedbackFormSchema>;
 
 interface FeedbackDialogProps {
-  children: React.ReactNode;
+  children: React.ReactElement;
 }
 
 export function FeedbackDialog({ children }: FeedbackDialogProps) {
@@ -94,11 +103,11 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger render={children} />
       <DialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-[425px] sm:mx-auto sm:w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <MessageSquare className="h-5 w-5" />
+            <MessageSquare {...sx("h-5 w-5")} />
             Share Your Feedback
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
@@ -108,7 +117,7 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 sm:space-y-6 px-1 sm:px-0"
+            {...sx("space-y-4 sm:space-y-6 px-1 sm:px-0")}
           >
             <FormField
               control={form.control}
@@ -117,28 +126,31 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
                 <FormItem>
                   <FormLabel className="text-sm font-medium">Feedback Type</FormLabel>
                   <Select
+                    items={feedbackTypeItems}
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     disabled={isSubmitting}
                   >
                     <FormControl>
                       <SelectTrigger className="h-10 sm:h-11">
-                        <SelectValue placeholder="Select feedback type" />
+                        <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="general">General Feedback</SelectItem>
-                      <SelectItem value="bug">Bug Report</SelectItem>
-                      <SelectItem value="feature">Feature Request</SelectItem>
-                      <SelectItem value="improvement">Improvement</SelectItem>
-                      <SelectItem value="complaint">Complaint</SelectItem>
-                      <SelectItem value="compliment">Compliment</SelectItem>
+                      <SelectGroup>
+                        {feedbackTypeItems.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="message"
@@ -154,13 +166,14 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
                       {...field}
                     />
                   </FormControl>
-                  <div className="text-xs text-muted-foreground text-right">
+                  <div {...sx("text-xs text-muted-foreground text-right")}>
                     {field.value.length}/2000
                   </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:gap-0">
               <Button
                 type="button"

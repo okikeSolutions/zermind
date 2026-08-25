@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +38,7 @@ import {
 import { type Message } from "@/lib/schemas/chat";
 
 // Available models for multi-model comparison
+import { sx } from "@/styles/sx";
 const COMPARISON_MODELS = [
   { id: "openai/gpt-5", name: "GPT-5", provider: "OpenAI", tier: "premium" },
   {
@@ -306,11 +305,15 @@ export function CreateMultiModelBranch({
     return (
       <Card className="border-t bg-background">
         <CardContent className="p-3 sm:p-4">
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-            <div className="w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-            <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
-            <span className="text-sm text-muted-foreground ml-2">
+          <div {...sx("flex items-center justify-center space-x-2")}>
+            <div
+              {...sx("w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]")}
+            ></div>
+            <div
+              {...sx("w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]")}
+            ></div>
+            <div {...sx("w-2 h-2 bg-current rounded-full animate-bounce")}></div>
+            <span {...sx("text-sm text-muted-foreground ml-2")}>
               Loading conversation context...
             </span>
           </div>
@@ -323,10 +326,14 @@ export function CreateMultiModelBranch({
     return (
       <Card className="border-t bg-background border-destructive">
         <CardContent className="p-3 sm:p-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-destructive">
-            <div className="flex items-center space-x-2">
-              <AlertCircle className="h-4 w-4" />
-              <span className="text-sm">{contextError.message}</span>
+          <div
+            {...sx(
+              "flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 text-destructive",
+            )}
+          >
+            <div {...sx("flex items-center space-x-2")}>
+              <AlertCircle {...sx("h-4 w-4")} />
+              <span {...sx("text-sm")}>{contextError.message}</span>
             </div>
             <Button size="sm" variant="outline" onClick={onClose}>
               Close
@@ -341,10 +348,14 @@ export function CreateMultiModelBranch({
     <Card className="border-t bg-background">
       <CardContent className="p-3 sm:p-4 space-y-4">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-          <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-purple-500" />
-            <h4 className="text-sm font-medium">Multi-Model Comparison</h4>
+        <div
+          {...sx(
+            "flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0",
+          )}
+        >
+          <div {...sx("flex items-center gap-2")}>
+            <Zap {...sx("h-4 w-4 text-purple-500")} />
+            <h4 {...sx("text-sm font-medium")}>Multi-Model Comparison</h4>
           </div>
           <Badge variant="outline" className="text-xs w-fit">
             From node: {parentNodeId.slice(0, 8)}...
@@ -353,18 +364,18 @@ export function CreateMultiModelBranch({
 
         {/* Context Preview */}
         {context.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground font-medium">Branching from:</p>
-            <div className="bg-muted rounded-md p-2 max-h-20 overflow-y-auto">
-              <div className="text-xs text-muted-foreground space-y-1">
+          <div {...sx("space-y-2")}>
+            <p {...sx("text-xs text-muted-foreground font-medium")}>Branching from:</p>
+            <div {...sx("bg-muted rounded-md p-2 max-h-20 overflow-y-auto")}>
+              <div {...sx("text-xs text-muted-foreground space-y-1")}>
                 {context.slice(-1).map((msg) => (
-                  <div key={msg.id} className="flex items-start gap-2">
+                  <div key={msg.id} {...sx("flex items-start gap-2")}>
                     {msg.role === "user" ? (
-                      <User className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <User {...sx("h-3 w-3 mt-0.5 flex-shrink-0")} />
                     ) : (
-                      <Bot className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <Bot {...sx("h-3 w-3 mt-0.5 flex-shrink-0")} />
                     )}
-                    <span className="text-xs leading-relaxed">
+                    <span {...sx("text-xs leading-relaxed")}>
                       {msg.content.length > 60 ? msg.content.substring(0, 60) + "..." : msg.content}
                     </span>
                   </div>
@@ -376,7 +387,7 @@ export function CreateMultiModelBranch({
 
         {/* Multi-Model Form */}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleMultiModelSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleMultiModelSubmit)} {...sx("space-y-4")}>
             {/* Branch Name */}
             <FormField
               control={form.control}
@@ -406,11 +417,13 @@ export function CreateMultiModelBranch({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Select Models to Compare (2-4 models)</FormLabel>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div {...sx("grid grid-cols-1 sm:grid-cols-2 gap-2")}>
                     {COMPARISON_MODELS.map((model) => (
                       <div
                         key={model.id}
-                        className="flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50"
+                        {...sx(
+                          "flex items-center space-x-2 p-2 border rounded-md hover:bg-muted/50",
+                        )}
                       >
                         <Checkbox
                           id={model.id}
@@ -430,13 +443,14 @@ export function CreateMultiModelBranch({
                             (!field.value.includes(model.id) && field.value.length >= 4)
                           }
                         />
+
                         <label
                           htmlFor={model.id}
-                          className="flex-1 flex items-center justify-between cursor-pointer"
+                          {...sx("flex-1 flex items-center justify-between cursor-pointer")}
                         >
                           <div>
-                            <span className="text-sm font-medium">{model.name}</span>
-                            <span className="text-xs text-muted-foreground ml-2">
+                            <span {...sx("text-sm font-medium")}>{model.name}</span>
+                            <span {...sx("text-xs text-muted-foreground ml-2")}>
                               by {model.provider}
                             </span>
                           </div>
@@ -457,26 +471,30 @@ export function CreateMultiModelBranch({
 
             {/* Model Status Display */}
             {modelStatuses.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">Processing Status:</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div {...sx("space-y-2")}>
+                <p {...sx("text-xs text-muted-foreground font-medium")}>Processing Status:</p>
+                <div {...sx("grid grid-cols-1 sm:grid-cols-2 gap-2")}>
                   {modelStatuses.map((status) => (
                     <div
                       key={status.model}
-                      className="flex items-center justify-between p-2 border rounded-md text-sm"
+                      {...sx("flex items-center justify-between p-2 border rounded-md text-sm")}
                     >
                       <span>{getModelDisplayName(status.model)}</span>
-                      <div className="flex items-center gap-1">
+                      <div {...sx("flex items-center gap-1")}>
                         {status.status === "pending" && (
-                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          <Clock {...sx("h-3 w-3 text-muted-foreground")} />
                         )}
                         {status.status === "loading" && (
-                          <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                          <div
+                            {...sx(
+                              "w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin",
+                            )}
+                          />
                         )}
                         {status.status === "success" && (
-                          <CheckCircle className="h-3 w-3 text-green-500" />
+                          <CheckCircle {...sx("h-3 w-3 text-green-500")} />
                         )}
-                        {status.status === "error" && <XCircle className="h-3 w-3 text-red-500" />}
+                        {status.status === "error" && <XCircle {...sx("h-3 w-3 text-red-500")} />}
                       </div>
                     </div>
                   ))}
@@ -493,7 +511,7 @@ export function CreateMultiModelBranch({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                    <div {...sx("flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2")}>
                       <Input
                         placeholder="Ask the same question to all selected models..."
                         disabled={isAnyLoading}
@@ -509,7 +527,8 @@ export function CreateMultiModelBranch({
                           }
                         }}
                       />
-                      <div className="flex gap-2">
+
+                      <div {...sx("flex gap-2")}>
                         {isAnyLoading ? (
                           <Button
                             type="button"
@@ -517,7 +536,7 @@ export function CreateMultiModelBranch({
                             variant="destructive"
                             className="flex-shrink-0"
                           >
-                            <StopCircle className="h-4 w-4 mr-2" />
+                            <StopCircle {...sx("h-4 w-4 mr-2")} />
                             Stop All
                           </Button>
                         ) : (
@@ -529,7 +548,7 @@ export function CreateMultiModelBranch({
                             }
                             className="flex-shrink-0"
                           >
-                            <Send className="h-4 w-4 mr-2" />
+                            <Send {...sx("h-4 w-4 mr-2")} />
                             Compare
                           </Button>
                         )}
@@ -549,7 +568,7 @@ export function CreateMultiModelBranch({
               )}
             />
 
-            <p className="text-xs text-muted-foreground text-center">
+            <p {...sx("text-xs text-muted-foreground text-center")}>
               This will create separate branches for each selected model&apos;s response
             </p>
           </form>
@@ -557,7 +576,7 @@ export function CreateMultiModelBranch({
 
         {/* Error Display */}
         {hasAnyError && (
-          <div className="space-y-2">
+          <div {...sx("space-y-2")}>
             {activeChats
               .filter((chat) => chat.error)
               .map((chat, index) => {
@@ -565,10 +584,10 @@ export function CreateMultiModelBranch({
                 const modelName = modelId ? getModelDisplayName(modelId) : `Model ${index + 1}`;
 
                 return (
-                  <div key={index} className="flex items-start space-x-2 text-destructive text-sm">
-                    <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <div className="flex flex-col">
-                      <span className="font-medium">{modelName}:</span>
+                  <div key={index} {...sx("flex items-start space-x-2 text-destructive text-sm")}>
+                    <AlertCircle {...sx("h-4 w-4 mt-0.5 flex-shrink-0")} />
+                    <div {...sx("flex flex-col")}>
+                      <span {...sx("font-medium")}>{modelName}:</span>
                       <span>{chat.error?.message}</span>
                     </div>
                   </div>

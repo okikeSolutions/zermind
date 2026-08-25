@@ -1,9 +1,9 @@
-"use client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import Link from "@/lib/navigation";
 
 // Define the window interface to include the addConsentListener, updateConsentState, and gtag functions
+import { sx } from "@/styles/sx";
 declare global {
   interface Window {
     addConsentListener: (callback: (consent: { [key: string]: boolean }) => void) => void;
@@ -24,10 +24,7 @@ const callGtag = (...args: Parameters<Window["gtag"]>) => {
 };
 
 const CookieBanner: React.FC = () => {
-  const [showBanner, setShowBanner] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return !localStorage.getItem("cookieConsent");
-  });
+  const [showBanner, setShowBanner] = useState(false);
 
   function setDefaultConsentState() {
     try {
@@ -78,6 +75,7 @@ const CookieBanner: React.FC = () => {
   useEffect(() => {
     try {
       const consent = localStorage.getItem("cookieConsent");
+      setShowBanner(!consent);
       if (!consent) {
         setDefaultConsentState();
       } else {
@@ -128,12 +126,18 @@ const CookieBanner: React.FC = () => {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-200 p-4 shadow-md z-50 dark:bg-neutral-800">
-      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between">
-        <p className="text-sm text-gray-700 mb-2 sm:mb-0 dark:text-gray-300">
+    <div
+      role="region"
+      aria-label="Cookie consent"
+      {...sx(
+        "fixed bottom-0 left-0 right-0 bg-card text-card-foreground border-t border-border p-4 shadow-md z-50",
+      )}
+    >
+      <div {...sx("container mx-auto flex flex-col sm:flex-row items-center justify-between")}>
+        <p {...sx("text-sm text-muted-foreground mb-2 sm:mb-0")}>
           We use cookies to enhance your experience. By continuing to visit this site you agree to
           our use of cookies.{" "}
-          <Link href="/privacy" className="text-rose-800 hover:text-rose-700 underline">
+          <Link href="/privacy" {...sx("text-rose-800 hover:text-rose-700 underline")}>
             Learn more
           </Link>
         </p>

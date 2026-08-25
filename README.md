@@ -54,18 +54,18 @@ Zermind is now built on a Convex-native backend:
 
 ## Tech Stack
 
-| Layer           | Technology                       | Purpose                                              |
-| --------------- | -------------------------------- | ---------------------------------------------------- |
-| Frontend        | Next.js 16 App Router + React 19 | App shell and server/client components               |
-| Backend         | Convex                           | Database, functions, actions, realtime subscriptions |
-| Auth            | Convex Better Auth               | Email/password and OAuth auth                        |
-| AI runtime      | AI SDK v6 + Convex Agent         | Persistent AI threads/messages and streaming         |
-| Model providers | OpenRouter + direct providers    | Fallback and BYOK provider access                    |
-| Mind map UI     | `@xyflow/react`                  | Interactive conversation graph                       |
-| Collaboration   | Convex Presence + Convex tables  | Online presence, cursors, sessions, invites          |
-| Styling         | Tailwind CSS                     | Responsive UI                                        |
-| State           | Zustand + Convex subscriptions   | Local UI state + realtime backend state              |
-| Tooling         | Bun, Oxlint, Oxfmt, TypeScript   | Package/runtime, linting, formatting, type checking  |
+| Layer           | Technology                      | Purpose                                              |
+| --------------- | ------------------------------- | ---------------------------------------------------- |
+| Frontend        | TanStack Start SPA + React 19   | Typed routes, app shell, and server functions        |
+| Backend         | Convex                          | Database, functions, actions, realtime subscriptions |
+| Auth            | Convex Better Auth              | Email/password and OAuth auth                        |
+| AI runtime      | AI SDK v6 + Convex Agent        | Persistent AI threads/messages and streaming         |
+| Model providers | OpenRouter + direct providers   | Fallback and BYOK provider access                    |
+| Mind map UI     | `@xyflow/react`                 | Interactive conversation graph                       |
+| Collaboration   | Convex Presence + Convex tables | Online presence, cursors, sessions, invites          |
+| Styling         | StyleX                          | Typed, build-time atomic styles                      |
+| State           | Zustand + Convex subscriptions  | Local UI state + realtime backend state              |
+| Tooling         | Bun, Oxlint, Oxfmt, TypeScript  | Package/runtime, linting, formatting, type checking  |
 
 ---
 
@@ -121,9 +121,9 @@ Required local variables:
 
 ```bash
 # Convex
-NEXT_PUBLIC_CONVEX_URL="https://your-deployment.convex.cloud"
-NEXT_PUBLIC_CONVEX_SITE_URL="https://your-deployment.convex.site"
-SITE_URL="http://localhost:3000"
+VITE_CONVEX_URL="https://your-deployment.convex.cloud"
+VITE_CONVEX_SITE_URL="https://your-deployment.convex.site"
+VITE_SITE_URL="http://localhost:3000"
 
 # AI fallback provider
 OPENROUTER_API_KEY="sk-or-v1-..."
@@ -173,7 +173,7 @@ Run Convex dev in one terminal if needed:
 bunx convex dev
 ```
 
-Run Next.js in another terminal:
+Run TanStack Start in another terminal:
 
 ```bash
 bun dev
@@ -186,12 +186,12 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Common commands
 
 ```bash
-bun dev              # Start Next.js
-bun run build        # Build Next.js
+bun dev              # Start TanStack Start with Vite
+bun run build        # Build the SPA shell and Nitro server
 bun run start        # Start production server
 bunx convex dev      # Start Convex dev loop
 bunx convex codegen  # Generate Convex types
-bunx tsc --noEmit    # Type check
+bun run typecheck    # Type check
 bun run lint         # Oxlint
 bun run fmt          # Oxfmt
 bun run fmt:check    # Check formatting

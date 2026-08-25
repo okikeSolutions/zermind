@@ -1,3 +1,4 @@
+import { sx } from "@/styles/sx";
 interface InfoSectionProps {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   title: string;
@@ -6,15 +7,15 @@ interface InfoSectionProps {
 
 function InfoSection({ icon: Icon, title, content }: Readonly<InfoSectionProps>) {
   return (
-    <div className="flex space-x-4">
-      <div className="shrink-0">
-        <Icon className="h-6 w-6 text-primary" />
+    <div {...sx("flex space-x-4")}>
+      <div {...sx("shrink-0")}>
+        <Icon {...sx("h-6 w-6 text-primary")} />
       </div>
       <div>
-        <h3 className="text-lg font-medium text-primary">{title}</h3>
-        <ul className="mt-2 text-sm text-primary">
+        <h2 {...sx("text-lg font-medium text-primary")}>{title}</h2>
+        <ul {...sx("mt-2 text-sm text-primary")}>
           {content.map((item, index) => (
-            <li className="list-disc" key={index}>
+            <li {...sx("list-disc")} key={index}>
               {item}
             </li>
           ))}

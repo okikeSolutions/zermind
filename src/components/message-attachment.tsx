@@ -1,13 +1,12 @@
-"use client";
-
 import { type Attachment } from "@/lib/schemas/chat";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Image as ImageIcon, FileText, ExternalLink, Download, Eye, Paperclip } from "lucide-react";
 import { cn, formatBytes } from "@/lib/utils";
-import NextImage from "next/image";
+import NextImage from "@/components/app-image";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { sx } from "@/styles/sx";
 
 interface MessageAttachmentProps {
   attachments: Attachment[];
@@ -113,9 +112,9 @@ export function MessageAttachment({
 
   const getFileTypeIcon = (mimeType: string) => {
     if (mimeType.startsWith("image/")) {
-      return <ImageIcon className="h-4 w-4" />;
+      return <ImageIcon {...sx("h-4 w-4")} />;
     }
-    return <FileText className="h-4 w-4" />;
+    return <FileText {...sx("h-4 w-4")} />;
   };
 
   const getFileTypeLabel = (mimeType: string) => {
@@ -131,17 +130,17 @@ export function MessageAttachment({
   // Compact view - just show attachment indicator
   if (showCompact) {
     return (
-      <div className={cn("flex items-center space-x-1 mt-1", className)}>
-        <Paperclip className="h-3 w-3 text-muted-foreground" />
-        <span className="text-xs text-muted-foreground">
+      <div {...sx(cn("flex items-center space-x-1 mt-1", className))}>
+        <Paperclip {...sx("h-3 w-3 text-muted-foreground")} />
+        <span {...sx("text-xs text-muted-foreground")}>
           {attachments.length} attachment{attachments.length > 1 ? "s" : ""}
         </span>
-        <div className="flex space-x-1">
+        <div {...sx("flex space-x-1")}>
           {attachments.slice(0, 3).map((attachment) => (
-            <div key={attachment.id} className="h-2 w-2 rounded-full bg-current opacity-60" />
+            <div key={attachment.id} {...sx("h-2 w-2 rounded-full bg-current opacity-60")} />
           ))}
           {attachments.length > 3 && (
-            <span className="text-xs text-muted-foreground">+{attachments.length - 3}</span>
+            <span {...sx("text-xs text-muted-foreground")}>+{attachments.length - 3}</span>
           )}
         </div>
       </div>
@@ -149,10 +148,10 @@ export function MessageAttachment({
   }
 
   return (
-    <div className={cn("space-y-2 mt-2", className)}>
+    <div {...sx(cn("space-y-2 mt-2", className))}>
       {/* Grid layout for multiple images */}
       {attachments.filter((att) => att.type === "image" && !imageErrors.has(att.id)).length > 1 ? (
-        <div className="grid grid-cols-2 gap-2">
+        <div {...sx("grid grid-cols-2 gap-2")}>
           {attachments
             .filter((att) => att.type === "image" && !imageErrors.has(att.id))
             .slice(0, 4)
@@ -162,18 +161,19 @@ export function MessageAttachment({
                 className="overflow-hidden cursor-pointer"
                 onClick={() => setExpandedImage(attachment.id)}
               >
-                <div className="relative aspect-square">
+                <div {...sx("relative aspect-square")}>
                   <NextImage
                     src={getAttachmentUrl(attachment)}
                     alt={attachment.name}
                     fill
-                    className="object-cover"
+                    {...sx("object-cover")}
                     onError={() => handleImageError(attachment.id)}
                   />
+
                   {attachments.filter((att) => att.type === "image").length > 4 &&
                     attachments.filter((att) => att.type === "image").indexOf(attachment) === 3 && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <span className="text-white font-medium">
+                      <div {...sx("absolute inset-0 bg-black/50 flex items-center justify-center")}>
+                        <span {...sx("text-white font-medium")}>
                           +{attachments.filter((att) => att.type === "image").length - 4}
                         </span>
                       </div>
@@ -192,19 +192,20 @@ export function MessageAttachment({
               className="overflow-hidden bg-background/50 hover:bg-background/70 transition-colors"
             >
               {isImage ? (
-                <div className="relative">
-                  <div className="relative max-w-sm">
+                <div {...sx("relative")}>
+                  <div {...sx("relative max-w-sm")}>
                     <NextImage
                       src={getAttachmentUrl(attachment)}
                       alt={attachment.name}
                       width={400}
                       height={300}
-                      className="object-cover max-w-full h-auto rounded-t-lg cursor-pointer"
+                      {...sx("object-cover max-w-full h-auto rounded-t-lg cursor-pointer")}
                       onError={() => handleImageError(attachment.id)}
                       onClick={() => setExpandedImage(attachment.id)}
                     />
+
                     {/* Image overlay controls */}
-                    <div className="absolute top-2 right-2 flex space-x-1">
+                    <div {...sx("absolute top-2 right-2 flex space-x-1")}>
                       <Button
                         variant="secondary"
                         size="sm"
@@ -214,7 +215,7 @@ export function MessageAttachment({
                           setExpandedImage(attachment.id);
                         }}
                       >
-                        <Eye className="h-3 w-3" />
+                        <Eye {...sx("h-3 w-3")} />
                       </Button>
                       <Button
                         variant="secondary"
@@ -225,18 +226,18 @@ export function MessageAttachment({
                           window.open(getAttachmentUrl(attachment), "_blank");
                         }}
                       >
-                        <Download className="h-3 w-3" />
+                        <Download {...sx("h-3 w-3")} />
                       </Button>
                     </div>
                   </div>
 
                   <CardContent className="p-2 border-t">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                    <div {...sx("flex items-center justify-between")}>
+                      <div {...sx("flex items-center space-x-2 min-w-0 flex-1")}>
                         <Badge variant="secondary" className="text-xs">
                           {getFileTypeLabel(attachment.mimeType)}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">
+                        <span {...sx("text-xs text-muted-foreground")}>
                           {formatBytes(attachment.size)}
                         </span>
                       </div>
@@ -246,32 +247,32 @@ export function MessageAttachment({
                         className="h-6 w-6 p-0"
                         onClick={() => window.open(getAttachmentUrl(attachment), "_blank")}
                       >
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink {...sx("h-3 w-3")} />
                       </Button>
                     </div>
-                    <p className="text-xs font-medium truncate mt-1">{attachment.name}</p>
+                    <p {...sx("text-xs font-medium truncate mt-1")}>{attachment.name}</p>
                   </CardContent>
                 </div>
               ) : (
                 <CardContent className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 min-w-0 flex-1">
-                      <div className="flex-shrink-0 p-2 bg-muted rounded-lg">
+                  <div {...sx("flex items-center justify-between")}>
+                    <div {...sx("flex items-center space-x-3 min-w-0 flex-1")}>
+                      <div {...sx("flex-shrink-0 p-2 bg-muted rounded-lg")}>
                         {getFileTypeIcon(attachment.mimeType)}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{attachment.name}</p>
-                        <div className="flex items-center space-x-2 mt-1">
+                      <div {...sx("flex-1 min-w-0")}>
+                        <p {...sx("text-sm font-medium truncate")}>{attachment.name}</p>
+                        <div {...sx("flex items-center space-x-2 mt-1")}>
                           <Badge variant="secondary" className="text-xs">
                             {getFileTypeLabel(attachment.mimeType)}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
+                          <span {...sx("text-xs text-muted-foreground")}>
                             {formatBytes(attachment.size)}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex space-x-1">
+                    <div {...sx("flex space-x-1")}>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -279,7 +280,7 @@ export function MessageAttachment({
                         className="h-8 w-8 p-0"
                         title="View document"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye {...sx("h-4 w-4")} />
                       </Button>
                       <Button
                         variant="ghost"
@@ -293,7 +294,7 @@ export function MessageAttachment({
                         className="h-8 w-8 p-0"
                         title="Download"
                       >
-                        <Download className="h-4 w-4" />
+                        <Download {...sx("h-4 w-4")} />
                       </Button>
                     </div>
                   </div>
@@ -306,7 +307,7 @@ export function MessageAttachment({
 
       {/* Expanded image modal */}
       {expandedImage && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div {...sx("fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4")}>
           <Button
             type="button"
             variant="ghost"
@@ -314,7 +315,8 @@ export function MessageAttachment({
             className="absolute inset-0 h-full w-full cursor-default rounded-none p-0 hover:bg-transparent focus-visible:ring-0"
             onClick={() => setExpandedImage(null)}
           />
-          <div className="relative max-w-4xl max-h-full z-10">
+
+          <div {...sx("relative max-w-4xl max-h-full z-10")}>
             <Button
               variant="secondary"
               size="sm"
@@ -331,7 +333,7 @@ export function MessageAttachment({
                   alt={attachment.name}
                   width={800}
                   height={600}
-                  className="object-contain max-w-full max-h-full"
+                  {...sx("object-contain max-w-full max-h-full")}
                   onClick={(e) => e.stopPropagation()}
                 />
               ) : null;

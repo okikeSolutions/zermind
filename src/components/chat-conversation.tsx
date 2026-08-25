@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +22,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
@@ -49,6 +48,7 @@ import { useFileAttachments } from "@/hooks/use-file-attachments";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { sx } from "@/styles/sx";
 
 const messageSchema = z.object({
   message: z
@@ -222,7 +222,7 @@ export function ChatConversation({
   return (
     <div
       ref={chatContainerRef}
-      className="flex flex-col h-full relative"
+      {...sx("flex flex-col h-full relative")}
       onDragEnter={
         fileAttachments.supportsAttachments ? fileAttachments.handleDragEnter : undefined
       }
@@ -241,8 +241,8 @@ export function ChatConversation({
           className="pointer-events-none border-2 border-dashed border-primary bg-primary/10 backdrop-blur-sm"
           showCloseButton={false}
         >
-          <div className="text-center space-y-4">
-            <Upload className="h-12 w-12 text-primary mx-auto" />
+          <div {...sx("text-center space-y-4")}>
+            <Upload {...sx("h-12 w-12 text-primary mx-auto")} />
             <DialogHeader>
               <DialogTitle className="text-lg font-semibold">Drop files here</DialogTitle>
               <DialogDescription className="text-sm">
@@ -255,7 +255,7 @@ export function ChatConversation({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex justify-center space-x-4 text-xs text-muted-foreground">
+            <div {...sx("flex justify-center space-x-4 text-xs text-muted-foreground")}>
               {fileAttachments.modelCapabilities.supportsImages && (
                 <span>
                   Images: up to{" "}
@@ -274,17 +274,17 @@ export function ChatConversation({
       </Dialog>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4">
+      <div {...sx("flex-1 overflow-y-auto p-2 sm:p-4 space-y-3 sm:space-y-4")}>
         {/* Error Display */}
         {error && (
-          <div className="flex items-center justify-center mb-3 sm:mb-4">
+          <div {...sx("flex items-center justify-center mb-3 sm:mb-4")}>
             <Card className="border-destructive bg-destructive/10 max-w-sm sm:max-w-md mx-2">
               <CardContent className="p-2 sm:p-3">
-                <div className="flex items-center space-x-2 text-destructive">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  <div className="text-sm">
-                    <p className="font-medium text-xs sm:text-sm">Error occurred</p>
-                    <p className="text-xs mt-1">{error.message}</p>
+                <div {...sx("flex items-center space-x-2 text-destructive")}>
+                  <AlertCircle {...sx("h-4 w-4 flex-shrink-0")} />
+                  <div {...sx("text-sm")}>
+                    <p {...sx("font-medium text-xs sm:text-sm")}>Error occurred</p>
+                    <p {...sx("text-xs mt-1")}>{error.message}</p>
                   </div>
                 </div>
               </CardContent>
@@ -293,14 +293,18 @@ export function ChatConversation({
         )}
 
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center space-y-3 sm:space-y-4 px-4">
-            <MessageSquare className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground" />
+          <div
+            {...sx(
+              "flex flex-col items-center justify-center h-full text-center space-y-3 sm:space-y-4 px-4",
+            )}
+          >
+            <MessageSquare {...sx("h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground")} />
             <div>
-              <h3 className="text-base sm:text-lg font-medium">Start the conversation</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">
+              <h3 {...sx("text-base sm:text-lg font-medium")}>Start the conversation</h3>
+              <p {...sx("text-xs sm:text-sm text-muted-foreground")}>
                 Send a message to begin chatting with AI
               </p>
-              <p className="text-xs text-muted-foreground mt-2">Using: {selectedModel}</p>
+              <p {...sx("text-xs text-muted-foreground mt-2")}>Using: {selectedModel}</p>
             </div>
           </div>
         ) : (
@@ -308,7 +312,7 @@ export function ChatConversation({
             {sortedMessages.map((message) => (
               <div
                 key={message.id}
-                className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
+                {...sx(cn("flex", message.role === "user" ? "justify-end" : "justify-start"))}
               >
                 <Card
                   className={cn(
@@ -317,20 +321,20 @@ export function ChatConversation({
                   )}
                 >
                   <CardContent className="p-2 sm:p-3">
-                    <div className="flex items-start space-x-1.5 sm:space-x-2">
-                      <div className="flex-shrink-0 mt-0.5">
+                    <div {...sx("flex items-start space-x-1.5 sm:space-x-2")}>
+                      <div {...sx("flex-shrink-0 mt-0.5")}>
                         {message.role === "user" ? (
-                          <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <User {...sx("h-3 w-3 sm:h-4 sm:w-4")} />
                         ) : (
-                          <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <Bot {...sx("h-3 w-3 sm:h-4 sm:w-4")} />
                         )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="whitespace-pre-wrap break-words text-xs sm:text-sm">
+                      <div {...sx("flex-1 min-w-0")}>
+                        <div {...sx("whitespace-pre-wrap break-words text-xs sm:text-sm")}>
                           {message.content}
                         </div>
                         <MessageAttachment attachments={message.attachments || []} />
-                        <div className="flex items-center justify-between mt-1.5 sm:mt-2">
+                        <div {...sx("flex items-center justify-between mt-1.5 sm:mt-2")}>
                           <Badge
                             variant="outline"
                             className={cn(
@@ -346,13 +350,16 @@ export function ChatConversation({
                             <Button
                               variant="ghost"
                               size="sm"
+                              aria-label={
+                                copiedMessageId === message.id ? "Response copied" : "Copy response"
+                              }
                               className="h-6 w-6 sm:h-7 sm:w-7 p-0 hover:bg-background/20"
                               onClick={() => copyToClipboard(message.content, message.id)}
                             >
                               {copiedMessageId === message.id ? (
-                                <Check className="h-3 w-3" />
+                                <Check {...sx("h-3 w-3")} />
                               ) : (
-                                <Copy className="h-3 w-3" />
+                                <Copy {...sx("h-3 w-3")} />
                               )}
                             </Button>
                           )}
@@ -365,15 +372,27 @@ export function ChatConversation({
             ))}
 
             {isLoading && (
-              <div className="flex justify-start">
+              <div {...sx("flex justify-start")}>
                 <Card className="bg-muted max-w-[85%] sm:max-w-[80%] md:max-w-[70%]">
                   <CardContent className="p-2 sm:p-3">
-                    <div className="flex items-center space-x-1.5 sm:space-x-2">
-                      <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
-                      <div className="flex space-x-1">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full animate-bounce"></div>
+                    <div {...sx("flex items-center space-x-1.5 sm:space-x-2")}>
+                      <Bot {...sx("h-3 w-3 sm:h-4 sm:w-4")} />
+                      <div {...sx("flex space-x-1")}>
+                        <div
+                          {...sx(
+                            "w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]",
+                          )}
+                        ></div>
+                        <div
+                          {...sx(
+                            "w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]",
+                          )}
+                        ></div>
+                        <div
+                          {...sx(
+                            "w-1.5 h-1.5 sm:w-2 sm:h-2 bg-current rounded-full animate-bounce",
+                          )}
+                        ></div>
                       </div>
                     </div>
                   </CardContent>
@@ -387,9 +406,9 @@ export function ChatConversation({
 
       {/* Message Input - Hidden in shared view */}
       {!isSharedView && (
-        <div className="border-t p-2 sm:p-4 bg-background/50 backdrop-blur space-y-2 sm:space-y-3">
+        <div {...sx("border-t p-2 sm:p-4 bg-background/50 backdrop-blur space-y-2 sm:space-y-3")}>
           {/* Model Selector and BYOK Status */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <div {...sx("flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3")}>
             <ModelSelector
               selectedModel={selectedModel}
               onModelChange={setSelectedModel}
@@ -400,21 +419,23 @@ export function ChatConversation({
             {/* Attachment Button */}
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    {fileAttachments.supportsAttachments ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                <TooltipTrigger render={<div />}>
+                  {fileAttachments.supportsAttachments ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
                           <Button
                             variant="outline"
                             disabled={isLoading}
                             className="w-full sm:w-auto h-9 sm:h-10"
-                          >
-                            <Paperclip className="h-4 w-4 mr-2" />
-                            <span className="text-sm">Attach</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-56">
+                          />
+                        }
+                      >
+                        <Paperclip {...sx("h-4 w-4 mr-2")} />
+                        <span {...sx("text-sm")}>Attach</span>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-56">
+                        <DropdownMenuGroup>
                           <DropdownMenuLabel className="text-sm">Attach Files</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           {fileAttachments.modelCapabilities.supportsImages && (
@@ -422,9 +443,9 @@ export function ChatConversation({
                               onClick={() => handleFileSelect("image")}
                               className="text-sm"
                             >
-                              <ImageIcon className="h-4 w-4 mr-2" />
+                              <ImageIcon {...sx("h-4 w-4 mr-2")} />
                               Upload Images
-                              <span className="ml-auto text-xs text-muted-foreground">
+                              <span {...sx("ml-auto text-xs text-muted-foreground")}>
                                 up to{" "}
                                 {Math.round(fileAttachments.modelCapabilities.maxImageSize! || 5)}
                                 MB
@@ -436,9 +457,9 @@ export function ChatConversation({
                               onClick={() => handleFileSelect("document")}
                               className="text-sm"
                             >
-                              <FileText className="h-4 w-4 mr-2" />
+                              <FileText {...sx("h-4 w-4 mr-2")} />
                               Upload PDFs
-                              <span className="ml-auto text-xs text-muted-foreground">
+                              <span {...sx("ml-auto text-xs text-muted-foreground")}>
                                 up to{" "}
                                 {Math.round(
                                   fileAttachments.modelCapabilities.maxDocumentSize! || 5,
@@ -447,19 +468,19 @@ export function ChatConversation({
                               </span>
                             </DropdownMenuItem>
                           )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        disabled={true}
-                        className="w-full sm:w-auto h-9 sm:h-10 opacity-50 cursor-not-allowed"
-                      >
-                        <Paperclip className="h-4 w-4 mr-2" />
-                        <span className="text-sm">Attach</span>
-                      </Button>
-                    )}
-                  </div>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      disabled={true}
+                      className="w-full sm:w-auto h-9 sm:h-10 opacity-50 cursor-not-allowed"
+                    >
+                      <Paperclip {...sx("h-4 w-4 mr-2")} />
+                      <span {...sx("text-sm")}>Attach</span>
+                    </Button>
+                  )}
                 </TooltipTrigger>
                 <TooltipContent>
                   {fileAttachments.supportsAttachments
@@ -509,21 +530,21 @@ export function ChatConversation({
 
           {/* Pending Files */}
           {fileAttachments.pendingFiles.length > 0 && (
-            <div className="space-y-2">
+            <div {...sx("space-y-2")}>
               {fileAttachments.pendingFiles.map((file) => (
                 <div
                   key={file.id}
-                  className="flex items-center justify-between bg-muted/50 rounded-lg p-2"
+                  {...sx("flex items-center justify-between bg-muted/50 rounded-lg p-2")}
                 >
-                  <div className="flex items-center space-x-2 flex-1 min-w-0">
-                    <div className="h-4 w-4 flex-shrink-0">
+                  <div {...sx("flex items-center space-x-2 flex-1 min-w-0")}>
+                    <div {...sx("h-4 w-4 flex-shrink-0")}>
                       {file.type.startsWith("image/") ? (
-                        <ImageIcon className="h-4 w-4" />
+                        <ImageIcon {...sx("h-4 w-4")} />
                       ) : (
-                        <FileText className="h-4 w-4" />
+                        <FileText {...sx("h-4 w-4")} />
                       )}
                     </div>
-                    <span className="text-xs sm:text-sm font-medium truncate">{file.name}</span>
+                    <span {...sx("text-xs sm:text-sm font-medium truncate")}>{file.name}</span>
                     <Badge variant="secondary" className="text-xs flex-shrink-0">
                       {formatBytes(file.size)}
                     </Badge>
@@ -531,11 +552,12 @@ export function ChatConversation({
                   <Button
                     variant="ghost"
                     size="sm"
+                    aria-label={`Remove ${file.name}`}
                     onClick={() => fileAttachments.removeFile(file.id)}
                     disabled={isLoading || fileAttachments.isUploading}
                     className="h-6 w-6 p-0 ml-2 flex-shrink-0"
                   >
-                    <X className="h-3 w-3" />
+                    <X {...sx("h-3 w-3")} />
                   </Button>
                 </div>
               ))}
@@ -544,7 +566,7 @@ export function ChatConversation({
 
           {/* Input Form */}
           <Form {...messageForm}>
-            <form onSubmit={messageForm.handleSubmit(handleSendMessage)} className="flex space-x-2">
+            <form onSubmit={messageForm.handleSubmit(handleSendMessage)} {...sx("flex space-x-2")}>
               <FormField
                 control={messageForm.control}
                 name="message"
@@ -568,32 +590,35 @@ export function ChatConversation({
                   </FormItem>
                 )}
               />
+
               {isLoading ? (
                 <Button
                   type="button"
                   onClick={stop}
                   size="icon"
                   variant="destructive"
+                  aria-label="Stop generating response"
                   className="flex-shrink-0 h-9 w-9 sm:h-10 sm:w-10"
                 >
-                  <StopCircle className="h-4 w-4" />
+                  <StopCircle {...sx("h-4 w-4")} />
                 </Button>
               ) : (
                 <Button
                   type="submit"
                   disabled={!messageForm.watch("message")?.trim()}
                   size="icon"
+                  aria-label="Send message"
                   className="flex-shrink-0 h-9 w-9 sm:h-10 sm:w-10"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send {...sx("h-4 w-4")} />
                 </Button>
               )}
             </form>
           </Form>
-          <p className="text-xs text-muted-foreground text-center px-2">
+          <p {...sx("text-xs text-muted-foreground text-center px-2")}>
             Press Enter to send, Shift + Enter for new line
             {fileAttachments.supportsAttachments && fileAttachments.pendingFiles.length === 0 && (
-              <span className="block mt-1">
+              <span {...sx("block mt-1")}>
                 💡 Drag and drop{" "}
                 {fileAttachments.modelCapabilities.supportsImages &&
                 fileAttachments.modelCapabilities.supportsDocuments
@@ -605,7 +630,7 @@ export function ChatConversation({
               </span>
             )}
             {!fileAttachments.supportsAttachments && (
-              <span className="block mt-1 text-muted-foreground/60">
+              <span {...sx("block mt-1 text-muted-foreground/60")}>
                 ℹ️ Current model does not support file attachments
               </span>
             )}
@@ -615,8 +640,8 @@ export function ChatConversation({
 
       {/* Read-only footer for shared view */}
       {isSharedView && (
-        <div className="border-t p-2 sm:p-4 bg-background/50 backdrop-blur">
-          <p className="text-xs text-muted-foreground text-center">
+        <div {...sx("border-t p-2 sm:p-4 bg-background/50 backdrop-blur")}>
+          <p {...sx("text-xs text-muted-foreground text-center")}>
             This is a shared chat conversation in read-only mode
           </p>
         </div>
