@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { ZermindLogo } from "@/components/zermind-logo";
 import { sx } from "@/styles/sx";
@@ -11,7 +12,8 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
           <ZermindLogo variant="compact" />
         </div>
       </div>
-      <div {...sx("absolute top-4 right-4 z-10")}>
+      <div {...sx("absolute top-4 right-4 z-10 flex items-center gap-2")}>
+        <LocaleSwitcher />
         <ThemeSwitcher />
       </div>
       <div {...sx("flex min-h-svh w-full items-center justify-center p-6 md:p-10")}>

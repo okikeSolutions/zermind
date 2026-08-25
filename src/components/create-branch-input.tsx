@@ -22,20 +22,21 @@ import { z } from "zod";
 import { type Message } from "@/lib/schemas/chat";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const branchFormSchema = z.object({
   branchName: z
     .string()
     .optional()
     .refine((val) => !val || val.length >= 3, {
-      message: "Branch name must be at least 3 characters if provided",
+      message: m.copy_branch_name_must_be_at_least_3_characters_if_provided(),
     })
     .refine((val) => !val || val.length <= 100, {
-      message: "Branch name must be less than 100 characters",
+      message: m.copy_branch_name_must_be_less_than_100_characters(),
     }),
   message: z
     .string()
-    .min(1, "Message cannot be empty")
-    .max(4000, "Message is too long (max 4000 characters)")
+    .min(1, m.copy_message_cannot_be_empty())
+    .max(4000, m.copy_message_is_too_long_max_4000_characters())
     .trim(),
 });
 
@@ -110,10 +111,10 @@ function BranchingForm({
         >
           <div {...sx("flex items-center gap-2")}>
             <GitBranch {...sx("h-4 w-4 text-orange-500")} />
-            <h4 {...sx("text-sm font-medium")}>Create New Branch</h4>
+            <h4 {...sx("text-sm font-medium")}>{m.copy_create_new_branch()}</h4>
           </div>
           <Badge variant="outline" className="text-xs w-fit">
-            From node: {parentNodeId.slice(0, 8)}...
+            {m.copy_from_node()} {parentNodeId.slice(0, 8)}...
           </Badge>
         </div>
 
@@ -124,9 +125,9 @@ function BranchingForm({
               "flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0",
             )}
           >
-            <p {...sx("text-xs text-muted-foreground")}>Branching from:</p>
+            <p {...sx("text-xs text-muted-foreground")}>{m.copy_branching_from()}</p>
             <Badge variant="outline" className="text-xs w-fit">
-              {context.length} message{context.length !== 1 ? "s" : ""} in context
+              {context.length} message{context.length !== 1 ? "s" : ""} {m.copy_in_context()}
             </Badge>
           </div>
 
@@ -147,8 +148,8 @@ function BranchingForm({
                 ))}
                 {context.length > 1 && (
                   <div {...sx("text-center text-xs text-muted-foreground/70 pt-1")}>
-                    ... and {context.length - 1} more message
-                    {context.length - 1 !== 1 ? "s" : ""} before this
+                    ... and {context.length - 1} {m.copy_more_message()}{" "}
+                    {context.length - 1 !== 1 ? "s" : ""} {m.copy_before_this()}
                   </div>
                 )}
               </div>
@@ -159,7 +160,7 @@ function BranchingForm({
         {/* Branch Messages */}
         {messages.length > context.length && (
           <div {...sx("space-y-2 max-h-32 sm:max-h-40 overflow-y-auto")}>
-            <p {...sx("text-xs text-muted-foreground")}>New branch messages:</p>
+            <p {...sx("text-xs text-muted-foreground")}>{m.copy_new_branch_messages()}</p>
             {messages.slice(context.length).map((message) => {
               const msg = message as unknown as { content?: string };
               const messageContent =
@@ -207,17 +208,17 @@ function BranchingForm({
               name="branchName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Branch Name (optional)</FormLabel>
+                  <FormLabel>{m.copy_branch_name_optional()}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Alternative approach, Different perspective..."
+                      placeholder={m.copy_e_g_alternative_approach_different_perspective()}
                       disabled={isLoading}
                       className="min-h-[44px] sm:min-h-auto text-base sm:text-sm"
                       {...field}
                     />
                   </FormControl>
                   <FormDescription className="text-xs leading-relaxed">
-                    Give this branch a descriptive name to identify it later
+                    {m.copy_give_this_branch_a_descriptive_name_to_identify_it_later()}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -242,7 +243,7 @@ function BranchingForm({
                 onClick={onClose}
                 className="min-h-[36px] sm:min-h-auto w-full sm:w-auto"
               >
-                Cancel
+                {m.copy_cancel()}
               </Button>
             </div>
 
@@ -254,7 +255,7 @@ function BranchingForm({
                   <FormControl>
                     <div {...sx("flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2")}>
                       <Input
-                        placeholder="Start the new branch with a different question or approach..."
+                        placeholder={m.copy_start_the_new_branch_with_a_different_question_or_approach()}
                         disabled={isLoading}
                         className="flex-1 min-h-[44px] sm:min-h-auto text-base sm:text-sm"
                         {...field}
@@ -294,7 +295,7 @@ function BranchingForm({
             />
 
             <p {...sx("text-xs text-muted-foreground text-center leading-relaxed px-2")}>
-              Create a new conversation path from this point • Press Enter to send
+              {m.copy_create_a_new_conversation_path_from_this_point_press_enter_to_se()}
             </p>
           </form>
         </Form>
@@ -330,7 +331,7 @@ export function CreateBranchInput({
             ></div>
             <div {...sx("w-2 h-2 bg-current rounded-full animate-bounce")}></div>
             <span {...sx("text-sm text-muted-foreground ml-2")}>
-              Loading conversation context...
+              {m.copy_loading_conversation_context()}
             </span>
           </div>
         </CardContent>
@@ -357,7 +358,7 @@ export function CreateBranchInput({
               onClick={onClose}
               className="min-h-[36px] sm:min-h-auto"
             >
-              Close
+              {m.copy_close()}
             </Button>
           </div>
         </CardContent>

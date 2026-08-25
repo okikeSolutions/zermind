@@ -3,11 +3,12 @@ import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { seo } from "@/lib/seo";
 
+import * as m from "@/paraglide/messages.js";
 export const Route = createFileRoute("/auth/error")({
   head: () =>
     seo({
-      title: "Authentication error | Zermind",
-      description: "Zermind could not complete the authentication request.",
+      title: m.copy_authentication_error_zermind(),
+      description: m.copy_zermind_could_not_complete_the_authentication_request(),
       path: "/auth/error",
       noIndex: true,
     }),
@@ -23,10 +24,12 @@ function AuthError() {
     <AuthPageShell>
       <Card>
         <CardHeader>
-          <CardTitle>Sorry, something went wrong.</CardTitle>
+          <CardTitle>{m.copy_sorry_something_went_wrong()}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>{error ? `Error code: ${error}` : "An unspecified error occurred."}</p>
+          <p>
+            {error ? m.copy_error_code({ code: error }) : m.copy_an_unspecified_error_occurred()}
+          </p>
         </CardContent>
       </Card>
     </AuthPageShell>

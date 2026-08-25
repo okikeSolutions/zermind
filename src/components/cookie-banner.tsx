@@ -4,6 +4,7 @@ import Link from "@/lib/navigation";
 
 // Define the window interface to include the addConsentListener, updateConsentState, and gtag functions
 import { sx } from "@/styles/sx";
+import * as m from "@/paraglide/messages.js";
 declare global {
   interface Window {
     addConsentListener: (callback: (consent: { [key: string]: boolean }) => void) => void;
@@ -128,25 +129,24 @@ const CookieBanner: React.FC = () => {
   return (
     <div
       role="region"
-      aria-label="Cookie consent"
+      aria-label={m.copy_cookie_consent()}
       {...sx(
         "fixed bottom-0 left-0 right-0 bg-card text-card-foreground border-t border-border p-4 shadow-md z-50",
       )}
     >
       <div {...sx("container mx-auto flex flex-col sm:flex-row items-center justify-between")}>
         <p {...sx("text-sm text-muted-foreground mb-2 sm:mb-0")}>
-          We use cookies to enhance your experience. By continuing to visit this site you agree to
-          our use of cookies.{" "}
+          {m.copy_we_use_cookies_to_enhance_your_experience_by_continuing_to_visit()}{" "}
           <Link href="/privacy" {...sx("text-rose-800 hover:text-rose-700 underline")}>
-            Learn more
+            {m.copy_learn_more()}
           </Link>
         </p>
         <div>
           <Button onClick={rejectCookies} variant="outline" className="mr-2">
-            Reject
+            {m.copy_reject()}
           </Button>
           <Button onClick={acceptCookies} className="ml-0 sm:ml-4">
-            Accept
+            {m.copy_accept()}
           </Button>
         </div>
       </div>

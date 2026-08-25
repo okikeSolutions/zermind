@@ -21,6 +21,7 @@ import { ConversationNode, ConversationNodeData } from "./mind-map-node";
 import { Brain, GitBranch, Plus, Zap } from "lucide-react";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -262,7 +263,7 @@ export function MindMapView({
             strokeWidth: isMultiModelChild ? 3 : 2,
             strokeDasharray: isMultiModelChild ? "5 5" : undefined,
           },
-          label: isMultiModelChild ? "Compare" : undefined,
+          label: isMultiModelChild ? m.copy_compare() : undefined,
           labelStyle: {
             fontSize: "10px",
             fontWeight: "bold",
@@ -394,12 +395,11 @@ export function MindMapView({
           <div {...sx("flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2")}>
             <div {...sx("flex items-center gap-2")}>
               <Brain {...sx("h-4 w-4 sm:h-5 sm:w-5 text-purple-500")} />
-              <h3 {...sx("font-semibold text-sm sm:text-base")}>Mind Map</h3>
+              <h3 {...sx("font-semibold text-sm sm:text-base")}>{m.copy_mind_map()}</h3>
             </div>
             {multiModelComparisons > 0 && (
               <Badge variant="secondary" className="text-xs bg-secondary text-secondary-foreground">
-                <Zap {...sx("h-3 w-3 mr-1")} />
-                Multi-Model
+                <Zap {...sx("h-3 w-3 mr-1")} /> {m.copy_multi_model()}
               </Badge>
             )}
           </div>
@@ -412,7 +412,7 @@ export function MindMapView({
               {userNodes} user
             </Badge>
             <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-              {assistantNodes} AI
+              {assistantNodes} {m.copy_ai()}
             </Badge>
             {uniqueModels > 1 && (
               <Badge variant="outline" className="text-xs px-1.5 py-0.5">
@@ -432,7 +432,7 @@ export function MindMapView({
           {selectedNodeId && (
             <div {...sx("mt-2 pt-2 border-t")}>
               <p {...sx("text-xs text-muted-foreground truncate")}>
-                Selected: {selectedNodeId.slice(0, 8)}...
+                {m.copy_selected()} {selectedNodeId.slice(0, 8)}...
               </p>
             </div>
           )}
@@ -454,8 +454,8 @@ export function MindMapView({
               className="w-full min-h-[36px] sm:min-h-auto text-xs sm:text-sm px-2 sm:px-3"
             >
               <GitBranch {...sx("h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2")} />
-              <span {...sx("hidden sm:inline")}>Create Branch</span>
-              <span {...sx("sm:hidden")}>Branch</span>
+              <span {...sx("hidden sm:inline")}>{m.copy_create_branch()}</span>
+              <span {...sx("sm:hidden")}>{m.copy_branch()}</span>
             </Button>
 
             {/* Multi-Model Branch Button */}
@@ -466,11 +466,11 @@ export function MindMapView({
                 onClick={() => selectedNodeId && onCreateMultiModelBranch(selectedNodeId)}
                 disabled={!selectedNodeId}
                 className="w-full min-h-[36px] sm:min-h-auto text-xs sm:text-sm px-2 sm:px-3 bg-secondary text-secondary-foreground"
-                title="Compare multiple AI models"
+                title={m.copy_compare_multiple_ai_models()}
               >
                 <Zap {...sx("h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2")} />
-                <span {...sx("hidden sm:inline")}>Multi - Model</span>
-                <span {...sx("sm:hidden")}>Multi</span>
+                <span {...sx("hidden sm:inline")}>{m.copy_multi_model_2()}</span>
+                <span {...sx("sm:hidden")}>{m.copy_multi()}</span>
               </Button>
             )}
 
@@ -482,8 +482,8 @@ export function MindMapView({
               className="w-full min-h-[36px] sm:min-h-auto text-xs sm:text-sm px-2 sm:px-3"
             >
               <Plus {...sx("h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2")} />
-              <span {...sx("hidden sm:inline")}>Continue Chat</span>
-              <span {...sx("sm:hidden")}>Continue</span>
+              <span {...sx("hidden sm:inline")}>{m.copy_continue_chat()}</span>
+              <span {...sx("sm:hidden")}>{m.copy_continue()}</span>
             </Button>
           </div>
         </Panel>

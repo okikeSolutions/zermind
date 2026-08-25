@@ -44,18 +44,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const providers = ["openrouter", "openai", "anthropic", "meta", "google"] as const;
 
 const addApiKeySchema = z.object({
   provider: z.enum(providers, {
-    message: "Please select a provider",
+    message: m.copy_please_select_a_provider(),
   }),
   keyName: z
     .string()
-    .min(1, "Key name is required")
-    .min(3, "Key name must be at least 3 characters")
-    .max(50, "Key name must be less than 50 characters"),
-  apiKey: z.string().min(1, "API key is required").min(10, "API key seems too short"),
+    .min(1, m.copy_key_name_is_required())
+    .min(3, m.copy_key_name_must_be_at_least_3_characters())
+    .max(50, m.copy_key_name_must_be_less_than_50_characters()),
+  apiKey: z.string().min(1, m.copy_api_key_is_required()).min(10, m.copy_api_key_seems_too_short()),
 });
 
 type AddApiKeyFormData = z.infer<typeof addApiKeySchema>;
@@ -95,46 +96,50 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
 
     try {
       await createApiKeyMutation.mutateAsync(data);
-      setSuccess("API key added successfully");
+      setSuccess(m.copy_api_key_added_successfully());
       setIsAddDialogOpen(false);
       form.reset();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to add API key");
+      setFormError(err instanceof Error ? err.message : m.copy_failed_to_add_api_key());
     }
   };
 
   const handleToggleActive = async (keyId: string, isActive: boolean) => {
     try {
       await updateApiKeyMutation.mutateAsync({ keyId, data: { isActive } });
-      setSuccess(`API key ${isActive ? "activated" : "deactivated"} successfully`);
+      setSuccess(
+        isActive
+          ? m.copy_api_key_activated_successfully()
+          : m.copy_api_key_deactivated_successfully(),
+      );
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to update API key");
+      setFormError(err instanceof Error ? err.message : m.copy_failed_to_update_api_key());
     }
   };
 
   const handleDeleteApiKey = async (keyId: string) => {
-    if (!confirm("Are you sure you want to delete this API key? This action cannot be undone.")) {
+    if (!confirm(m.copy_are_you_sure_you_want_to_delete_this_api_key_this_action_cannot())) {
       return;
     }
 
     try {
       await deleteApiKeyMutation.mutateAsync(keyId);
-      setSuccess("API key deleted successfully");
+      setSuccess(m.copy_api_key_deleted_successfully());
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to delete API key");
+      setFormError(err instanceof Error ? err.message : m.copy_failed_to_delete_api_key());
     }
   };
 
   const providers: { value: Provider; label: string; description: string }[] = [
     {
       value: "openrouter",
-      label: "OpenRouter",
-      description: "Access to multiple AI models",
+      label: m.copy_openrouter(),
+      description: m.copy_access_to_multiple_ai_models(),
     },
-    { value: "openai", label: "OpenAI", description: "GPT models" },
-    { value: "anthropic", label: "Anthropic", description: "Claude models" },
-    { value: "meta", label: "Meta", description: "Llama models" },
-    { value: "google", label: "Google", description: "Gemini models" },
+    { value: "openai", label: m.copy_openai(), description: m.copy_gpt_models() },
+    { value: "anthropic", label: m.copy_anthropic(), description: m.copy_claude_models() },
+    { value: "meta", label: m.copy_meta(), description: m.copy_llama_models() },
+    { value: "google", label: m.copy_google(), description: m.copy_gemini_models() },
   ];
 
   return (
@@ -168,23 +173,21 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
         )}
       >
         <div {...sx("space-y-1")}>
-          <h3 {...sx("text-base sm:text-lg font-medium")}>API Keys</h3>
+          <h3 {...sx("text-base sm:text-lg font-medium")}>{m.copy_api_keys()}</h3>
           <p {...sx("text-xs sm:text-sm text-muted-foreground")}>
-            Manage your API keys for different AI providers
+            {m.copy_manage_your_api_keys_for_different_ai_providers()}
           </p>
         </div>
 
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger render={<Button className="w-full sm:w-auto" />}>
-            <Plus {...sx("h-4 w-4 mr-2")} />
-            Add API Key
+            <Plus {...sx("h-4 w-4 mr-2")} /> {m.copy_add_api_key()}
           </DialogTrigger>
           <DialogContent className="mx-4 max-w-md sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle className="text-lg sm:text-xl">Add New API Key</DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl">{m.copy_add_new_api_key()}</DialogTitle>
               <DialogDescription className="text-sm">
-                Add an API key to use your own credits with AI providers. Your key will be encrypted
-                and stored securely.
+                {m.copy_add_an_api_key_to_use_your_own_credits_with_ai_providers_your_ke()}
               </DialogDescription>
             </DialogHeader>
 
@@ -195,7 +198,7 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                   name="provider"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Provider</FormLabel>
+                      <FormLabel className="text-sm">{m.copy_provider()}</FormLabel>
                       <Select
                         items={providers}
                         onValueChange={field.onChange}
@@ -231,16 +234,16 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                   name="keyName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Key Name</FormLabel>
+                      <FormLabel className="text-sm">{m.copy_key_name()}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., My OpenRouter Key"
+                          placeholder={m.copy_e_g_my_openrouter_key()}
                           {...field}
                           className="text-sm"
                         />
                       </FormControl>
                       <FormDescription className="text-xs">
-                        A descriptive name to identify this API key
+                        {m.copy_a_descriptive_name_to_identify_this_api_key()}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -252,12 +255,12 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                   name="apiKey"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">API Key</FormLabel>
+                      <FormLabel className="text-sm">{m.copy_api_key()}</FormLabel>
                       <FormControl>
                         <div {...sx("relative")}>
                           <Input
                             type={showApiKey ? "text" : "password"}
-                            placeholder="Enter your API key"
+                            placeholder={m.copy_enter_your_api_key()}
                             {...field}
                             className="text-sm pr-10"
                           />
@@ -278,7 +281,7 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                         </div>
                       </FormControl>
                       <FormDescription className="text-xs">
-                        Your API key will be encrypted and stored securely
+                        {m.copy_your_api_key_will_be_encrypted_and_stored_securely()}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -296,14 +299,14 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                     disabled={createApiKeyMutation.isPending}
                     className="w-full sm:w-auto"
                   >
-                    Cancel
+                    {m.copy_cancel()}
                   </Button>
                   <Button
                     type="submit"
                     disabled={createApiKeyMutation.isPending}
                     className="w-full sm:w-auto"
                   >
-                    {createApiKeyMutation.isPending ? "Adding..." : "Add API Key"}
+                    {createApiKeyMutation.isPending ? m.copy_adding() : m.copy_add_api_key()}
                   </Button>
                 </DialogFooter>
               </form>
@@ -323,13 +326,12 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
             <Key {...sx("h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-3 sm:mb-4")} />
-            <h3 {...sx("font-medium mb-1 sm:mb-2 text-sm sm:text-base")}>No API Keys</h3>
+            <h3 {...sx("font-medium mb-1 sm:mb-2 text-sm sm:text-base")}>{m.copy_no_api_keys()}</h3>
             <p {...sx("text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 px-4")}>
-              Add your API keys to use your own credits with AI providers
+              {m.copy_add_your_api_keys_to_use_your_own_credits_with_ai_providers()}
             </p>
             <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
-              <Plus {...sx("h-4 w-4 mr-2")} />
-              Add Your First API Key
+              <Plus {...sx("h-4 w-4 mr-2")} /> {m.copy_add_your_first_api_key()}
             </Button>
           </CardContent>
         </Card>
@@ -358,15 +360,21 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                           variant={apiKey.isActive ? "default" : "secondary"}
                           className="text-xs"
                         >
-                          {apiKey.isActive ? "Active" : "Inactive"}
+                          {apiKey.isActive ? m.copy_active() : m.copy_inactive()}
                         </Badge>
                       </div>
                     </div>
                     <div {...sx("text-xs sm:text-sm text-muted-foreground space-y-0.5")}>
-                      <p {...sx("break-all")}>Key: {apiKey.keyPreview}</p>
-                      <p>Added: {new Date(apiKey.createdAt).toLocaleDateString()}</p>
+                      <p {...sx("break-all")}>
+                        {m.copy_key()} {apiKey.keyPreview}
+                      </p>
+                      <p>
+                        {m.copy_added()} {new Date(apiKey.createdAt).toLocaleDateString()}
+                      </p>
                       {apiKey.lastUsedAt && (
-                        <p>Last used: {new Date(apiKey.lastUsedAt).toLocaleDateString()}</p>
+                        <p>
+                          {m.copy_last_used()} {new Date(apiKey.lastUsedAt).toLocaleDateString()}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -374,7 +382,7 @@ export function ApiKeyManagement({ className }: ApiKeyManagementProps) {
                   <div {...sx("flex items-center justify-between sm:justify-end gap-3 sm:gap-2")}>
                     <div {...sx("flex items-center gap-2")}>
                       <span {...sx("text-xs sm:text-sm text-muted-foreground")}>
-                        {apiKey.isActive ? "Active" : "Inactive"}
+                        {apiKey.isActive ? m.copy_active() : m.copy_inactive()}
                       </span>
                       <Switch
                         checked={apiKey.isActive}

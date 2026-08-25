@@ -11,6 +11,7 @@ import {
 } from "@/lib/utils/model-utils";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 export interface ConversationNodeData extends Record<string, unknown> {
   id: string;
   role: "user" | "assistant";
@@ -115,7 +116,7 @@ export const ConversationNode = memo(
                   <Bot {...sx(`h-4 w-4 ${modelTheme.icon}`)} />
                 )}
                 <span {...sx("text-sm font-medium")}>
-                  {isUser ? "You" : getModelDisplayName(model || "Assistant")}
+                  {isUser ? m.copy_you() : getModelDisplayName(model || m.copy_assistant())}
                 </span>
                 <div {...sx("flex flex-col items-start gap-1")}>
                   {!isUser && model && (
@@ -129,8 +130,7 @@ export const ConversationNode = memo(
                       variant="secondary"
                       className="text-xs bg-secondary text-secondary-foreground"
                     >
-                      <Zap {...sx("h-3 w-3 mr-1")} />
-                      Multi-Model
+                      <Zap {...sx("h-3 w-3 mr-1")} /> {m.copy_multi_model()}
                     </Badge>
                   )}
 
@@ -142,8 +142,7 @@ export const ConversationNode = memo(
 
                   {nodeType === "branching_point" && (
                     <Badge variant="secondary" className="text-xs">
-                      <GitBranch {...sx("h-3 w-3 mr-1")} />
-                      Branch
+                      <GitBranch {...sx("h-3 w-3 mr-1")} /> {m.copy_branch()}
                     </Badge>
                   )}
                 </div>
@@ -152,7 +151,7 @@ export const ConversationNode = memo(
 
             {hasModelComparison && (
               <div {...sx("flex items-center gap-1 mt-2 pt-2 border-t border-border/50")}>
-                <span {...sx("text-xs text-muted-foreground")}>Compared with:</span>
+                <span {...sx("text-xs text-muted-foreground")}>{m.copy_compared_with()}</span>
                 <div {...sx("flex gap-1 flex-wrap")}>
                   {siblingModels!.slice(0, 3).map((siblingModel) => {
                     const siblingTheme = getModelTheme(siblingModel);
@@ -188,15 +187,14 @@ export const ConversationNode = memo(
                 onClick={() => onResumeConversation?.(data.id)}
                 className="flex-1"
               >
-                <Play {...sx("h-3 w-3 mr-1")} />
-                Resume
+                <Play {...sx("h-3 w-3 mr-1")} /> {m.copy_resume()}
               </Button>
 
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => onCreateBranch?.(data.id)}
-                aria-label="Create branch"
+                aria-label={m.copy_create_branch_2()}
               >
                 <Plus {...sx("h-3 w-3")} />
               </Button>
@@ -206,9 +204,9 @@ export const ConversationNode = memo(
                   size="sm"
                   variant="outline"
                   onClick={() => onCreateMultiModelBranch(data.id)}
-                  aria-label="Compare multiple AI models"
+                  aria-label={m.copy_compare_multiple_ai_models()}
                   className="bg-secondary text-secondary-foreground"
-                  title="Compare multiple AI models"
+                  title={m.copy_compare_multiple_ai_models()}
                 >
                   <Zap {...sx("h-3 w-3")} />
                 </Button>

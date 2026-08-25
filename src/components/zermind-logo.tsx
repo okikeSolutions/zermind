@@ -2,6 +2,7 @@ import Link from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 interface ZermindLogoProps {
   variant?: "default" | "compact";
   className?: string;
@@ -17,7 +18,9 @@ export function ZermindLogo({ variant = "default", className = "" }: ZermindLogo
         size="sm"
         className={`hover:bg-transparent ${className}`}
       >
-        <span {...sx("font-bold text-lg bg-primary bg-clip-text text-transparent")}>Zermind</span>
+        <span {...sx("font-bold text-lg bg-primary bg-clip-text text-transparent")}>
+          {m.copy_zermind()}
+        </span>
       </Button>
     );
   }
@@ -29,7 +32,9 @@ export function ZermindLogo({ variant = "default", className = "" }: ZermindLogo
       variant="ghost"
       className={`hover:bg-transparent ${className}`}
     >
-      <span {...sx("font-bold text-2xl bg-primary bg-clip-text text-transparent")}>Zermind</span>
+      <span {...sx("font-bold text-2xl bg-primary bg-clip-text text-transparent")}>
+        {m.copy_zermind()}
+      </span>
     </Button>
   );
 }

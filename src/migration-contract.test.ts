@@ -25,6 +25,7 @@ describe("TanStack Start and StyleX migration contract", () => {
     expect(packages["tailwind-merge"]).toBeUndefined();
     expect(packages["@stylexjs/stylex"]).toBeDefined();
     expect(packages["@tanstack/react-start"]).toBeDefined();
+    expect(packages["@inlang/paraglide-js"]).toBeDefined();
   });
 
   it("transforms DOM utilities once and passes raw utilities to component adapters", async () => {
@@ -116,12 +117,28 @@ describe("TanStack Start and StyleX migration contract", () => {
     const robots = await readFile(path.join(projectRoot, "public/robots.txt"), "utf8");
     const sitemap = await readFile(path.join(projectRoot, "src/routes/sitemap[.]xml.ts"), "utf8");
     const viteConfig = await readFile(path.join(projectRoot, "vite.config.ts"), "utf8");
+    const i18nConfig = await readFile(path.join(projectRoot, "i18n/config.ts"), "utf8");
 
     expect(robots).toContain("Sitemap: https://zermind.ai/sitemap.xml");
     expect(robots).toContain("Disallow: /api/");
+    expect(sitemap).toContain('hreflang="x-default"');
+    expect(viteConfig).toContain("paraglideVitePlugin");
     for (const path of ["/privacy", "/terms", "/imprint"]) {
-      expect(sitemap).toContain(path);
-      expect(viteConfig).toContain(path);
+      expect(i18nConfig).toContain(path);
     }
+  });
+
+  it("keeps the Paraglide integration at the router and server boundaries", async () => {
+    const viteConfig = await readFile(path.join(projectRoot, "vite.config.ts"), "utf8");
+    const router = await readFile(path.join(projectRoot, "src/router.tsx"), "utf8");
+    const server = await readFile(path.join(projectRoot, "src/server.ts"), "utf8");
+    const rootRoute = await readFile(path.join(projectRoot, "src/routes/__root.tsx"), "utf8");
+
+    expect(viteConfig).toContain("paraglideVitePlugin");
+    expect(viteConfig).toContain("localizedPrerenderPaths");
+    expect(router).toContain("deLocalizeUrl");
+    expect(router).toContain("localizeUrl");
+    expect(server).toContain("paraglideMiddleware");
+    expect(rootRoute).toContain("lang={getLocale()}");
   });
 });

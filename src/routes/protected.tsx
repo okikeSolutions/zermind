@@ -4,11 +4,12 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { seo } from "@/lib/seo";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 export const Route = createFileRoute("/protected")({
   head: () =>
     seo({
-      title: "Zermind workspace",
-      description: "Your private Zermind workspace.",
+      title: m.copy_zermind_workspace(),
+      description: m.copy_your_private_zermind_workspace(),
       path: "/protected",
       noIndex: true,
     }),

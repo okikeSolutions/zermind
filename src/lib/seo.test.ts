@@ -1,22 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { absoluteUrl, seo } from "./seo";
-import { buildHomeJsonLd, buildSiteJsonLd, homeFaqs } from "./site-content";
+import { absoluteUrl, localizedAbsoluteUrl, seo } from "./seo";
+import { buildHomeJsonLd, buildSiteJsonLd, getHomeFaqs } from "./site-content";
 
 describe("SEO metadata", () => {
   it("creates canonical and social metadata for public pages", () => {
     const head = seo({
       title: "Example | Zermind",
       description: "Example description",
-      path: "/example",
+      path: "/privacy",
     });
 
     expect(head.links).toContainEqual({
       rel: "canonical",
-      href: absoluteUrl("/example"),
+      href: localizedAbsoluteUrl("/privacy"),
     });
     expect(head.meta).toContainEqual({
       property: "og:url",
-      content: absoluteUrl("/example"),
+      content: localizedAbsoluteUrl("/privacy"),
     });
     expect(head.meta).toContainEqual({
       name: "twitter:card",
@@ -24,9 +24,14 @@ describe("SEO metadata", () => {
     });
     expect(JSON.parse(head.scripts?.[0]?.children ?? "{}")).toMatchObject({
       "@type": "WebPage",
-      url: absoluteUrl("/example"),
+      url: localizedAbsoluteUrl("/privacy"),
       inLanguage: "en",
-      isPartOf: { "@id": absoluteUrl("/#website") },
+      isPartOf: { "@id": localizedAbsoluteUrl("/#website") },
+    });
+    expect(head.links).toContainEqual({
+      rel: "alternate",
+      hrefLang: "de",
+      href: absoluteUrl("/de/privacy"),
     });
   });
 
@@ -65,6 +70,7 @@ describe("SEO metadata", () => {
   it("keeps homepage FAQ schema aligned with the visible FAQ content", () => {
     const siteJsonLd = buildSiteJsonLd();
     const jsonLd = buildHomeJsonLd();
+    const homeFaqs = getHomeFaqs();
     const graph = jsonLd["@graph"];
     const faqPage = graph.find((entry) => entry["@type"] === "FAQPage");
 

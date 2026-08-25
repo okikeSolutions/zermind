@@ -37,21 +37,22 @@ import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 
 // Form schema
 import { sx } from "@/styles/sx";
+import * as m from "@/paraglide/messages.js";
 const feedbackFormSchema = z.object({
   message: z
     .string()
-    .min(1, "Feedback message is required")
-    .max(2000, "Feedback message is too long"),
+    .min(1, m.copy_feedback_message_is_required())
+    .max(2000, m.copy_feedback_message_is_too_long()),
   type: z.enum(["general", "bug", "feature", "improvement", "complaint", "compliment"]),
 });
 
 const feedbackTypeItems = [
-  { value: "general", label: "General Feedback" },
-  { value: "bug", label: "Bug Report" },
-  { value: "feature", label: "Feature Request" },
-  { value: "improvement", label: "Improvement" },
-  { value: "complaint", label: "Complaint" },
-  { value: "compliment", label: "Compliment" },
+  { value: "general", label: m.copy_general_feedback() },
+  { value: "bug", label: m.copy_bug_report() },
+  { value: "feature", label: m.copy_feature_request() },
+  { value: "improvement", label: m.copy_improvement() },
+  { value: "complaint", label: m.copy_complaint() },
+  { value: "compliment", label: m.copy_compliment() },
 ] as const;
 
 type FeedbackFormValues = z.infer<typeof feedbackFormSchema>;
@@ -83,12 +84,14 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
         userAgent: navigator.userAgent,
       });
 
-      toast.success("Thank you for your feedback! We'll review it soon.");
+      toast.success(m.copy_thank_you_for_your_feedback_we_ll_review_it_soon());
       form.reset();
       handleOpenChange(false);
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      toast.error(getFriendlyErrorMessage(error, "Failed to submit feedback. Please try again."));
+      toast.error(
+        getFriendlyErrorMessage(error, m.copy_failed_to_submit_feedback_please_try_again()),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -107,11 +110,10 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
       <DialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-[425px] sm:mx-auto sm:w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <MessageSquare {...sx("h-5 w-5")} />
-            Share Your Feedback
+            <MessageSquare {...sx("h-5 w-5")} /> {m.copy_share_your_feedback()}
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            Help us improve by sharing your thoughts, reporting bugs, or suggesting new features.
+            {m.copy_help_us_improve_by_sharing_your_thoughts_reporting_bugs_or_sugge()}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -124,7 +126,7 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Feedback Type</FormLabel>
+                  <FormLabel className="text-sm font-medium">{m.copy_feedback_type()}</FormLabel>
                   <Select
                     items={feedbackTypeItems}
                     onValueChange={field.onChange}
@@ -156,10 +158,10 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Your Message</FormLabel>
+                  <FormLabel className="text-sm font-medium">{m.copy_your_message()}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Tell us what's on your mind..."
+                      placeholder={m.copy_tell_us_what_s_on_your_mind()}
                       disabled={isSubmitting}
                       className="min-h-[100px] sm:min-h-[120px] resize-none text-base sm:text-sm"
                       maxLength={2000}
@@ -182,14 +184,14 @@ export function FeedbackDialog({ children }: FeedbackDialogProps) {
                 disabled={isSubmitting}
                 className="w-full sm:w-auto mr-2"
               >
-                Cancel
+                {m.copy_cancel()}
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting || !form.watch("message").trim()}
                 className="w-full sm:w-auto"
               >
-                {isSubmitting ? "Submitting..." : "Submit Feedback"}
+                {isSubmitting ? m.copy_submitting() : m.copy_submit_feedback()}
               </Button>
             </DialogFooter>
           </form>

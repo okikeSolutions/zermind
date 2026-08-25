@@ -1,8 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ZermindLogo } from "@/components/zermind-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 export default function Page() {
   return (
     <div {...sx("min-h-svh bg-gradient-to-br from-background via-background to-muted/30 relative")}>
@@ -14,7 +16,8 @@ export default function Page() {
       </div>
 
       {/* Theme Switcher in top right */}
-      <div {...sx("absolute top-4 right-4 z-10")}>
+      <div {...sx("absolute top-4 right-4 z-10 flex items-center gap-2")}>
+        <LocaleSwitcher />
         <ThemeSwitcher />
       </div>
 
@@ -24,13 +27,12 @@ export default function Page() {
           <div {...sx("flex flex-col gap-6")}>
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl">Thank you for signing up!</CardTitle>
-                <CardDescription>Check your email to confirm</CardDescription>
+                <CardTitle className="text-2xl">{m.copy_thank_you_for_signing_up()}</CardTitle>
+                <CardDescription>{m.copy_check_your_email_to_confirm()}</CardDescription>
               </CardHeader>
               <CardContent>
                 <p {...sx("text-sm text-muted-foreground")}>
-                  You&apos;ve successfully signed up. Please check your email to confirm your
-                  account before signing in.
+                  {m.copy_you_ve_successfully_signed_up_please_check_your_email_to_confirm()}
                 </p>
               </CardContent>
             </Card>

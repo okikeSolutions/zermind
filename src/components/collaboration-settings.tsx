@@ -15,19 +15,20 @@ import { Users, Eye, MousePointer, Shield, Zap, Crown, Edit } from "lucide-react
 import { toast } from "sonner";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 interface CollaborationSettingsProps {
   className?: string;
 }
 
 const conflictResolutionItems = [
-  { value: "last-writer-wins", label: "Last Writer Wins" },
-  { value: "manual", label: "Manual Resolution" },
-  { value: "auto-merge", label: "Auto Merge" },
+  { value: "last-writer-wins", label: m.copy_last_writer_wins() },
+  { value: "manual", label: m.copy_manual_resolution() },
+  { value: "auto-merge", label: m.copy_auto_merge() },
 ] as const;
 
 const collaborationRoleItems = [
-  { value: "collaborator", label: "Collaborator" },
-  { value: "viewer", label: "Viewer" },
+  { value: "collaborator", label: m.copy_collaborator() },
+  { value: "viewer", label: m.copy_viewer() },
 ] as const;
 
 export function CollaborationSettings({ className }: CollaborationSettingsProps) {
@@ -44,7 +45,7 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
 
   const handleSettingChange = (key: keyof typeof settings, value: boolean | string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
-    toast.success("Collaboration preferences updated");
+    toast.success(m.copy_collaboration_preferences_updated());
   };
 
   return (
@@ -53,11 +54,10 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
       <Card>
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Users {...sx("h-4 w-4 sm:h-5 sm:w-5")} />
-            Real-time Collaboration
+            <Users {...sx("h-4 w-4 sm:h-5 sm:w-5")} /> {m.copy_real_time_collaboration()}
           </CardTitle>
           <CardDescription className="text-sm">
-            Configure how collaboration works in your mind maps
+            {m.copy_configure_how_collaboration_works_in_your_mind_maps()}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-6">
@@ -67,10 +67,10 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
               <div {...sx("space-y-0.5")}>
                 <div {...sx("flex items-center gap-2")}>
                   <MousePointer {...sx("h-4 w-4")} />
-                  <Label className="text-sm font-medium">Real-time Cursors</Label>
+                  <Label className="text-sm font-medium">{m.copy_real_time_cursors()}</Label>
                 </div>
                 <p {...sx("text-xs text-muted-foreground")}>
-                  Show other users&apos; cursors in mind maps
+                  {m.copy_show_other_users_cursors_in_mind_maps()}
                 </p>
               </div>
               <Switch
@@ -84,10 +84,10 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
               <div {...sx("space-y-0.5")}>
                 <div {...sx("flex items-center gap-2")}>
                   <Eye {...sx("h-4 w-4")} />
-                  <Label className="text-sm font-medium">Live Presence</Label>
+                  <Label className="text-sm font-medium">{m.copy_live_presence()}</Label>
                 </div>
                 <p {...sx("text-xs text-muted-foreground")}>
-                  Show who&apos;s online and collaborating
+                  {m.copy_show_who_s_online_and_collaborating()}
                 </p>
               </div>
               <Switch
@@ -101,9 +101,11 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
               <div {...sx("space-y-0.5")}>
                 <div {...sx("flex items-center gap-2")}>
                   <Zap {...sx("h-4 w-4")} />
-                  <Label className="text-sm font-medium">Auto Layout</Label>
+                  <Label className="text-sm font-medium">{m.copy_auto_layout()}</Label>
                 </div>
-                <p {...sx("text-xs text-muted-foreground")}>Automatically arrange mind map nodes</p>
+                <p {...sx("text-xs text-muted-foreground")}>
+                  {m.copy_automatically_arrange_mind_map_nodes()}
+                </p>
               </div>
               <Switch
                 checked={settings.autoLayout}
@@ -116,10 +118,10 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
               <div {...sx("space-y-0.5")}>
                 <div {...sx("flex items-center gap-2")}>
                   <Shield {...sx("h-4 w-4")} />
-                  <Label className="text-sm font-medium">Require Approval</Label>
+                  <Label className="text-sm font-medium">{m.copy_require_approval()}</Label>
                 </div>
                 <p {...sx("text-xs text-muted-foreground")}>
-                  Approve new collaborators before they join
+                  {m.copy_approve_new_collaborators_before_they_join()}
                 </p>
               </div>
               <Switch
@@ -132,7 +134,7 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
           <div {...sx("grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-4 border-t space-y-4")}>
             {/* Conflict Resolution */}
             <div {...sx("space-y-2")}>
-              <Label className="text-sm font-medium">Conflict Resolution</Label>
+              <Label className="text-sm font-medium">{m.copy_conflict_resolution()}</Label>
               <Select
                 items={conflictResolutionItems}
                 value={settings.conflictResolution}
@@ -149,9 +151,9 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
                       <div {...sx("flex items-center gap-2")}>
                         <Edit {...sx("h-4 w-4")} />
                         <div>
-                          <p {...sx("font-medium")}>Last Writer Wins</p>
+                          <p {...sx("font-medium")}>{m.copy_last_writer_wins()}</p>
                           <p {...sx("text-xs text-muted-foreground")}>
-                            Most recent edit takes precedence
+                            {m.copy_most_recent_edit_takes_precedence()}
                           </p>
                         </div>
                       </div>
@@ -160,9 +162,9 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
                       <div {...sx("flex items-center gap-2")}>
                         <Shield {...sx("h-4 w-4")} />
                         <div>
-                          <p {...sx("font-medium")}>Manual Resolution</p>
+                          <p {...sx("font-medium")}>{m.copy_manual_resolution()}</p>
                           <p {...sx("text-xs text-muted-foreground")}>
-                            Prompt user to resolve conflicts
+                            {m.copy_prompt_user_to_resolve_conflicts()}
                           </p>
                         </div>
                       </div>
@@ -171,9 +173,9 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
                       <div {...sx("flex items-center gap-2")}>
                         <Zap {...sx("h-4 w-4")} />
                         <div>
-                          <p {...sx("font-medium")}>Auto Merge</p>
+                          <p {...sx("font-medium")}>{m.copy_auto_merge()}</p>
                           <p {...sx("text-xs text-muted-foreground")}>
-                            Automatically merge compatible changes
+                            {m.copy_automatically_merge_compatible_changes()}
                           </p>
                         </div>
                       </div>
@@ -185,7 +187,9 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
 
             {/* Default Role */}
             <div {...sx("space-y-2")}>
-              <Label className="text-sm font-medium">Default Role for New Collaborators</Label>
+              <Label className="text-sm font-medium">
+                {m.copy_default_role_for_new_collaborators()}
+              </Label>
               <Select
                 items={collaborationRoleItems}
                 value={settings.defaultRole}
@@ -202,8 +206,10 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
                       <div {...sx("flex items-center gap-2")}>
                         <Edit {...sx("h-4 w-4")} />
                         <div>
-                          <p {...sx("font-medium")}>Collaborator</p>
-                          <p {...sx("text-xs text-muted-foreground")}>Can edit and add content</p>
+                          <p {...sx("font-medium")}>{m.copy_collaborator()}</p>
+                          <p {...sx("text-xs text-muted-foreground")}>
+                            {m.copy_can_edit_and_add_content()}
+                          </p>
                         </div>
                       </div>
                     </SelectItem>
@@ -211,8 +217,10 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
                       <div {...sx("flex items-center gap-2")}>
                         <Eye {...sx("h-4 w-4")} />
                         <div>
-                          <p {...sx("font-medium")}>Viewer</p>
-                          <p {...sx("text-xs text-muted-foreground")}>Can view but not edit</p>
+                          <p {...sx("font-medium")}>{m.copy_viewer()}</p>
+                          <p {...sx("text-xs text-muted-foreground")}>
+                            {m.copy_can_view_but_not_edit()}
+                          </p>
                         </div>
                       </div>
                     </SelectItem>
@@ -229,14 +237,14 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
                   variant="secondary"
                   className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 text-xs"
                 >
-                  Owner
+                  {m.copy_owner()}
                 </Badge>
               </div>
               <ul {...sx("text-xs space-y-1 text-muted-foreground")}>
-                <li>• Full editing access</li>
-                <li>• Manage participants</li>
-                <li>• End sessions</li>
-                <li>• Change permissions</li>
+                <li>{m.copy_full_editing_access()}</li>
+                <li>{m.copy_manage_participants()}</li>
+                <li>{m.copy_end_sessions()}</li>
+                <li>{m.copy_change_permissions()}</li>
               </ul>
             </div>
 
@@ -247,14 +255,14 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
                   variant="secondary"
                   className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 text-xs"
                 >
-                  Collaborator
+                  {m.copy_collaborator()}
                 </Badge>
               </div>
               <ul {...sx("text-xs space-y-1 text-muted-foreground")}>
-                <li>• Edit content</li>
-                <li>• Create branches</li>
-                <li>• Add messages</li>
-                <li>• View all content</li>
+                <li>{m.copy_edit_content()}</li>
+                <li>{m.copy_create_branches()}</li>
+                <li>{m.copy_add_messages()}</li>
+                <li>{m.copy_view_all_content()}</li>
               </ul>
             </div>
 
@@ -265,14 +273,14 @@ export function CollaborationSettings({ className }: CollaborationSettingsProps)
                   variant="secondary"
                   className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 text-xs"
                 >
-                  Viewer
+                  {m.copy_viewer()}
                 </Badge>
               </div>
               <ul {...sx("text-xs space-y-1 text-muted-foreground")}>
-                <li>• View content only</li>
-                <li>• See live cursors</li>
-                <li>• Follow changes</li>
-                <li>• No editing access</li>
+                <li>{m.copy_view_content_only()}</li>
+                <li>{m.copy_see_live_cursors()}</li>
+                <li>{m.copy_follow_changes()}</li>
+                <li>{m.copy_no_editing_access()}</li>
               </ul>
             </div>
           </div>

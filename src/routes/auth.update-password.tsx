@@ -3,11 +3,12 @@ import { UpdatePasswordForm } from "@/components/auth/forms/update-password-form
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { seo } from "@/lib/seo";
 
+import * as m from "@/paraglide/messages.js";
 export const Route = createFileRoute("/auth/update-password")({
   head: () =>
     seo({
-      title: "Choose a new password | Zermind",
-      description: "Choose a new password for your Zermind account.",
+      title: m.copy_choose_a_new_password_zermind(),
+      description: m.copy_choose_a_new_password_for_your_zermind_account(),
       path: "/auth/update-password",
       noIndex: true,
     }),

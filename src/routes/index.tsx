@@ -3,14 +3,14 @@ import { AppHeader } from "@/components/app-header";
 import { ChatInterface } from "@/components/chat-interface";
 import { seo } from "@/lib/seo";
 import { buildHomeJsonLd } from "@/lib/site-content";
+import * as m from "@/paraglide/messages.js";
 import { sx } from "@/styles/sx";
 
 export const Route = createFileRoute("/")({
   head: () =>
     seo({
-      title: "Zermind | AI conversations and mind maps",
-      description:
-        "Chat with multiple AI models, branch conversations, and explore responses as interactive mind maps.",
+      title: m.home_meta_title(),
+      description: m.home_meta_description(),
       path: "/",
       jsonLd: buildHomeJsonLd(),
     }),

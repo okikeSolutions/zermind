@@ -50,11 +50,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const messageSchema = z.object({
   message: z
     .string()
-    .min(1, "Message cannot be empty")
-    .max(4000, "Message is too long (max 4000 characters)")
+    .min(1, m.copy_message_cannot_be_empty())
+    .max(4000, m.copy_message_is_too_long_max_4000_characters())
     .trim(),
 });
 
@@ -215,7 +216,7 @@ export function ChatConversation({
       return `${hours}:${minutes}`;
     } catch (error) {
       console.error("Failed to format time:", error);
-      return "Invalid time";
+      return m.copy_invalid_time();
     }
   };
 
@@ -244,27 +245,29 @@ export function ChatConversation({
           <div {...sx("text-center space-y-4")}>
             <Upload {...sx("h-12 w-12 text-primary mx-auto")} />
             <DialogHeader>
-              <DialogTitle className="text-lg font-semibold">Drop files here</DialogTitle>
+              <DialogTitle className="text-lg font-semibold">
+                {m.copy_drop_files_here()}
+              </DialogTitle>
               <DialogDescription className="text-sm">
                 {fileAttachments.modelCapabilities.supportsImages &&
                 fileAttachments.modelCapabilities.supportsDocuments
-                  ? "Upload images and PDFs to enhance your conversation"
+                  ? m.copy_upload_images_and_pdfs_to_enhance_your_conversation()
                   : fileAttachments.modelCapabilities.supportsImages
-                    ? "Upload images to enhance your conversation"
-                    : "Upload documents to enhance your conversation"}
+                    ? m.copy_upload_images_to_enhance_your_conversation()
+                    : m.copy_upload_documents_to_enhance_your_conversation()}
               </DialogDescription>
             </DialogHeader>
 
             <div {...sx("flex justify-center space-x-4 text-xs text-muted-foreground")}>
               {fileAttachments.modelCapabilities.supportsImages && (
                 <span>
-                  Images: up to{" "}
+                  {m.copy_images_up_to()}{" "}
                   {formatBytes(fileAttachments.modelCapabilities.maxImageSize! * 1024 * 1024)}
                 </span>
               )}
               {fileAttachments.modelCapabilities.supportsDocuments && (
                 <span>
-                  PDFs: up to{" "}
+                  {m.copy_pdfs_up_to()}{" "}
                   {formatBytes(fileAttachments.modelCapabilities.maxDocumentSize! * 1024 * 1024)}
                 </span>
               )}
@@ -283,7 +286,7 @@ export function ChatConversation({
                 <div {...sx("flex items-center space-x-2 text-destructive")}>
                   <AlertCircle {...sx("h-4 w-4 flex-shrink-0")} />
                   <div {...sx("text-sm")}>
-                    <p {...sx("font-medium text-xs sm:text-sm")}>Error occurred</p>
+                    <p {...sx("font-medium text-xs sm:text-sm")}>{m.copy_error_occurred()}</p>
                     <p {...sx("text-xs mt-1")}>{error.message}</p>
                   </div>
                 </div>
@@ -300,11 +303,13 @@ export function ChatConversation({
           >
             <MessageSquare {...sx("h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground")} />
             <div>
-              <h3 {...sx("text-base sm:text-lg font-medium")}>Start the conversation</h3>
+              <h3 {...sx("text-base sm:text-lg font-medium")}>{m.copy_start_the_conversation()}</h3>
               <p {...sx("text-xs sm:text-sm text-muted-foreground")}>
-                Send a message to begin chatting with AI
+                {m.copy_send_a_message_to_begin_chatting_with_ai()}
               </p>
-              <p {...sx("text-xs text-muted-foreground mt-2")}>Using: {selectedModel}</p>
+              <p {...sx("text-xs text-muted-foreground mt-2")}>
+                {m.copy_using()} {selectedModel}
+              </p>
             </div>
           </div>
         ) : (
@@ -351,7 +356,9 @@ export function ChatConversation({
                               variant="ghost"
                               size="sm"
                               aria-label={
-                                copiedMessageId === message.id ? "Response copied" : "Copy response"
+                                copiedMessageId === message.id
+                                  ? m.copy_response_copied()
+                                  : m.copy_copy_response()
                               }
                               className="h-6 w-6 sm:h-7 sm:w-7 p-0 hover:bg-background/20"
                               onClick={() => copyToClipboard(message.content, message.id)}
@@ -432,23 +439,24 @@ export function ChatConversation({
                         }
                       >
                         <Paperclip {...sx("h-4 w-4 mr-2")} />
-                        <span {...sx("text-sm")}>Attach</span>
+                        <span {...sx("text-sm")}>{m.copy_attach()}</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start" className="w-56">
                         <DropdownMenuGroup>
-                          <DropdownMenuLabel className="text-sm">Attach Files</DropdownMenuLabel>
+                          <DropdownMenuLabel className="text-sm">
+                            {m.copy_attach_files()}
+                          </DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           {fileAttachments.modelCapabilities.supportsImages && (
                             <DropdownMenuItem
                               onClick={() => handleFileSelect("image")}
                               className="text-sm"
                             >
-                              <ImageIcon {...sx("h-4 w-4 mr-2")} />
-                              Upload Images
+                              <ImageIcon {...sx("h-4 w-4 mr-2")} /> {m.copy_upload_images()}{" "}
                               <span {...sx("ml-auto text-xs text-muted-foreground")}>
-                                up to{" "}
-                                {Math.round(fileAttachments.modelCapabilities.maxImageSize! || 5)}
-                                MB
+                                {m.copy_up_to()}{" "}
+                                {Math.round(fileAttachments.modelCapabilities.maxImageSize! || 5)}{" "}
+                                {m.copy_mb()}
                               </span>
                             </DropdownMenuItem>
                           )}
@@ -457,14 +465,13 @@ export function ChatConversation({
                               onClick={() => handleFileSelect("document")}
                               className="text-sm"
                             >
-                              <FileText {...sx("h-4 w-4 mr-2")} />
-                              Upload PDFs
+                              <FileText {...sx("h-4 w-4 mr-2")} /> {m.copy_upload_pdfs()}{" "}
                               <span {...sx("ml-auto text-xs text-muted-foreground")}>
-                                up to{" "}
+                                {m.copy_up_to()}{" "}
                                 {Math.round(
                                   fileAttachments.modelCapabilities.maxDocumentSize! || 5,
-                                )}
-                                MB
+                                )}{" "}
+                                {m.copy_mb()}
                               </span>
                             </DropdownMenuItem>
                           )}
@@ -478,16 +485,16 @@ export function ChatConversation({
                       className="w-full sm:w-auto h-9 sm:h-10 opacity-50 cursor-not-allowed"
                     >
                       <Paperclip {...sx("h-4 w-4 mr-2")} />
-                      <span {...sx("text-sm")}>Attach</span>
+                      <span {...sx("text-sm")}>{m.copy_attach()}</span>
                     </Button>
                   )}
                 </TooltipTrigger>
                 <TooltipContent>
                   {fileAttachments.supportsAttachments
-                    ? "Upload files to enhance your conversation"
-                    : `${
-                        selectedModel.split("/").pop() || selectedModel
-                      } does not support file attachments`}
+                    ? m.copy_upload_files_to_enhance_your_conversation()
+                    : m.copy_model_does_not_support_file_attachments({
+                        model: selectedModel.split("/").pop() || selectedModel,
+                      })}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -552,7 +559,7 @@ export function ChatConversation({
                   <Button
                     variant="ghost"
                     size="sm"
-                    aria-label={`Remove ${file.name}`}
+                    aria-label={m.copy_remove_file({ name: file.name })}
                     onClick={() => fileAttachments.removeFile(file.id)}
                     disabled={isLoading || fileAttachments.isUploading}
                     className="h-6 w-6 p-0 ml-2 flex-shrink-0"
@@ -574,7 +581,7 @@ export function ChatConversation({
                   <FormItem className="flex-1">
                     <FormControl>
                       <Input
-                        placeholder="Type your message..."
+                        placeholder={m.copy_type_your_message()}
                         disabled={isLoading}
                         className="h-9 sm:h-10 text-sm"
                         {...field}
@@ -597,7 +604,7 @@ export function ChatConversation({
                   onClick={stop}
                   size="icon"
                   variant="destructive"
-                  aria-label="Stop generating response"
+                  aria-label={m.copy_stop_generating_response()}
                   className="flex-shrink-0 h-9 w-9 sm:h-10 sm:w-10"
                 >
                   <StopCircle {...sx("h-4 w-4")} />
@@ -607,7 +614,7 @@ export function ChatConversation({
                   type="submit"
                   disabled={!messageForm.watch("message")?.trim()}
                   size="icon"
-                  aria-label="Send message"
+                  aria-label={m.copy_send_message()}
                   className="flex-shrink-0 h-9 w-9 sm:h-10 sm:w-10"
                 >
                   <Send {...sx("h-4 w-4")} />
@@ -616,22 +623,22 @@ export function ChatConversation({
             </form>
           </Form>
           <p {...sx("text-xs text-muted-foreground text-center px-2")}>
-            Press Enter to send, Shift + Enter for new line
+            {m.copy_press_enter_to_send_shift_enter_for_new_line()}{" "}
             {fileAttachments.supportsAttachments && fileAttachments.pendingFiles.length === 0 && (
               <span {...sx("block mt-1")}>
-                💡 Drag and drop{" "}
+                {m.copy_drag_and_drop()}{" "}
                 {fileAttachments.modelCapabilities.supportsImages &&
                 fileAttachments.modelCapabilities.supportsDocuments
-                  ? "images or PDFs"
+                  ? m.copy_images_or_pdfs()
                   : fileAttachments.modelCapabilities.supportsImages
                     ? "images"
-                    : "PDFs"}{" "}
-                anywhere to attach
+                    : m.copy_pdfs()}{" "}
+                {m.copy_anywhere_to_attach()}
               </span>
             )}
             {!fileAttachments.supportsAttachments && (
               <span {...sx("block mt-1 text-muted-foreground/60")}>
-                ℹ️ Current model does not support file attachments
+                {m.copy_current_model_does_not_support_file_attachments()}
               </span>
             )}
           </p>
@@ -642,7 +649,7 @@ export function ChatConversation({
       {isSharedView && (
         <div {...sx("border-t p-2 sm:p-4 bg-background/50 backdrop-blur")}>
           <p {...sx("text-xs text-muted-foreground text-center")}>
-            This is a shared chat conversation in read-only mode
+            {m.copy_this_is_a_shared_chat_conversation_in_read_only_mode()}
           </p>
         </div>
       )}

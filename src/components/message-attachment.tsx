@@ -8,6 +8,7 @@ import NextImage from "@/components/app-image";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 interface MessageAttachmentProps {
   attachments: Attachment[];
   className?: string;
@@ -119,12 +120,12 @@ export function MessageAttachment({
 
   const getFileTypeLabel = (mimeType: string) => {
     if (mimeType.startsWith("image/")) {
-      return "Image";
+      return m.copy_image();
     }
     if (mimeType === "application/pdf") {
-      return "PDF";
+      return m.copy_pdf();
     }
-    return "Document";
+    return m.copy_document();
   };
 
   // Compact view - just show attachment indicator
@@ -133,7 +134,9 @@ export function MessageAttachment({
       <div {...sx(cn("flex items-center space-x-1 mt-1", className))}>
         <Paperclip {...sx("h-3 w-3 text-muted-foreground")} />
         <span {...sx("text-xs text-muted-foreground")}>
-          {attachments.length} attachment{attachments.length > 1 ? "s" : ""}
+          {attachments.length === 1
+            ? m.copy_one_attachment()
+            : m.copy_attachments({ count: attachments.length })}
         </span>
         <div {...sx("flex space-x-1")}>
           {attachments.slice(0, 3).map((attachment) => (
@@ -278,7 +281,7 @@ export function MessageAttachment({
                         size="sm"
                         onClick={() => window.open(getAttachmentUrl(attachment), "_blank")}
                         className="h-8 w-8 p-0"
-                        title="View document"
+                        title={m.copy_view_document()}
                       >
                         <Eye {...sx("h-4 w-4")} />
                       </Button>
@@ -292,7 +295,7 @@ export function MessageAttachment({
                           link.click();
                         }}
                         className="h-8 w-8 p-0"
-                        title="Download"
+                        title={m.copy_download()}
                       >
                         <Download {...sx("h-4 w-4")} />
                       </Button>
@@ -311,7 +314,7 @@ export function MessageAttachment({
           <Button
             type="button"
             variant="ghost"
-            aria-label="Close expanded image"
+            aria-label={m.copy_close_expanded_image()}
             className="absolute inset-0 h-full w-full cursor-default rounded-none p-0 hover:bg-transparent focus-visible:ring-0"
             onClick={() => setExpandedImage(null)}
           />

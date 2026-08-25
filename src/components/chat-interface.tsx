@@ -20,9 +20,10 @@ import {
 import Link, { useRouter } from "@/lib/navigation";
 import { FAQItem } from "@/components/faq-item";
 import { OnboardingTooltip, useOnboarding } from "@/components/onboarding-tooltip";
-import { homeFaqs } from "@/lib/site-content";
+import { getHomeFaqs } from "@/lib/site-content";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 interface ChatInterfaceProps {
   isAuthenticated: boolean;
 }
@@ -45,6 +46,7 @@ const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
+  const homeFaqs = getHomeFaqs();
   const [message, setMessage] = useState("");
   const router = useRouter();
   const { showOnboarding, completeOnboarding, skipOnboarding } = useOnboarding();
@@ -102,11 +104,11 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               "text-2xl sm:text-3xl lg:text-4xl font-bold bg-primary bg-clip-text text-transparent",
             )}
           >
-            Zermind
+            {m.copy_zermind()}
           </h1>
         </div>
         <p {...sx("text-muted-foreground text-base sm:text-lg")}>
-          Your open-source AI chat companion
+          {m.copy_your_open_source_ai_chat_companion()}
         </p>
         {!isAuthenticated && (
           <div {...sx("space-y-3")}>
@@ -117,9 +119,8 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
             >
               <PlayCircle {...sx("h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2 flex-shrink-0")} />
               <span {...sx("text-center leading-tight")}>
-                Try Interactive Demo
-                <br {...sx("sm:hidden")} />
-                <span {...sx("sm:ml-1")}>(No Sign-up Required)</span>
+                {m.copy_try_interactive_demo()} <br {...sx("sm:hidden")} />
+                <span {...sx("sm:ml-1")}>{m.copy_no_sign_up_required()}</span>
               </span>
             </Button>
           </div>
@@ -132,12 +133,12 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
           <h2
             {...sx("flex items-center justify-center space-x-2 text-lg sm:text-xl font-semibold")}
           >
-            <span>Start Chatting</span>
+            <span>{m.copy_start_chatting()}</span>
           </h2>
           <CardDescription className="text-sm sm:text-base">
             {isAuthenticated
-              ? "Choose from multiple AI models and start your conversation"
-              : "Sign in to access multiple AI models and start chatting"}
+              ? m.copy_choose_from_multiple_ai_models_and_start_your_conversation()
+              : m.copy_sign_in_to_access_multiple_ai_models_and_start_chatting()}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
@@ -145,7 +146,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
           <div {...sx("space-y-2 sm:space-y-3")}>
             <h3 {...sx("text-sm font-medium text-muted-foreground flex items-center gap-2")}>
               <Zap {...sx("h-4 w-4")} />
-              <span>Available Models</span>
+              <span>{m.copy_available_models()}</span>
             </h3>
             <div {...sx("flex flex-wrap gap-1.5 sm:gap-2")}>
               {modelProviders.map((model, index) => (
@@ -171,8 +172,8 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               <Input
                 placeholder={
                   isAuthenticated
-                    ? "What would you like to chat about today?"
-                    : "Sign in to start chatting..."
+                    ? m.copy_what_would_you_like_to_chat_about_today()
+                    : m.copy_sign_in_to_start_chatting()
                 }
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -196,7 +197,9 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               className="w-full h-10 sm:h-12 text-sm sm:text-base font-medium bg-primary hover:bg-primary/80 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:transform-none"
             >
               <Sparkles {...sx("mr-2 h-4 w-4 sm:h-5 sm:w-5")} />
-              {!isAuthenticated ? "Sign In to Start Chatting" : "Start Conversation"}
+              {!isAuthenticated
+                ? m.copy_sign_in_to_start_chatting_2()
+                : m.copy_start_conversation()}
             </Button>
           </div>
         </CardContent>
@@ -205,9 +208,9 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
       {/* Enhanced Features */}
       <div {...sx("space-y-6 sm:space-y-8 py-8 sm:py-16")}>
         <div {...sx("text-center space-y-1 sm:space-y-2")}>
-          <h2 {...sx("text-2xl sm:text-3xl font-bold")}>Branching AI conversations</h2>
+          <h2 {...sx("text-2xl sm:text-3xl font-bold")}>{m.copy_branching_ai_conversations()}</h2>
           <p {...sx("text-muted-foreground text-base sm:text-lg")}>
-            Explore conversations as visual trees and continue from any earlier message
+            {m.copy_explore_conversations_as_visual_trees_and_continue_from_any_earl()}
           </p>
         </div>
 
@@ -220,10 +223,9 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               <div {...sx("relative")}>
                 <MapIcon {...sx("h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto")} />
               </div>
-              <h3 {...sx("font-bold text-base sm:text-lg")}>Mind Mode</h3>
+              <h3 {...sx("font-bold text-base sm:text-lg")}>{m.copy_mind_mode()}</h3>
               <p {...sx("text-sm text-muted-foreground")}>
-                Transform conversations into interactive mind maps. Visualize how ideas connect and
-                evolve in real-time.
+                {m.copy_transform_conversations_into_interactive_mind_maps_visualize_how()}
               </p>
             </CardContent>
           </Card>
@@ -233,10 +235,9 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               <div {...sx("relative")}>
                 <GitBranch {...sx("h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto")} />
               </div>
-              <h3 {...sx("font-bold text-base sm:text-lg")}>Multi-Model Branching</h3>
+              <h3 {...sx("font-bold text-base sm:text-lg")}>{m.copy_multi_model_branching()}</h3>
               <p {...sx("text-sm text-muted-foreground")}>
-                Ask the same question to different AI models and see their responses branch
-                visually. Compare approaches side-by-side.
+                {m.copy_ask_the_same_question_to_different_ai_models_and_see_their_respo()}
               </p>
             </CardContent>
           </Card>
@@ -246,10 +247,9 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               <div {...sx("relative")}>
                 <RefreshCw {...sx("h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto")} />
               </div>
-              <h3 {...sx("font-bold text-base sm:text-lg")}>Resumable Conversations</h3>
+              <h3 {...sx("font-bold text-base sm:text-lg")}>{m.copy_resumable_conversations()}</h3>
               <p {...sx("text-sm text-muted-foreground")}>
-                Click any node in your conversation tree to continue from that exact point. Never
-                lose context again.
+                {m.copy_click_any_node_in_your_conversation_tree_to_continue_from_that_e()}
               </p>
             </CardContent>
           </Card>
@@ -257,17 +257,16 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
           <Card className="border-2 border-primary/10 shadow-xl backdrop-blur-sm sm:col-span-3">
             <CardHeader className="text-center pb-2 sm:pb-3">
               <Badge variant="secondary" className="text-xs sm:text-sm">
-                Beta
+                {m.copy_beta()}
               </Badge>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 text-center space-y-2 sm:space-y-3 pt-0">
               <div {...sx("relative")}>
                 <Users {...sx("h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto")} />
               </div>
-              <h3 {...sx("font-bold text-base sm:text-lg")}>Real-time Collaboration</h3>
+              <h3 {...sx("font-bold text-base sm:text-lg")}>{m.copy_real_time_collaboration()}</h3>
               <p {...sx("text-sm text-muted-foreground")}>
-                Collaborate with your team in real-time. Build mind maps together and explore ideas
-                collectively.
+                {m.copy_collaborate_with_your_team_in_real_time_build_mind_maps_together()}
               </p>
             </CardContent>
           </Card>
@@ -275,17 +274,16 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
           <Card className="border-2 border-primary/10 shadow-xl backdrop-blur-sm sm:col-span-3">
             <CardHeader className="text-center pb-2 sm:pb-3">
               <Badge variant="secondary" className="text-xs sm:text-sm">
-                Beta
+                {m.copy_beta()}
               </Badge>
             </CardHeader>
             <CardContent className="p-4 sm:p-6 text-center space-y-2 sm:space-y-3 pt-0">
               <div {...sx("relative")}>
                 <Share2 {...sx("h-10 w-10 sm:h-12 sm:w-12 text-primary mx-auto")} />
               </div>
-              <h3 {...sx("font-bold text-base sm:text-lg")}>Shareable Mind Maps</h3>
+              <h3 {...sx("font-bold text-base sm:text-lg")}>{m.copy_shareable_mind_maps_2()}</h3>
               <p {...sx("text-sm text-muted-foreground")}>
-                Share your conversation trees as interactive mind maps. Perfect for presentations
-                and knowledge sharing.
+                {m.copy_share_your_conversation_trees_as_interactive_mind_maps_perfect_f()}
               </p>
             </CardContent>
           </Card>
@@ -299,10 +297,10 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
                 "text-xl sm:text-2xl flex items-center justify-center space-x-2 font-semibold",
               )}
             >
-              <span>Why Choose Zermind?</span>
+              <span>{m.copy_why_choose_zermind()}</span>
             </h2>
             <CardDescription className="text-sm sm:text-base">
-              Work with multiple models without losing the structure of your conversation
+              {m.copy_work_with_multiple_models_without_losing_the_structure_of_your_c()}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 px-4 sm:px-6">
@@ -312,9 +310,11 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
                   <GitBranch {...sx("h-4 w-4 text-primary")} />
                 </div>
                 <div>
-                  <h3 {...sx("font-medium text-sm sm:text-base")}>Branch from any message</h3>
+                  <h3 {...sx("font-medium text-sm sm:text-base")}>
+                    {m.copy_branch_from_any_message()}
+                  </h3>
                   <p {...sx("text-sm text-muted-foreground")}>
-                    Continue an earlier idea without discarding the rest of the conversation tree.
+                    {m.copy_continue_an_earlier_idea_without_discarding_the_rest_of_the_conv()}
                   </p>
                 </div>
               </div>
@@ -323,10 +323,11 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
                   <Network {...sx("h-4 w-4 text-primary")} />
                 </div>
                 <div>
-                  <h3 {...sx("font-medium text-sm sm:text-base")}>Compare model responses</h3>
+                  <h3 {...sx("font-medium text-sm sm:text-base")}>
+                    {m.copy_compare_model_responses()}
+                  </h3>
                   <p {...sx("text-sm text-muted-foreground")}>
-                    Compare responses from GPT-4, Claude, Llama, and more in the same conversation
-                    tree.
+                    {m.copy_compare_responses_from_gpt_4_claude_llama_and_more_in_the_same_c()}
                   </p>
                 </div>
               </div>
@@ -337,10 +338,11 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
                   <Eye {...sx("h-4 w-4 text-primary")} />
                 </div>
                 <div>
-                  <h3 {...sx("font-medium text-sm sm:text-base")}>Visual conversation history</h3>
+                  <h3 {...sx("font-medium text-sm sm:text-base")}>
+                    {m.copy_visual_conversation_history()}
+                  </h3>
                   <p {...sx("text-sm text-muted-foreground")}>
-                    See how ideas connect, evolve, and branch. Perfect for research, brainstorming,
-                    and complex problem-solving.
+                    {m.copy_see_how_ideas_connect_evolve_and_branch_perfect_for_research_bra()}
                   </p>
                 </div>
               </div>
@@ -349,10 +351,11 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
                   <Heart {...sx("h-4 w-4 text-primary")} />
                 </div>
                 <div>
-                  <h3 {...sx("font-medium text-sm sm:text-base")}>Open source and BYOK</h3>
+                  <h3 {...sx("font-medium text-sm sm:text-base")}>
+                    {m.copy_open_source_and_byok()}
+                  </h3>
                   <p {...sx("text-sm text-muted-foreground")}>
-                    Fully open source with your privacy in mind. Use your own API keys and maintain
-                    control of your data.
+                    {m.copy_fully_open_source_with_your_privacy_in_mind_use_your_own_api_key()}
                   </p>
                 </div>
               </div>
@@ -366,9 +369,9 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
           {...sx("space-y-4 sm:space-y-6 py-8 sm:py-16 scroll-mt-24")}
         >
           <div {...sx("text-center space-y-1 sm:space-y-2")}>
-            <h2 {...sx("text-2xl sm:text-3xl font-bold")}>Frequently Asked Questions</h2>
+            <h2 {...sx("text-2xl sm:text-3xl font-bold")}>{m.copy_frequently_asked_questions()}</h2>
             <p {...sx("text-muted-foreground text-sm sm:text-base")}>
-              Everything you need to know about Zermind
+              {m.copy_everything_you_need_to_know_about_zermind()}
             </p>
           </div>
 
@@ -383,7 +386,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
       {/* Footer */}
       <div {...sx("text-center text-xs sm:text-sm text-muted-foreground space-y-2 sm:space-y-3")}>
         <p>
-          Open source • Privacy-focused • Built by{" "}
+          {m.copy_open_source_privacy_focused_built_by()}{" "}
           <Link
             href="https://x.com/NickelanddimeO"
             target="_blank"
@@ -392,7 +395,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               "text-primary font-bold hover:text-primary/80 transition-colors hover:underline",
             )}
           >
-            NickelanddimeO
+            {m.copy_nickelanddimeo()}
           </Link>
         </p>
         <div {...sx("flex flex-wrap items-center justify-center gap-x-2 gap-y-1")}>
@@ -402,7 +405,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               "text-primary font-bold hover:text-primary/80 transition-colors hover:underline",
             )}
           >
-            Privacy Policy
+            {m.copy_privacy_policy()}
           </Link>
           <span>•</span>
           <Link
@@ -411,7 +414,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               "text-primary font-bold hover:text-primary/80 transition-colors hover:underline",
             )}
           >
-            Terms of Use
+            {m.copy_terms_of_use()}
           </Link>
           <span>•</span>
           <Link
@@ -420,7 +423,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               "text-primary font-bold hover:text-primary/80 transition-colors hover:underline",
             )}
           >
-            Imprint
+            {m.copy_imprint()}
           </Link>
         </div>
         <div {...sx("flex flex-wrap items-center justify-center gap-x-2 gap-y-1")}>
@@ -432,8 +435,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               "text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1",
             )}
           >
-            <TwitterIcon {...sx("h-3 w-3 sm:h-4 sm:w-4")} />
-            Twitter
+            <TwitterIcon {...sx("h-3 w-3 sm:h-4 sm:w-4")} /> {m.copy_twitter()}
           </Link>
           <span>•</span>
           <Link
@@ -444,8 +446,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               "text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1",
             )}
           >
-            <GitHubIcon {...sx("h-3 w-3 sm:h-4 sm:w-4")} />
-            GitHub Repo
+            <GitHubIcon {...sx("h-3 w-3 sm:h-4 sm:w-4")} /> {m.copy_github_repo()}
           </Link>
           <span>•</span>
           <Link
@@ -456,8 +457,7 @@ export function ChatInterface({ isAuthenticated }: ChatInterfaceProps) {
               "text-primary font-bold hover:text-primary/80 transition-colors hover:underline inline-flex items-center gap-1",
             )}
           >
-            <Heart {...sx("h-3 w-3 sm:h-4 sm:w-4 fill-primary")} />
-            Support Zermind
+            <Heart {...sx("h-3 w-3 sm:h-4 sm:w-4 fill-primary")} /> {m.copy_support_zermind()}
           </Link>
         </div>
       </div>

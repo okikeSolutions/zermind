@@ -1,3 +1,4 @@
+import * as m from "@/paraglide/messages.js";
 /**
  * Generate a chat title from the first user message
  * @param message - The first user message content
@@ -33,7 +34,7 @@ export function generateChatTitle(message: string): string {
 export function shouldUpdateChatTitle(title: string | null): boolean {
   if (!title) return true;
 
-  const defaultTitles = ["New Chat", "Untitled Chat", "Chat"];
+  const defaultTitles: string[] = [m.copy_new_chat(), m.copy_untitled_chat(), m.copy_chat()];
 
   return defaultTitles.includes(title);
 }

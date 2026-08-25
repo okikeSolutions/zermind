@@ -4,6 +4,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { type Message, type Attachment } from "@/lib/schemas/chat";
 import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
+import * as m from "@/paraglide/messages.js";
 
 interface UseChatOptions {
   chatId?: string;
@@ -46,7 +47,7 @@ export function useChat({
         });
       } catch (unknownError) {
         const nextError = new Error(
-          getFriendlyErrorMessage(unknownError, "Failed to send message"),
+          getFriendlyErrorMessage(unknownError, m.copy_failed_to_send_message()),
         );
         setError(nextError);
         onError?.(nextError);

@@ -3,11 +3,12 @@ import { LoginForm } from "@/components/auth/forms/login-form";
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { seo } from "@/lib/seo";
 
+import * as m from "@/paraglide/messages.js";
 export const Route = createFileRoute("/auth/login")({
   head: () =>
     seo({
-      title: "Sign in | Zermind",
-      description: "Sign in to your Zermind account.",
+      title: m.copy_sign_in_zermind(),
+      description: m.copy_sign_in_to_your_zermind_account(),
       path: "/auth/login",
       noIndex: true,
     }),

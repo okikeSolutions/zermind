@@ -17,6 +17,7 @@ import { CollaborationPresenceWrapper } from "@/components/collaboration/collabo
 import { RealtimeCursors, CollaborationPresence } from "@/components/mind-map/realtime-cursors";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -99,7 +100,7 @@ export function DualModeChat({
       // Extract name from email (before @ symbol) as fallback
       return user.email.split("@")[0];
     }
-    return "User"; // Final fallback
+    return m.copy_user(); // Final fallback
   };
 
   const userDisplayName = getUserDisplayName();
@@ -185,9 +186,9 @@ export function DualModeChat({
 
   // Get active action name for better UX
   const getActiveActionName = () => {
-    if (resumeFromNodeId) return "Resume Conversation";
-    if (createBranchFromNodeId) return "Create Branch";
-    if (createMultiModelFromNodeId) return "Create Multi-Model Branch";
+    if (resumeFromNodeId) return m.copy_resume_conversation();
+    if (createBranchFromNodeId) return m.copy_create_branch();
+    if (createMultiModelFromNodeId) return m.copy_create_multi_model_branch();
     return "";
   };
 
@@ -212,9 +213,9 @@ export function DualModeChat({
                   <div {...sx("flex items-center gap-3")}>
                     <Brain {...sx("h-5 w-5 text-purple-500")} />
                     <div>
-                      <h2 {...sx("font-semibold")}>{currentChatTitle || "Mind Map Chat"}</h2>
+                      <h2 {...sx("font-semibold")}>{currentChatTitle || m.copy_mind_map_chat()}</h2>
                       <p {...sx("text-xs text-muted-foreground")}>
-                        Interactive conversation visualization
+                        {m.copy_interactive_conversation_visualization()}
                       </p>
                     </div>
                   </div>
@@ -224,8 +225,7 @@ export function DualModeChat({
                       variant="secondary"
                       className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
                     >
-                      <Brain {...sx("h-3 w-3 mr-1")} />
-                      Mind Mode
+                      <Brain {...sx("h-3 w-3 mr-1")} /> {m.copy_mind_mode()}
                     </Badge>
 
                     {/* Collaboration Controls */}
@@ -250,8 +250,10 @@ export function DualModeChat({
                         className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white"
                       >
                         <X {...sx("h-3 w-3")} />
-                        <span {...sx("hidden sm:inline")}>Close {getActiveActionName()}</span>
-                        <span {...sx("sm:hidden")}>Close</span>
+                        <span {...sx("hidden sm:inline")}>
+                          {m.copy_close()} {getActiveActionName()}
+                        </span>
+                        <span {...sx("sm:hidden")}>{m.copy_close()}</span>
                       </Button>
                     )}
                   </div>
@@ -376,8 +378,10 @@ export function DualModeChat({
                 <div {...sx("flex items-center gap-3")}>
                   <MessageSquare {...sx("h-5 w-5 text-blue-500")} />
                   <div>
-                    <h2 {...sx("font-semibold")}>{currentChatTitle || "Chat"}</h2>
-                    <p {...sx("text-xs text-muted-foreground")}>Traditional linear conversation</p>
+                    <h2 {...sx("font-semibold")}>{currentChatTitle || m.copy_chat()}</h2>
+                    <p {...sx("text-xs text-muted-foreground")}>
+                      {m.copy_traditional_linear_conversation()}
+                    </p>
                   </div>
                 </div>
 
@@ -386,8 +390,7 @@ export function DualModeChat({
                     variant="secondary"
                     className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
                   >
-                    <MessageSquare {...sx("h-3 w-3 mr-1")} />
-                    Chat Mode
+                    <MessageSquare {...sx("h-3 w-3 mr-1")} /> {m.copy_chat_mode()}
                   </Badge>
 
                   {/* Collaboration Controls */}

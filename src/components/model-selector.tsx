@@ -15,47 +15,48 @@ import { getModelCapabilities, modelSupportsAttachments } from "@/lib/utils/mode
 
 // Popular OpenRouter models
 import { sx } from "@/styles/sx";
+import * as m from "@/paraglide/messages.js";
 const MODELS = [
   {
     id: "anthropic/claude-3.5-sonnet",
     name: "Claude 3.5 Sonnet",
     provider: "Anthropic",
-    description: "Best for reasoning, analysis, and coding",
+    description: m.copy_best_for_reasoning_analysis_and_coding(),
     tier: "premium",
   },
   {
     id: "anthropic/claude-3-haiku",
     name: "Claude 3 Haiku",
     provider: "Anthropic",
-    description: "Fast and efficient for simple tasks",
+    description: m.copy_fast_and_efficient_for_simple_tasks(),
     tier: "standard",
   },
   {
     id: "openai/gpt-5",
     name: "GPT-5",
     provider: "OpenAI",
-    description: "Latest multimodal model from OpenAI",
+    description: m.copy_latest_multimodal_model_from_openai(),
     tier: "premium",
   },
   {
     id: "openai/gpt-5-mini",
     name: "GPT-5 Mini",
     provider: "OpenAI",
-    description: "Faster and cheaper version of GPT-5",
+    description: m.copy_faster_and_cheaper_version_of_gpt_5(),
     tier: "standard",
   },
   {
     id: "meta-llama/llama-3.1-405b-instruct",
     name: "Llama 3.1 405B",
     provider: "Meta",
-    description: "Open source, great for general tasks",
+    description: m.copy_open_source_great_for_general_tasks(),
     tier: "premium",
   },
   {
     id: "meta-llama/llama-3.1-70b-instruct",
     name: "Llama 3.1 70B",
     provider: "Meta",
-    description: "Balanced performance and speed",
+    description: m.copy_balanced_performance_and_speed(),
     tier: "standard",
   },
 ];
@@ -93,20 +94,20 @@ export function ModelSelector({
 
     if (capabilities.supportsImages && capabilities.supportsDocuments) {
       icons.push(
-        <div key="image" title="Supports images and documents">
+        <div key="image" title={m.copy_supports_images_and_documents()}>
           <ImageIcon {...sx("h-3 w-3 text-primary")} />
           <FileText {...sx("h-3 w-3 text-primary")} />
         </div>,
       );
     } else if (capabilities.supportsImages) {
       icons.push(
-        <div key="image" title="Supports images">
+        <div key="image" title={m.copy_supports_images()}>
           <ImageIcon {...sx("h-3 w-3 text-primary")} />
         </div>,
       );
     } else if (capabilities.supportsDocuments) {
       icons.push(
-        <div key="document" title="Supports documents">
+        <div key="document" title={m.copy_supports_documents()}>
           <FileText {...sx("h-3 w-3 text-primary")} />
         </div>,
       );
@@ -117,7 +118,7 @@ export function ModelSelector({
     }
 
     return (
-      <div {...sx("flex items-center space-x-1")} title="Supports file attachments">
+      <div {...sx("flex items-center space-x-1")} title={m.copy_supports_file_attachments()}>
         {icons}
       </div>
     );
@@ -147,11 +148,11 @@ export function ModelSelector({
         <ChevronDown {...sx("h-3 w-3 sm:h-4 sm:w-4 opacity-50 flex-shrink-0")} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72 sm:w-80 max-h-[70vh] overflow-y-auto">
-        <div {...sx("px-2 py-1.5 text-sm font-medium")}>Select AI Model</div>
+        <div {...sx("px-2 py-1.5 text-sm font-medium")}>{m.copy_select_ai_model()}</div>
         <DropdownMenuSeparator />
 
         {/* Group by provider */}
-        {["Anthropic", "OpenAI", "Meta", "Google"].map((provider) => {
+        {[m.copy_anthropic(), m.copy_openai(), m.copy_meta(), m.copy_google()].map((provider) => {
           const providerModels = MODELS.filter((model) => model.provider === provider);
           if (providerModels.length === 0) return null;
 
@@ -193,24 +194,24 @@ export function ModelSelector({
 
         <div {...sx("px-2 py-1")}>
           <p {...sx("text-xs text-muted-foreground")}>
-            Powered by{" "}
+            {m.copy_powered_by()}{" "}
             <a
               href="https://openrouter.ai"
               target="_blank"
               rel="noopener noreferrer"
               {...sx("underline hover:text-foreground")}
             >
-              OpenRouter
+              {m.copy_openrouter()}
             </a>
           </p>
           <div {...sx("flex items-center space-x-4 mt-2 text-xs text-muted-foreground")}>
             <div {...sx("flex items-center space-x-1")}>
               <ImageIcon {...sx("h-3 w-3 text-primary")} />
-              <span>Images</span>
+              <span>{m.copy_images()}</span>
             </div>
             <div {...sx("flex items-center space-x-1")}>
               <FileText {...sx("h-3 w-3 text-primary")} />
-              <span>Documents</span>
+              <span>{m.copy_documents()}</span>
             </div>
           </div>
         </div>

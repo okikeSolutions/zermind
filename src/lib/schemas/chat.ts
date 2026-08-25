@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import * as m from "@/paraglide/messages.js";
 export const AttachmentSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -62,7 +63,7 @@ export const CreateChatSchema = z.object({
 });
 
 export const UpdateChatSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, m.copy_title_is_required()),
 });
 
 export type Attachment = z.infer<typeof AttachmentSchema>;

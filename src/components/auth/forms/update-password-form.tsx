@@ -18,11 +18,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const updatePasswordSchema = z.object({
   password: z
     .string()
-    .min(1, "Password is required")
-    .min(6, "Password must be at least 6 characters"),
+    .min(1, m.copy_password_is_required())
+    .min(6, m.copy_password_must_be_at_least_6_characters()),
 });
 
 type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>;
@@ -54,7 +55,7 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
       router.push("/protected");
       router.refresh();
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : m.copy_an_error_occurred());
     } finally {
       setIsLoading(false);
     }
@@ -64,8 +65,8 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
     <div {...sx(cn("flex flex-col gap-6", className))} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-          <CardDescription>Please enter your new password below.</CardDescription>
+          <CardTitle className="text-2xl">{m.copy_reset_your_password()}</CardTitle>
+          <CardDescription>{m.copy_please_enter_your_new_password_below()}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -75,9 +76,9 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>New password</FormLabel>
+                    <FormLabel>{m.copy_new_password()}</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="New password" {...field} />
+                      <Input type="password" placeholder={m.copy_new_password()} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -86,7 +87,7 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
 
               {error && <p {...sx("text-sm text-red-500")}>{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save new password"}
+                {isLoading ? m.copy_saving() : m.copy_save_new_password()}
               </Button>
             </form>
           </Form>

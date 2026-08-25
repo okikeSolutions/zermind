@@ -6,6 +6,7 @@ import { useDropzone, type Accept, type FileRejection } from "react-dropzone";
 import Image from "@/components/app-image";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 export const formatBytes = (
   bytes: number,
   decimals = 2,
@@ -13,9 +14,20 @@ export const formatBytes = (
 ) => {
   const k = 1000;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const sizes = [
+    "bytes",
+    m.copy_kb(),
+    m.copy_mb(),
+    m.copy_gb(),
+    m.copy_tb(),
+    m.copy_pb(),
+    m.copy_eb(),
+    m.copy_zb(),
+    m.copy_yb(),
+  ];
 
-  if (bytes === 0 || bytes === undefined) return size !== undefined ? `0 ${size}` : "0 bytes";
+  if (bytes === 0 || bytes === undefined)
+    return size !== undefined ? `0 ${size}` : m.copy_0_bytes();
   const i = size !== undefined ? sizes.indexOf(size) : Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
@@ -154,7 +166,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
       <div {...sx(cn("flex flex-row items-center gap-x-2 justify-center", className))}>
         <CheckCircle size={16} {...sx("text-primary")} />
         <p {...sx("text-primary text-sm")}>
-          Successfully uploaded {files.length} file{files.length > 1 ? "s" : ""}
+          {m.copy_successfully_uploaded()} {files.length} file{files.length > 1 ? "s" : ""}
         </p>
       </div>
     );
@@ -200,20 +212,22 @@ const DropzoneContent = ({ className }: { className?: string }) => {
                   {file.errors
                     .map((e) =>
                       e.message.startsWith("File is larger than")
-                        ? `File is larger than ${formatBytes(
-                            maxFileSize,
-                            2,
-                          )} (Size: ${formatBytes(file.size, 2)})`
+                        ? m.copy_file_is_larger_than_size({
+                            maximum: formatBytes(maxFileSize, 2),
+                            size: formatBytes(file.size, 2),
+                          })
                         : e.message,
                     )
                     .join(", ")}
                 </p>
               ) : loading && !isSuccessfullyUploaded ? (
-                <p {...sx("text-xs text-muted-foreground")}>Uploading file...</p>
+                <p {...sx("text-xs text-muted-foreground")}>{m.copy_uploading_file()}</p>
               ) : fileError ? (
-                <p {...sx("text-xs text-destructive")}>Failed to upload: {fileError.message}</p>
+                <p {...sx("text-xs text-destructive")}>
+                  {m.copy_failed_to_upload()} {fileError.message}
+                </p>
               ) : isSuccessfullyUploaded ? (
-                <p {...sx("text-xs text-primary")}>Successfully uploaded file</p>
+                <p {...sx("text-xs text-primary")}>{m.copy_successfully_uploaded_file()}</p>
               ) : (
                 <p {...sx("text-xs text-muted-foreground")}>{formatBytes(file.size, 2)}</p>
               )}
@@ -234,7 +248,8 @@ const DropzoneContent = ({ className }: { className?: string }) => {
       })}
       {exceedMaxFiles && (
         <p {...sx("text-sm text-left mt-2 text-destructive")}>
-          You may upload only up to {maxFiles} files, please remove {files.length - maxFiles} file
+          {m.copy_you_may_upload_only_up_to()} {maxFiles} {m.copy_files_please_remove()}{" "}
+          {files.length - maxFiles} file
           {files.length - maxFiles > 1 ? "s" : ""}.
         </p>
       )}
@@ -247,11 +262,10 @@ const DropzoneContent = ({ className }: { className?: string }) => {
           >
             {loading ? (
               <>
-                <Loader2 {...sx("mr-2 h-4 w-4 animate-spin")} />
-                Uploading...
+                <Loader2 {...sx("mr-2 h-4 w-4 animate-spin")} /> {m.copy_uploading()}
               </>
             ) : (
-              <>Upload files</>
+              <>{m.copy_upload_files()}</>
             )}
           </Button>
         </div>
@@ -271,24 +285,25 @@ const DropzoneEmptyState = ({ className }: { className?: string }) => {
     <div {...sx(cn("flex flex-col items-center gap-y-2", className))}>
       <Upload size={20} {...sx("text-muted-foreground")} />
       <p {...sx("text-sm")}>
-        Upload{!!maxFiles && maxFiles > 1 ? ` ${maxFiles}` : ""} file
-        {!maxFiles || maxFiles > 1 ? "s" : ""}
+        {maxFiles === 1
+          ? m.copy_upload_one_file()
+          : m.copy_upload_files_limit({ count: maxFiles ?? "" })}
       </p>
       <div {...sx("flex flex-col items-center gap-y-1")}>
         <p {...sx("text-xs text-muted-foreground")}>
-          Drag and drop or{" "}
+          {m.copy_drag_and_drop_or()}{" "}
           <button
             type="button"
             onClick={() => openFileDialog?.() ?? inputRef?.current?.click()}
             {...sx("underline cursor-pointer transition hover:text-foreground")}
           >
-            select {maxFiles === 1 ? `file` : "files"}
+            {maxFiles === 1 ? m.copy_select_file() : m.copy_select_files()}
           </button>{" "}
-          to upload
+          {m.copy_to_upload()}
         </p>
         {maxFileSize !== Number.POSITIVE_INFINITY && (
           <p {...sx("text-xs text-muted-foreground")}>
-            Maximum file size: {formatBytes(maxFileSize, 2)}
+            {m.copy_maximum_file_size()} {formatBytes(maxFileSize, 2)}
           </p>
         )}
       </div>

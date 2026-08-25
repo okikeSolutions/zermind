@@ -1,8 +1,10 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { ZermindLogo } from "@/components/zermind-logo";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 export const Route = createFileRoute("/share")({ component: ShareLayout });
 
 function ShareLayout() {
@@ -12,7 +14,8 @@ function ShareLayout() {
         <div {...sx("container mx-auto px-4 py-3 flex justify-between items-center")}>
           <ZermindLogo variant="compact" />
           <div {...sx("flex items-center gap-2")}>
-            <span {...sx("text-sm text-muted-foreground")}>Shared Chat</span>
+            <span {...sx("text-sm text-muted-foreground")}>{m.copy_shared_chat()}</span>
+            <LocaleSwitcher />
             <ThemeSwitcher />
           </div>
         </div>

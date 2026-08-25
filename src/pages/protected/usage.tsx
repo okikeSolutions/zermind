@@ -4,6 +4,7 @@ import { BarChart3, Activity, Calendar } from "lucide-react";
 import { useUsageStats } from "@/hooks/use-usage";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 export default function UsagePage() {
   const { data: stats, isLoading: loading, error } = useUsageStats();
 
@@ -12,7 +13,7 @@ export default function UsagePage() {
       <div {...sx("container mx-auto p-6")}>
         <div {...sx("flex items-center gap-2 mb-6")}>
           <BarChart3 {...sx("h-6 w-6")} />
-          <h1 {...sx("text-2xl font-bold")}>Usage Statistics</h1>
+          <h1 {...sx("text-2xl font-bold")}>{m.copy_usage_statistics()}</h1>
         </div>
         <div {...sx("grid gap-6 md:grid-cols-2 lg:grid-cols-3")}>
           {Array.from({ length: 6 }).map((_, i) => (
@@ -36,12 +37,14 @@ export default function UsagePage() {
       <div {...sx("container mx-auto p-6")}>
         <div {...sx("flex items-center gap-2 mb-6")}>
           <BarChart3 {...sx("h-6 w-6")} />
-          <h1 {...sx("text-2xl font-bold")}>Usage Statistics</h1>
+          <h1 {...sx("text-2xl font-bold")}>{m.copy_usage_statistics()}</h1>
         </div>
         <Card>
           <CardContent className="pt-6">
             <div {...sx("text-center text-muted-foreground")}>
-              <p>Error loading usage statistics: {error?.message || "Unknown error"}</p>
+              <p>
+                {m.copy_error_loading_usage_statistics()} {error?.message || m.copy_unknown_error()}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -54,12 +57,12 @@ export default function UsagePage() {
       <div {...sx("container mx-auto p-6")}>
         <div {...sx("flex items-center gap-2 mb-6")}>
           <BarChart3 {...sx("h-6 w-6")} />
-          <h1 {...sx("text-2xl font-bold")}>Usage Statistics</h1>
+          <h1 {...sx("text-2xl font-bold")}>{m.copy_usage_statistics()}</h1>
         </div>
         <Card>
           <CardContent className="pt-6">
             <div {...sx("text-center text-muted-foreground")}>
-              <p>No usage data available</p>
+              <p>{m.copy_no_usage_data_available()}</p>
             </div>
           </CardContent>
         </Card>
@@ -85,11 +88,11 @@ export default function UsagePage() {
     if (model.startsWith("anthropic/")) return "Anthropic";
     if (model.startsWith("meta-llama/")) return "Meta";
     if (model.startsWith("google/")) return "Google";
-    return "Unknown";
+    return m.copy_unknown();
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString(undefined, {
       month: "short",
       day: "numeric",
     });
@@ -99,41 +102,41 @@ export default function UsagePage() {
     <div {...sx("container mx-auto p-6")}>
       <div {...sx("flex items-center gap-2 mb-6")}>
         <BarChart3 {...sx("h-6 w-6")} />
-        <h1 {...sx("text-2xl font-bold")}>Usage Statistics</h1>
+        <h1 {...sx("text-2xl font-bold")}>{m.copy_usage_statistics()}</h1>
       </div>
 
       {/* Overview Cards */}
       <div {...sx("grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8")}>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
+            <CardTitle className="text-sm font-medium">{m.copy_total_requests()}</CardTitle>
             <Activity {...sx("h-4 w-4 text-muted-foreground")} />
           </CardHeader>
           <CardContent>
             <div {...sx("text-2xl font-bold")}>{stats.totalRequests}</div>
-            <p {...sx("text-xs text-muted-foreground")}>All-time chat requests</p>
+            <p {...sx("text-xs text-muted-foreground")}>{m.copy_all_time_chat_requests()}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Models Used</CardTitle>
+            <CardTitle className="text-sm font-medium">{m.copy_models_used()}</CardTitle>
             <BarChart3 {...sx("h-4 w-4 text-muted-foreground")} />
           </CardHeader>
           <CardContent>
             <div {...sx("text-2xl font-bold")}>{modelEntries.length}</div>
-            <p {...sx("text-xs text-muted-foreground")}>Different AI models</p>
+            <p {...sx("text-xs text-muted-foreground")}>{m.copy_different_ai_models()}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+            <CardTitle className="text-sm font-medium">{m.copy_recent_activity()}</CardTitle>
             <Calendar {...sx("h-4 w-4 text-muted-foreground")} />
           </CardHeader>
           <CardContent>
             <div {...sx("text-2xl font-bold")}>{dailyEntries.length}</div>
-            <p {...sx("text-xs text-muted-foreground")}>Active days tracked</p>
+            <p {...sx("text-xs text-muted-foreground")}>{m.copy_active_days_tracked()}</p>
           </CardContent>
         </Card>
       </div>
@@ -142,14 +145,14 @@ export default function UsagePage() {
       <div {...sx("grid gap-6 md:grid-cols-1 lg:grid-cols-2")}>
         <Card>
           <CardHeader>
-            <CardTitle>Model Usage</CardTitle>
-            <CardDescription>AI models you&apos;ve used and request counts</CardDescription>
+            <CardTitle>{m.copy_model_usage()}</CardTitle>
+            <CardDescription>{m.copy_ai_models_you_ve_used_and_request_counts()}</CardDescription>
           </CardHeader>
           <CardContent>
             <div {...sx("space-y-4")}>
               {modelEntries.length === 0 ? (
                 <p {...sx("text-muted-foreground text-center py-4")}>
-                  No model usage data available
+                  {m.copy_no_model_usage_data_available()}
                 </p>
               ) : (
                 modelEntries.map(([model, count]) => {
@@ -184,14 +187,14 @@ export default function UsagePage() {
         {/* Daily Activity */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Daily request counts over the last week</CardDescription>
+            <CardTitle>{m.copy_recent_activity()}</CardTitle>
+            <CardDescription>{m.copy_daily_request_counts_over_the_last_week()}</CardDescription>
           </CardHeader>
           <CardContent>
             <div {...sx("space-y-4")}>
               {dailyEntries.length === 0 ? (
                 <p {...sx("text-muted-foreground text-center py-4")}>
-                  No recent activity data available
+                  {m.copy_no_recent_activity_data_available()}
                 </p>
               ) : (
                 dailyEntries.map(([date, count]) => {

@@ -5,6 +5,7 @@ import { XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 function Sheet(props: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
@@ -77,7 +78,7 @@ function SheetContent({
             )}
           >
             <XIcon {...sx("size-4")} />
-            <span {...sx("sr-only")}>Close</span>
+            <span {...sx("sr-only")}>{m.copy_close()}</span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Popup>

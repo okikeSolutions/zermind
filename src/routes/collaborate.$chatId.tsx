@@ -8,6 +8,7 @@ import { fetchAuthMutation } from "@/lib/auth-server";
 import { seo } from "@/lib/seo";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const joinChat = createServerFn({ method: "POST" })
   .validator(z.object({ chatId: z.string() }))
   .handler(({ data }) =>
@@ -32,8 +33,8 @@ export const Route = createFileRoute("/collaborate/$chatId")({
   },
   head: ({ params }) =>
     seo({
-      title: "Collaborative chat | Zermind",
-      description: "A private collaborative conversation on Zermind.",
+      title: m.copy_collaborative_chat_zermind(),
+      description: m.copy_a_private_collaborative_conversation_on_zermind(),
       path: `/collaborate/${params.chatId}`,
       noIndex: true,
     }),
@@ -49,7 +50,7 @@ function CollaborationRoute() {
       <div {...sx("border-b")}>
         <div {...sx("container mx-auto px-4 py-3 flex justify-between items-center")}>
           <div {...sx("text-sm text-muted-foreground")}>
-            <span {...sx("font-medium")}>Collaborative Chat</span>
+            <span {...sx("font-medium")}>{m.copy_collaborative_chat()}</span>
             {chat.title ? <span>{` • ${chat.title}`}</span> : null}
           </div>
           <span {...sx("text-xs text-muted-foreground capitalize")}>{userRole}</span>

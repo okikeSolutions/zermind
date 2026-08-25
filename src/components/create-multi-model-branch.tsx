@@ -39,6 +39,7 @@ import { type Message } from "@/lib/schemas/chat";
 
 // Available models for multi-model comparison
 import { sx } from "@/styles/sx";
+import * as m from "@/paraglide/messages.js";
 const COMPARISON_MODELS = [
   { id: "openai/gpt-5", name: "GPT-5", provider: "OpenAI", tier: "premium" },
   {
@@ -78,13 +79,16 @@ const multiModelFormSchema = z.object({
     .string()
     .optional()
     .refine((val) => !val || val.length >= 3, {
-      message: "Branch name must be at least 3 characters if provided",
+      message: m.copy_branch_name_must_be_at_least_3_characters_if_provided(),
     }),
-  message: z.string().min(1, "Message cannot be empty").max(4000, "Message is too long"),
+  message: z
+    .string()
+    .min(1, m.copy_message_cannot_be_empty())
+    .max(4000, m.copy_message_is_too_long()),
   selectedModels: z
     .array(z.string())
-    .min(2, "Please select at least 2 models for comparison")
-    .max(4, "Maximum 4 models allowed for comparison"),
+    .min(2, m.copy_please_select_at_least_2_models_for_comparison())
+    .max(4, m.copy_maximum_4_models_allowed_for_comparison()),
 });
 
 type MultiModelFormData = z.infer<typeof multiModelFormSchema>;
@@ -172,7 +176,11 @@ function useMultiBranchingChats({
         parentNodeId,
         initialContext,
         model,
-        branchName: branchName || `${getProviderDisplayName(getProviderFromModel(model))} Response`,
+        branchName:
+          branchName ||
+          m.copy_provider_response({
+            provider: getProviderDisplayName(getProviderFromModel(model)),
+          }),
         onFinish: handleFinish,
         onError: handleError,
       };
@@ -314,7 +322,7 @@ export function CreateMultiModelBranch({
             ></div>
             <div {...sx("w-2 h-2 bg-current rounded-full animate-bounce")}></div>
             <span {...sx("text-sm text-muted-foreground ml-2")}>
-              Loading conversation context...
+              {m.copy_loading_conversation_context()}
             </span>
           </div>
         </CardContent>
@@ -336,7 +344,7 @@ export function CreateMultiModelBranch({
               <span {...sx("text-sm")}>{contextError.message}</span>
             </div>
             <Button size="sm" variant="outline" onClick={onClose}>
-              Close
+              {m.copy_close()}
             </Button>
           </div>
         </CardContent>
@@ -355,17 +363,17 @@ export function CreateMultiModelBranch({
         >
           <div {...sx("flex items-center gap-2")}>
             <Zap {...sx("h-4 w-4 text-purple-500")} />
-            <h4 {...sx("text-sm font-medium")}>Multi-Model Comparison</h4>
+            <h4 {...sx("text-sm font-medium")}>{m.copy_multi_model_comparison()}</h4>
           </div>
           <Badge variant="outline" className="text-xs w-fit">
-            From node: {parentNodeId.slice(0, 8)}...
+            {m.copy_from_node()} {parentNodeId.slice(0, 8)}...
           </Badge>
         </div>
 
         {/* Context Preview */}
         {context.length > 0 && (
           <div {...sx("space-y-2")}>
-            <p {...sx("text-xs text-muted-foreground font-medium")}>Branching from:</p>
+            <p {...sx("text-xs text-muted-foreground font-medium")}>{m.copy_branching_from()}</p>
             <div {...sx("bg-muted rounded-md p-2 max-h-20 overflow-y-auto")}>
               <div {...sx("text-xs text-muted-foreground space-y-1")}>
                 {context.slice(-1).map((msg) => (
@@ -394,16 +402,16 @@ export function CreateMultiModelBranch({
               name="branchName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Branch Name (optional)</FormLabel>
+                  <FormLabel>{m.copy_branch_name_optional()}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Model Comparison, Multi-AI Analysis..."
+                      placeholder={m.copy_e_g_model_comparison_multi_ai_analysis()}
                       disabled={isAnyLoading}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription className="text-xs">
-                    This will be the parent name for all model responses
+                    {m.copy_this_will_be_the_parent_name_for_all_model_responses()}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -416,7 +424,7 @@ export function CreateMultiModelBranch({
               name="selectedModels"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Select Models to Compare (2-4 models)</FormLabel>
+                  <FormLabel>{m.copy_select_models_to_compare_2_4_models()}</FormLabel>
                   <div {...sx("grid grid-cols-1 sm:grid-cols-2 gap-2")}>
                     {COMPARISON_MODELS.map((model) => (
                       <div
@@ -472,7 +480,9 @@ export function CreateMultiModelBranch({
             {/* Model Status Display */}
             {modelStatuses.length > 0 && (
               <div {...sx("space-y-2")}>
-                <p {...sx("text-xs text-muted-foreground font-medium")}>Processing Status:</p>
+                <p {...sx("text-xs text-muted-foreground font-medium")}>
+                  {m.copy_processing_status()}
+                </p>
                 <div {...sx("grid grid-cols-1 sm:grid-cols-2 gap-2")}>
                   {modelStatuses.map((status) => (
                     <div
@@ -513,7 +523,7 @@ export function CreateMultiModelBranch({
                   <FormControl>
                     <div {...sx("flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2")}>
                       <Input
-                        placeholder="Ask the same question to all selected models..."
+                        placeholder={m.copy_ask_the_same_question_to_all_selected_models()}
                         disabled={isAnyLoading}
                         className="flex-1"
                         {...field}
@@ -536,8 +546,7 @@ export function CreateMultiModelBranch({
                             variant="destructive"
                             className="flex-shrink-0"
                           >
-                            <StopCircle {...sx("h-4 w-4 mr-2")} />
-                            Stop All
+                            <StopCircle {...sx("h-4 w-4 mr-2")} /> {m.copy_stop_all()}
                           </Button>
                         ) : (
                           <Button
@@ -548,8 +557,7 @@ export function CreateMultiModelBranch({
                             }
                             className="flex-shrink-0"
                           >
-                            <Send {...sx("h-4 w-4 mr-2")} />
-                            Compare
+                            <Send {...sx("h-4 w-4 mr-2")} /> {m.copy_compare()}
                           </Button>
                         )}
                         <Button
@@ -558,7 +566,7 @@ export function CreateMultiModelBranch({
                           onClick={onClose}
                           disabled={isAnyLoading}
                         >
-                          Cancel
+                          {m.copy_cancel()}
                         </Button>
                       </div>
                     </div>
@@ -569,7 +577,7 @@ export function CreateMultiModelBranch({
             />
 
             <p {...sx("text-xs text-muted-foreground text-center")}>
-              This will create separate branches for each selected model&apos;s response
+              {m.copy_this_will_create_separate_branches_for_each_selected_model_s_res()}
             </p>
           </form>
         </Form>
@@ -581,7 +589,9 @@ export function CreateMultiModelBranch({
               .filter((chat) => chat.error)
               .map((chat, index) => {
                 const modelId = form.watch("selectedModels")[index];
-                const modelName = modelId ? getModelDisplayName(modelId) : `Model ${index + 1}`;
+                const modelName = modelId
+                  ? getModelDisplayName(modelId)
+                  : m.copy_model_number({ number: index + 1 });
 
                 return (
                   <div key={index} {...sx("flex items-start space-x-2 text-destructive text-sm")}>

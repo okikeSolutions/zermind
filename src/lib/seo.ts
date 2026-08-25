@@ -1,5 +1,9 @@
+import { getLocale, localizeHref } from "@/paraglide/runtime.js";
+import { prefixLocale, supportedLocales } from "../../i18n/config";
+
+import * as m from "@/paraglide/messages.js";
 const defaultSiteUrl = "https://zermind.ai";
-const siteName = "Zermind";
+const siteName = m.copy_zermind();
 const defaultImagePath = "/opengraph-image.png";
 
 export const siteUrl = (
@@ -24,6 +28,10 @@ export function absoluteUrl(path: string) {
   return new URL(path, `${siteUrl}/`).toString();
 }
 
+export function localizedAbsoluteUrl(path: string) {
+  return absoluteUrl(localizeHref(path));
+}
+
 export function jsonLdScript(jsonLd: JsonLd | JsonLd[]) {
   return {
     type: "application/ld+json",
@@ -40,7 +48,8 @@ export function seo({
   type = "website",
   jsonLd,
 }: SeoOptions) {
-  const canonicalUrl = absoluteUrl(path);
+  const locale = getLocale();
+  const canonicalUrl = localizedAbsoluteUrl(path);
   const imageUrl = absoluteUrl(imagePath);
   const robots = "noindex, nofollow, noarchive";
   const pageJsonLd: JsonLd = {
@@ -49,8 +58,8 @@ export function seo({
     name: title,
     description,
     url: canonicalUrl,
-    inLanguage: "en",
-    isPartOf: { "@id": absoluteUrl("/#website") },
+    inLanguage: locale,
+    isPartOf: { "@id": localizedAbsoluteUrl("/#website") },
     primaryImageOfPage: {
       "@type": "ImageObject",
       url: imageUrl,
@@ -71,17 +80,17 @@ export function seo({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: type },
-      { property: "og:locale", content: "en_US" },
+      { property: "og:locale", content: locale === "de" ? "de-DE" : "en-US" },
       { property: "og:url", content: canonicalUrl },
       { property: "og:image", content: imageUrl },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: `${siteName} preview` },
+      { property: "og:image:alt", content: m.copy_site_preview({ siteName }) },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: description },
       { name: "twitter:image", content: imageUrl },
-      { name: "twitter:image:alt", content: `${siteName} preview` },
+      { name: "twitter:image:alt", content: m.copy_site_preview({ siteName }) },
       ...(noIndex
         ? [
             { name: "robots", content: robots },
@@ -89,7 +98,21 @@ export function seo({
           ]
         : []),
     ],
-    links: noIndex ? [] : [{ rel: "canonical", href: canonicalUrl }],
+    links: noIndex
+      ? []
+      : [
+          { rel: "canonical", href: canonicalUrl },
+          ...supportedLocales.map((alternateLocale) => ({
+            rel: "alternate",
+            hrefLang: alternateLocale,
+            href: absoluteUrl(prefixLocale(alternateLocale, path)),
+          })),
+          {
+            rel: "alternate",
+            hrefLang: "x-default",
+            href: absoluteUrl(prefixLocale("en", path)),
+          },
+        ],
     scripts,
   };
 }

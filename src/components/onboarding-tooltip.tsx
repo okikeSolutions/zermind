@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, ArrowRight, Brain, MessageSquare, GitBranch, Users, Sparkles } from "lucide-react";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 interface OnboardingStep {
   id: string;
   title: string;
@@ -24,48 +25,43 @@ interface OnboardingTooltipProps {
 const DEFAULT_ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "welcome",
-    title: "Welcome to Zermind! 🎉",
-    description:
-      "The first AI platform that transforms conversations into visual mind maps. Let's take a quick tour!",
+    title: m.copy_welcome_to_zermind_2(),
+    description: m.copy_the_first_ai_platform_that_transforms_conversations_into_visual(),
     icon: Sparkles,
     position: "bottom",
-    highlight: "Revolutionary AI visualization",
+    highlight: m.copy_revolutionary_ai_visualization(),
   },
   {
     id: "dual-mode",
-    title: "Dual Interaction Modes",
-    description:
-      "Switch between traditional Chat Mode and revolutionary Mind Mode anytime. Each offers unique advantages for different thinking styles.",
+    title: m.copy_dual_interaction_modes(),
+    description: m.copy_switch_between_traditional_chat_mode_and_revolutionary_mind_mode(),
     icon: MessageSquare,
     position: "bottom",
-    highlight: "Chat + Mind modes",
+    highlight: m.copy_chat_mind_modes(),
   },
   {
     id: "mind-mode",
-    title: "Mind Mode Magic ✨",
-    description:
-      "Transform your conversations into interactive mind maps. See how ideas connect, branch, and evolve visually.",
+    title: m.copy_mind_mode_magic(),
+    description: m.copy_transform_your_conversations_into_interactive_mind_maps_see_how(),
     icon: Brain,
     position: "top",
-    highlight: "Visual thinking revolution",
+    highlight: m.copy_visual_thinking_revolution(),
   },
   {
     id: "multi-model",
-    title: "Multi-Model Conversations",
-    description:
-      "Ask the same question to different AI models and compare their responses side-by-side in your mind map.",
+    title: m.copy_multi_model_conversations(),
+    description: m.copy_ask_the_same_question_to_different_ai_models_and_compare_their_r(),
     icon: GitBranch,
     position: "bottom",
-    highlight: "GPT-4 vs Claude vs Llama",
+    highlight: m.copy_gpt_4_vs_claude_vs_llama(),
   },
   {
     id: "collaboration",
-    title: "Real-time Collaboration",
-    description:
-      "Work with your team in real-time on the same conversation trees. Perfect for brainstorming and complex problem-solving.",
+    title: m.copy_real_time_collaboration(),
+    description: m.copy_work_with_your_team_in_real_time_on_the_same_conversation_trees(),
     icon: Users,
     position: "top",
-    highlight: "Coming soon!",
+    highlight: m.copy_coming_soon(),
   },
 ];
 
@@ -192,20 +188,18 @@ export function OnboardingTooltip({
             <div {...sx("flex items-center gap-2")}>
               {currentStep > 0 && (
                 <Button variant="outline" size="sm" onClick={handlePrevious}>
-                  Previous
+                  {m.copy_previous()}
                 </Button>
               )}
 
               <Button onClick={handleNext} size="sm" className="bg-primary hover:bg-primary/80">
                 {isLastStep ? (
                   <>
-                    Get Started
-                    <Sparkles {...sx("h-3 w-3 ml-1")} />
+                    {m.copy_get_started()} <Sparkles {...sx("h-3 w-3 ml-1")} />
                   </>
                 ) : (
                   <>
-                    Next
-                    <ArrowRight {...sx("h-3 w-3 ml-1")} />
+                    {m.copy_next()} <ArrowRight {...sx("h-3 w-3 ml-1")} />
                   </>
                 )}
               </Button>
@@ -220,7 +214,7 @@ export function OnboardingTooltip({
               onClick={handleSkip}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
-              Skip tour
+              {m.copy_skip_tour()}
             </Button>
           </div>
         </CardContent>

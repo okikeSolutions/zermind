@@ -4,12 +4,13 @@ import { LogoutButton } from "./logout-button";
 import { useAuthUser } from "@/hooks/use-auth";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 function SignedInAuthButton() {
   const { user } = useAuthUser();
 
   return (
     <div {...sx("flex items-center gap-4")}>
-      {user?.email ? `Hey, ${user.email}!` : "Signed in"}
+      {user?.email ? m.copy_greeting({ email: user.email }) : m.copy_signed_in()}
       <LogoutButton />
     </div>
   );
@@ -21,7 +22,7 @@ export function AuthButton({ isAuthenticated }: Readonly<{ isAuthenticated: bool
   return (
     <div {...sx("flex gap-2")}>
       <Button render={<Link href="/auth/login" />} nativeButton={false} size="sm" variant="outline">
-        Sign in
+        {m.copy_sign_in()}
       </Button>
       <Button
         render={<Link href="/auth/sign-up" />}
@@ -29,7 +30,7 @@ export function AuthButton({ isAuthenticated }: Readonly<{ isAuthenticated: bool
         size="sm"
         variant="default"
       >
-        Sign up
+        {m.copy_sign_up()}
       </Button>
     </div>
   );

@@ -1,15 +1,20 @@
 import { z } from "zod";
 
+import * as m from "@/paraglide/messages.js";
 export const ProviderEnum = z.enum(["openrouter", "openai", "anthropic", "meta", "google"]);
 
 export const CreateApiKeySchema = z.object({
   provider: ProviderEnum,
-  apiKey: z.string().min(1, "API key is required"),
-  keyName: z.string().min(1, "Key name is required").max(50, "Key name is too long"),
+  apiKey: z.string().min(1, m.copy_api_key_is_required()),
+  keyName: z.string().min(1, m.copy_key_name_is_required()).max(50, m.copy_key_name_is_too_long()),
 });
 
 export const UpdateApiKeySchema = z.object({
-  keyName: z.string().min(1, "Key name is required").max(50, "Key name is too long").optional(),
+  keyName: z
+    .string()
+    .min(1, m.copy_key_name_is_required())
+    .max(50, m.copy_key_name_is_too_long())
+    .optional(),
   isActive: z.boolean().optional(),
 });
 

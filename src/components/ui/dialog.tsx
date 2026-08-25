@@ -5,6 +5,7 @@ import { XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 function Dialog(props: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
@@ -64,7 +65,7 @@ function DialogContent({
             )}
           >
             <XIcon {...sx("size-4")} />
-            <span {...sx("sr-only")}>Close</span>
+            <span {...sx("sr-only")}>{m.copy_close()}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>

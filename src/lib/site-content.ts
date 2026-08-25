@@ -1,51 +1,24 @@
-import { absoluteUrl } from "./seo";
+import * as m from "@/paraglide/messages.js";
+import { getLocale } from "@/paraglide/runtime.js";
+import { absoluteUrl, localizedAbsoluteUrl } from "./seo";
 
-export const homeFaqs = [
-  {
-    question: "What makes Zermind different from other AI chat tools?",
-    answer:
-      "Zermind displays conversations as interactive trees. You can branch from an earlier message, compare responses from different AI models, and return to any point in the conversation.",
-  },
-  {
-    question: "How does Mind Mode work?",
-    answer:
-      "Mind Mode displays each message as a node in a visual tree. New questions and model responses create connected branches, and selecting a node lets you continue that conversation thread.",
-  },
-  {
-    question: "Can I use my own API keys?",
-    answer:
-      "Yes. Zermind supports bring-your-own-key access through OpenRouter and direct provider integrations. The available models depend on the provider and keys you configure.",
-  },
-  {
-    question: "Is Zermind free to use?",
-    answer:
-      "The Zermind source code is available under the MIT License. AI providers may charge for model usage, and self-hosting may have infrastructure costs.",
-  },
-  {
-    question: "Can I collaborate with others on mind maps?",
-    answer:
-      "Yes. Zermind supports collaborative conversation trees with shared updates and participant presence. Collaboration is currently marked as a beta feature.",
-  },
-  {
-    question: "How do I share my conversation trees?",
-    answer:
-      "You can create a public link for a conversation tree. Anyone with that link can open and explore the shared conversation until you revoke the link or delete the chat.",
-  },
-  {
-    question: "How does Zermind handle my data?",
-    answer:
-      "Zermind stores account and conversation data needed to run the service. Messages are sent to the AI provider you select. You can review the source code and read the privacy policy for the full data-handling details.",
-  },
-  {
-    question: "Which AI models are supported?",
-    answer:
-      "Zermind supports models from OpenAI, Anthropic, Google, Meta, and other providers available through OpenRouter. The exact model list depends on provider availability and your configuration.",
-  },
-] as const;
+export function getHomeFaqs() {
+  return [
+    { question: m.faq_difference_question(), answer: m.faq_difference_answer() },
+    { question: m.faq_mind_mode_question(), answer: m.faq_mind_mode_answer() },
+    { question: m.faq_api_keys_question(), answer: m.faq_api_keys_answer() },
+    { question: m.faq_free_question(), answer: m.faq_free_answer() },
+    { question: m.faq_collaboration_question(), answer: m.faq_collaboration_answer() },
+    { question: m.faq_sharing_question(), answer: m.faq_sharing_answer() },
+    { question: m.faq_data_question(), answer: m.faq_data_answer() },
+    { question: m.faq_models_question(), answer: m.faq_models_answer() },
+  ];
+}
 
 export function buildSiteJsonLd() {
-  const organizationId = absoluteUrl("/#organization");
-  const websiteId = absoluteUrl("/#website");
+  const locale = getLocale();
+  const organizationId = localizedAbsoluteUrl("/#organization");
+  const websiteId = localizedAbsoluteUrl("/#website");
 
   return {
     "@context": "https://schema.org",
@@ -55,7 +28,7 @@ export function buildSiteJsonLd() {
         "@id": organizationId,
         name: "okike Solutions e.U.",
         legalName: "okike Solutions e.U.",
-        url: absoluteUrl("/"),
+        url: localizedAbsoluteUrl("/"),
         email: "info@okike-solutions.com",
         logo: {
           "@type": "ImageObject",
@@ -77,10 +50,9 @@ export function buildSiteJsonLd() {
         "@type": "WebSite",
         "@id": websiteId,
         name: "Zermind",
-        url: absoluteUrl("/"),
-        description:
-          "An open-source AI conversation application for branching chats and interactive mind maps.",
-        inLanguage: "en",
+        url: localizedAbsoluteUrl("/"),
+        description: m.home_meta_description(),
+        inLanguage: locale,
         publisher: { "@id": organizationId },
       },
     ],
@@ -88,29 +60,31 @@ export function buildSiteJsonLd() {
 }
 
 export function buildHomeJsonLd() {
-  const organizationId = absoluteUrl("/#organization");
-  const websiteId = absoluteUrl("/#website");
+  const locale = getLocale();
+  const organizationId = localizedAbsoluteUrl("/#organization");
+  const websiteId = localizedAbsoluteUrl("/#website");
+  const homeFaqs = getHomeFaqs();
 
   return {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "WebApplication",
-        "@id": absoluteUrl("/#application"),
+        "@id": localizedAbsoluteUrl("/#application"),
         name: "Zermind",
-        url: absoluteUrl("/"),
+        url: localizedAbsoluteUrl("/"),
         applicationCategory: "ProductivityApplication",
         operatingSystem: "Web",
-        inLanguage: "en",
-        description:
-          "An open-source AI conversation application for branching chats and interactive mind maps.",
+        inLanguage: locale,
+        description: m.home_meta_description(),
         isPartOf: { "@id": websiteId },
         publisher: { "@id": organizationId },
       },
       {
         "@type": "FAQPage",
-        "@id": absoluteUrl("/#faq"),
-        url: absoluteUrl("/#frequently-asked-questions"),
+        "@id": localizedAbsoluteUrl("/#faq"),
+        url: localizedAbsoluteUrl("/#frequently-asked-questions"),
+        inLanguage: locale,
         isPartOf: { "@id": websiteId },
         mainEntity: homeFaqs.map(({ question, answer }) => ({
           "@type": "Question",

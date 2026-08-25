@@ -11,6 +11,21 @@ This changes the web framework and styling system. Convex remains the applicatio
 
 For StyleX, we should use the plain Vite and React integration. The Vite RSC setup builds separate RSC, SSR, and client environments, which adds machinery that an SPA does not use.
 
+## Internationalization
+
+The TanStack Start app uses Paraglide JS for locale detection, translated messages, and localized URLs. English and German pages use `/en` and `/de` prefixes.
+
+The integration follows the TanStack Start example at the framework boundaries:
+
+- the Paraglide Vite plugin compiles messages from `messages/`
+- TanStack Router rewrites localized URLs to the internal route tree and localizes generated links
+- server middleware establishes request-scoped locale state for SSR
+- the root document reads the active locale for the HTML `lang` attribute
+- prerender requests carry explicit locale headers so static HTML has the correct metadata and content
+- canonical links, hreflang alternates, JSON-LD, and the sitemap use localized URLs
+
+API routes and machine-readable files are excluded from locale redirects. The generated `src/paraglide/` directory stays untracked and is rebuilt before type checking and tests.
+
 ## What changed
 
 - File-based routes now live in `src/routes` and generate a typed TanStack Router tree.

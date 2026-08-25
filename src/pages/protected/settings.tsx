@@ -8,6 +8,7 @@ import { CollaborationSettings } from "@/components/collaboration-settings";
 import { User, Settings, Shield, Database } from "lucide-react";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 export default function SettingsPage({
   user,
 }: {
@@ -16,9 +17,9 @@ export default function SettingsPage({
   return (
     <div {...sx("p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6")}>
       <div {...sx("space-y-1 sm:space-y-2")}>
-        <h1 {...sx("text-xl sm:text-2xl font-semibold")}>Settings</h1>
+        <h1 {...sx("text-xl sm:text-2xl font-semibold")}>{m.copy_settings()}</h1>
         <p {...sx("text-sm sm:text-base text-muted-foreground")}>
-          Manage your account preferences and privacy settings
+          {m.copy_manage_your_account_preferences_and_privacy_settings()}
         </p>
       </div>
 
@@ -26,47 +27,54 @@ export default function SettingsPage({
       <Card>
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <User {...sx("h-4 w-4 sm:h-5 sm:w-5")} />
-            Profile Information
+            <User {...sx("h-4 w-4 sm:h-5 sm:w-5")} /> {m.copy_profile_information()}
           </CardTitle>
           <CardDescription className="text-sm">
-            Your account details and preferences
+            {m.copy_your_account_details_and_preferences()}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div {...sx("grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4")}>
             <div {...sx("space-y-1.5 sm:space-y-2")}>
-              <p {...sx("text-xs sm:text-sm font-medium text-muted-foreground")}>Email</p>
+              <p {...sx("text-xs sm:text-sm font-medium text-muted-foreground")}>
+                {m.copy_email()}
+              </p>
               <p {...sx("text-sm font-mono bg-muted px-3 py-2 rounded-md break-all")}>
-                {user?.email ?? "Unknown"}
+                {user?.email ?? m.copy_unknown()}
               </p>
             </div>
             <div {...sx("space-y-1.5 sm:space-y-2")}>
-              <p {...sx("text-xs sm:text-sm font-medium text-muted-foreground")}>User ID</p>
+              <p {...sx("text-xs sm:text-sm font-medium text-muted-foreground")}>
+                {m.copy_user_id()}
+              </p>
               <p {...sx("text-sm font-mono bg-muted px-3 py-2 rounded-md truncate")}>
-                {user?.userId ?? user?._id ?? "Unknown"}
+                {user?.userId ?? user?._id ?? m.copy_unknown()}
               </p>
             </div>
             <div {...sx("space-y-1.5 sm:space-y-2")}>
-              <p {...sx("text-xs sm:text-sm font-medium text-muted-foreground")}>Account Created</p>
+              <p {...sx("text-xs sm:text-sm font-medium text-muted-foreground")}>
+                {m.copy_account_created()}
+              </p>
               <p {...sx("text-sm bg-muted px-3 py-2 rounded-md")}>
                 {user?.createdAt
-                  ? new Date(user.createdAt).toLocaleDateString("en-US", {
+                  ? new Date(user.createdAt).toLocaleDateString(undefined, {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })
-                  : "Unknown"}
+                  : m.copy_unknown()}
               </p>
             </div>
             <div {...sx("space-y-1.5 sm:space-y-2")}>
-              <p {...sx("text-xs sm:text-sm font-medium text-muted-foreground")}>Email Verified</p>
+              <p {...sx("text-xs sm:text-sm font-medium text-muted-foreground")}>
+                {m.copy_email_verified()}
+              </p>
               <div {...sx("flex items-center gap-2 mt-1")}>
                 <Badge
                   variant={user?.emailVerified ? "secondary" : "destructive"}
                   className="text-xs"
                 >
-                  {user?.emailVerified ? "Verified" : "Not Verified"}
+                  {user?.emailVerified ? m.copy_verified() : m.copy_not_verified()}
                 </Badge>
               </div>
             </div>
@@ -78,24 +86,23 @@ export default function SettingsPage({
       <Card>
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Settings {...sx("h-4 w-4 sm:h-5 sm:w-5")} />
-            Chat Preferences & API Keys
+            <Settings {...sx("h-4 w-4 sm:h-5 sm:w-5")} /> {m.copy_chat_preferences_api_keys()}
           </CardTitle>
           <CardDescription className="text-sm">
-            Customize your chat experience and manage your API keys
+            {m.copy_customize_your_chat_experience_and_manage_your_api_keys()}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-6">
           <ApiKeyManagement />
           <div {...sx("pt-4 sm:pt-6 border-t")}>
             <h4 {...sx("font-medium mb-2 sm:mb-3 text-sm sm:text-base")}>
-              Other Preferences{" "}
+              {m.copy_other_preferences()}{" "}
               <Badge variant="secondary" className="text-xs">
-                Soon
+                {m.copy_soon()}
               </Badge>
             </h4>
             <div {...sx("text-xs sm:text-sm text-muted-foreground mb-2")}>
-              Additional chat preferences will be implemented in future updates.
+              {m.copy_additional_chat_preferences_will_be_implemented_in_future_update()}
             </div>
           </div>
         </CardContent>
@@ -107,19 +114,18 @@ export default function SettingsPage({
       <Card>
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Shield {...sx("h-4 w-4 sm:h-5 sm:w-5")} />
-            Privacy & Security
+            <Shield {...sx("h-4 w-4 sm:h-5 sm:w-5")} /> {m.copy_privacy_security()}{" "}
             <Badge variant="secondary" className="text-xs ml-2">
-              Soon
+              {m.copy_soon()}
             </Badge>
           </CardTitle>
           <CardDescription className="text-sm">
-            Control your data and security settings
+            {m.copy_control_your_data_and_security_settings()}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
           <div {...sx("text-xs sm:text-sm text-muted-foreground")}>
-            Privacy controls will be implemented in future updates.
+            {m.copy_privacy_controls_will_be_implemented_in_future_updates()}
           </div>
         </CardContent>
       </Card>
@@ -128,17 +134,18 @@ export default function SettingsPage({
       <Card>
         <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Database {...sx("h-4 w-4 sm:h-5 sm:w-5")} />
-            Data Management
+            <Database {...sx("h-4 w-4 sm:h-5 sm:w-5")} /> {m.copy_data_management()}{" "}
             <Badge variant="secondary" className="text-xs ml-2">
-              Soon
+              {m.copy_soon()}
             </Badge>
           </CardTitle>
-          <CardDescription className="text-sm">Manage your chat data and storage</CardDescription>
+          <CardDescription className="text-sm">
+            {m.copy_manage_your_chat_data_and_storage()}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 sm:space-y-4">
           <div {...sx("text-xs sm:text-sm text-muted-foreground")}>
-            Data management features will be implemented in future updates.
+            {m.copy_data_management_features_will_be_implemented_in_future_updates()}
           </div>
         </CardContent>
       </Card>

@@ -17,8 +17,10 @@ import { authClient } from "@/lib/auth-client";
 import { getToken } from "@/lib/auth-server";
 import { jsonLdScript } from "@/lib/seo";
 import { buildSiteJsonLd } from "@/lib/site-content";
+import { getLocale } from "@/paraglide/runtime.js";
 import appCss from "@/styles/legacy-utilities.css?url";
 
+import * as m from "@/paraglide/messages.js";
 const getAuth = createServerFn({ method: "GET" }).handler(async () => getToken());
 
 export const Route = createRootRouteWithContext<{
@@ -29,10 +31,10 @@ export const Route = createRootRouteWithContext<{
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Zermind - AI Chat" },
+      { title: m.copy_zermind_ai_chat() },
       {
         name: "description",
-        content: "Open-source AI chat application with multiple LLM providers",
+        content: m.copy_open_source_ai_chat_application_with_multiple_llm_providers(),
       },
     ],
     links: [
@@ -96,7 +98,7 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={getLocale()} suppressHydrationWarning>
       <head>
         <HeadContent />
         <StyleXDevRuntime />

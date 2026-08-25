@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "@/lib/navigation";
 
+import * as m from "@/paraglide/messages.js";
 export function LogoutButton() {
   const router = useRouter();
 
@@ -11,5 +12,5 @@ export function LogoutButton() {
     router.refresh();
   };
 
-  return <Button onClick={logout}>Logout</Button>;
+  return <Button onClick={logout}>{m.copy_logout()}</Button>;
 }

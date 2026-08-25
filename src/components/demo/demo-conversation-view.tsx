@@ -10,6 +10,7 @@ import { Brain, MessageSquare, ArrowLeft, Lightbulb, LogIn } from "lucide-react"
 import { DEMO_CONVERSATIONS } from "./demo-conversation-data";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 interface DemoConversationViewProps {
   scenario: string;
   onUpgrade: () => void;
@@ -45,12 +46,12 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
     return (
       <div {...sx("flex items-center justify-center w-full h-full px-4")}>
         <div {...sx("text-center max-w-md")}>
-          <h1 {...sx("text-lg sm:text-xl font-semibold mb-2")}>Demo Not Found</h1>
+          <h1 {...sx("text-lg sm:text-xl font-semibold mb-2")}>{m.copy_demo_not_found()}</h1>
           <p {...sx("text-sm text-muted-foreground mb-4")}>
-            The requested demo scenario could not be found.
+            {m.copy_the_requested_demo_scenario_could_not_be_found()}
           </p>
           <Button onClick={onBack} className="w-full sm:w-auto min-h-[44px] touch-manipulation">
-            Back to Demo Selection
+            {m.copy_back_to_demo_selection()}
           </Button>
         </div>
       </div>
@@ -93,7 +94,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                   variant="ghost"
                   size="sm"
                   onClick={onBack}
-                  aria-label="Back to demo selection"
+                  aria-label={m.copy_back_to_demo_selection_2()}
                   className="p-1 sm:p-2 min-h-[40px] min-w-[40px] touch-manipulation flex-shrink-0"
                 >
                   <ArrowLeft {...sx("h-4 w-4")} />
@@ -102,7 +103,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                 <div {...sx("min-w-0 flex-1")}>
                   <h1 {...sx("font-semibold text-sm sm:text-base truncate")}>{demoData.title}</h1>
                   <p {...sx("text-xs text-muted-foreground hidden sm:block truncate")}>
-                    Mind Mode Demo - {demoData.description}
+                    {m.copy_mind_mode_demo()} {demoData.description}
                   </p>
                 </div>
               </div>
@@ -112,7 +113,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                 <div {...sx("flex items-center bg-muted rounded-full p-0.5 text-xs")}>
                   <button
                     onClick={() => setMode("chat")}
-                    aria-label="Switch to chat mode"
+                    aria-label={m.copy_switch_to_chat_mode()}
                     {...sx(
                       `flex items-center gap-1 px-2 py-1 rounded-full transition-all touch-manipulation ${
                         !isMindMode ? "bg-background shadow-sm" : "text-muted-foreground"
@@ -120,11 +121,11 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                     )}
                   >
                     <MessageSquare {...sx("h-3 w-3")} />
-                    <span {...sx("hidden sm:inline")}>Chat</span>
+                    <span {...sx("hidden sm:inline")}>{m.copy_chat()}</span>
                   </button>
                   <button
                     onClick={() => setMode("mind")}
-                    aria-label="Switch to mind mode"
+                    aria-label={m.copy_switch_to_mind_mode()}
                     {...sx(
                       `flex items-center gap-1 px-2 py-1 rounded-full transition-all touch-manipulation ${
                         isMindMode ? "bg-background shadow-sm" : "text-muted-foreground"
@@ -132,7 +133,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                     )}
                   >
                     <Brain {...sx("h-3 w-3")} />
-                    <span {...sx("hidden sm:inline")}>Mind</span>
+                    <span {...sx("hidden sm:inline")}>{m.copy_mind()}</span>
                   </button>
                 </div>
 
@@ -142,11 +143,10 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                     variant="secondary"
                     className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 text-xs"
                   >
-                    <Brain {...sx("h-3 w-3 mr-1")} />
-                    Mind
+                    <Brain {...sx("h-3 w-3 mr-1")} /> {m.copy_mind()}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
-                    Demo
+                    {m.copy_demo()}
                   </Badge>
                 </div>
               </div>
@@ -158,8 +158,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                 variant="secondary"
                 className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 text-xs"
               >
-                <Brain {...sx("h-3 w-3 mr-1")} />
-                Mind Mode Demo
+                <Brain {...sx("h-3 w-3 mr-1")} /> {m.copy_mind_mode_demo_2()}
               </Badge>
             </div>
           </div>
@@ -167,7 +166,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
           {/* Usage Progress */}
           <div {...sx("px-2 sm:px-4 py-2 border-b bg-muted/30")}>
             <div {...sx("flex items-center justify-between text-xs sm:text-sm")}>
-              <span {...sx("text-muted-foreground")}>Demo Messages</span>
+              <span {...sx("text-muted-foreground")}>{m.copy_demo_messages()}</span>
               <span {...sx(`font-medium ${isLimitReached ? "text-destructive" : ""}`)}>
                 {userMessages} / {MAX_DEMO_MESSAGES}
               </span>
@@ -204,10 +203,9 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                       {...sx("h-3 w-3 sm:h-4 sm:w-4 text-yellow-500 flex-shrink-0 mt-0.5")}
                     />
                     <div>
-                      <span {...sx("font-medium")}>Mind Mode Demo:</span>
+                      <span {...sx("font-medium")}>{m.copy_mind_mode_demo_3()}</span>
                       <span {...sx("text-muted-foreground ml-1")}>
-                        See conversations as visual mind maps. Switch to chat mode for traditional
-                        view.
+                        {m.copy_see_conversations_as_visual_mind_maps_switch_to_chat_mode_for_tr()}
                       </span>
                     </div>
                   </div>
@@ -236,7 +234,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                 variant="ghost"
                 size="sm"
                 onClick={onBack}
-                aria-label="Back to demo selection"
+                aria-label={m.copy_back_to_demo_selection_2()}
                 className="p-1 sm:p-2 min-h-[40px] min-w-[40px] touch-manipulation flex-shrink-0"
               >
                 <ArrowLeft {...sx("h-4 w-4")} />
@@ -245,7 +243,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
               <div {...sx("min-w-0 flex-1")}>
                 <h1 {...sx("font-semibold text-sm sm:text-base truncate")}>{demoData.title}</h1>
                 <p {...sx("text-xs text-muted-foreground hidden sm:block truncate")}>
-                  Chat Mode Demo - {demoData.description}
+                  {m.copy_chat_mode_demo()} {demoData.description}
                 </p>
               </div>
             </div>
@@ -255,7 +253,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
               <div {...sx("flex items-center bg-muted rounded-full p-0.5 text-xs")}>
                 <button
                   onClick={() => setMode("chat")}
-                  aria-label="Switch to chat mode"
+                  aria-label={m.copy_switch_to_chat_mode()}
                   {...sx(
                     `flex items-center gap-1 px-2 py-1 rounded-full transition-all touch-manipulation ${
                       !isMindMode ? "bg-background shadow-sm" : "text-muted-foreground"
@@ -263,11 +261,11 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                   )}
                 >
                   <MessageSquare {...sx("h-3 w-3")} />
-                  <span {...sx("hidden sm:inline")}>Chat</span>
+                  <span {...sx("hidden sm:inline")}>{m.copy_chat()}</span>
                 </button>
                 <button
                   onClick={() => setMode("mind")}
-                  aria-label="Switch to mind mode"
+                  aria-label={m.copy_switch_to_mind_mode()}
                   {...sx(
                     `flex items-center gap-1 px-2 py-1 rounded-full transition-all touch-manipulation ${
                       isMindMode ? "bg-background shadow-sm" : "text-muted-foreground"
@@ -275,7 +273,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                   )}
                 >
                   <Brain {...sx("h-3 w-3")} />
-                  <span {...sx("hidden sm:inline")}>Mind</span>
+                  <span {...sx("hidden sm:inline")}>{m.copy_mind()}</span>
                 </button>
               </div>
 
@@ -285,11 +283,10 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
                   variant="secondary"
                   className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-xs"
                 >
-                  <MessageSquare {...sx("h-3 w-3 mr-1")} />
-                  Chat
+                  <MessageSquare {...sx("h-3 w-3 mr-1")} /> {m.copy_chat()}
                 </Badge>
                 <Badge variant="outline" className="text-xs">
-                  Demo
+                  {m.copy_demo()}
                 </Badge>
               </div>
             </div>
@@ -301,8 +298,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
               variant="secondary"
               className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-xs"
             >
-              <MessageSquare {...sx("h-3 w-3 mr-1")} />
-              Chat Mode Demo
+              <MessageSquare {...sx("h-3 w-3 mr-1")} /> {m.copy_chat_mode_demo_2()}
             </Badge>
           </div>
         </div>
@@ -310,7 +306,7 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
         {/* Usage Progress */}
         <div {...sx("px-2 sm:px-4 py-2 border-b bg-muted/30")}>
           <div {...sx("flex items-center justify-between text-xs sm:text-sm")}>
-            <span {...sx("text-muted-foreground")}>Demo Messages</span>
+            <span {...sx("text-muted-foreground")}>{m.copy_demo_messages()}</span>
             <span {...sx(`font-medium ${isLimitReached ? "text-destructive" : ""}`)}>
               {userMessages} / {MAX_DEMO_MESSAGES}
             </span>
@@ -341,25 +337,23 @@ export function DemoConversationView({ scenario, onUpgrade, onBack }: DemoConver
           >
             <Card className="w-full max-w-sm sm:max-w-md mx-auto">
               <CardContent className="p-4 sm:p-6 text-center space-y-3 sm:space-y-4">
-                <h3 {...sx("text-lg sm:text-xl font-semibold")}>Demo Limit Reached</h3>
+                <h3 {...sx("text-lg sm:text-xl font-semibold")}>{m.copy_demo_limit_reached()}</h3>
                 <p {...sx("text-sm text-muted-foreground leading-relaxed")}>
-                  You&apos;ve reached the 5-message demo limit. Sign in to continue with unlimited
-                  conversations!
+                  {m.copy_you_ve_reached_the_5_message_demo_limit_sign_in_to_continue_with()}
                 </p>
                 <div {...sx("flex flex-col gap-2 sm:gap-3")}>
                   <Button
                     onClick={onUpgrade}
                     className="w-full bg-primary hover:bg-primary/80 min-h-[44px] text-sm sm:text-base touch-manipulation"
                   >
-                    <LogIn {...sx("h-4 w-4 mr-2")} />
-                    Sign In to Continue
+                    <LogIn {...sx("h-4 w-4 mr-2")} /> {m.copy_sign_in_to_continue()}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={() => setShowUpgradeModal(false)}
                     className="w-full min-h-[44px] text-sm sm:text-base touch-manipulation"
                   >
-                    Back to Demo
+                    {m.copy_back_to_demo()}
                   </Button>
                 </div>
               </CardContent>

@@ -47,9 +47,10 @@ import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const collaborationRoleItems = [
-  { value: "collaborator", label: "Collaborator" },
-  { value: "viewer", label: "Viewer" },
+  { value: "collaborator", label: m.copy_collaborator() },
+  { value: "viewer", label: m.copy_viewer() },
 ] as const;
 
 interface CollaborationButtonProps {
@@ -63,7 +64,7 @@ interface CollaborationButtonProps {
 
 export function CollaborationButton({
   chatId,
-  chatTitle = "Untitled Chat",
+  chatTitle = m.copy_untitled_chat(),
   currentUserRole = "owner",
   className,
   isRealtimeConnected = false,
@@ -90,9 +91,9 @@ export function CollaborationButton({
   const startCollaboration = useCallback(async () => {
     try {
       await startSession({ chatId: convexChatId });
-      toast.success("Collaboration session started!");
+      toast.success(m.copy_collaboration_session_started());
     } catch (error) {
-      toast.error(getFriendlyErrorMessage(error, "Failed to start collaboration"));
+      toast.error(getFriendlyErrorMessage(error, m.copy_failed_to_start_collaboration()));
     }
   }, [convexChatId, startSession]);
 
@@ -100,9 +101,9 @@ export function CollaborationButton({
     if (!session) return;
     try {
       await leaveSession({ sessionId: session.id });
-      toast.success("Left collaboration session");
+      toast.success(m.copy_left_collaboration_session());
     } catch (error) {
-      toast.error(getFriendlyErrorMessage(error, "Failed to leave collaboration"));
+      toast.error(getFriendlyErrorMessage(error, m.copy_failed_to_leave_collaboration()));
     }
   }, [leaveSession, session]);
 
@@ -110,9 +111,9 @@ export function CollaborationButton({
     if (!session) return;
     try {
       await endSession({ chatId: convexChatId, sessionId: session.id });
-      toast.success("Collaboration session ended for all participants");
+      toast.success(m.copy_collaboration_session_ended_for_all_participants());
     } catch (error) {
-      toast.error(getFriendlyErrorMessage(error, "Failed to end collaboration session"));
+      toast.error(getFriendlyErrorMessage(error, m.copy_failed_to_end_collaboration_session()));
     }
   }, [convexChatId, endSession, session]);
 
@@ -120,13 +121,13 @@ export function CollaborationButton({
   const copyCollaborationLink = useCallback(() => {
     const url = `${window.location.origin}/collaborate/${chatId}?collaborate=true`;
     navigator.clipboard.writeText(url);
-    toast.success("Collaboration link copied to clipboard!");
+    toast.success(m.copy_collaboration_link_copied_to_clipboard());
   }, [chatId]);
 
   // Send invitation
   const sendInvitation = useCallback(async () => {
     if (!inviteEmail) {
-      toast.error("Please enter an email address");
+      toast.error(m.copy_please_enter_an_email_address());
       return;
     }
 
@@ -138,11 +139,11 @@ export function CollaborationButton({
         chatTitle,
       });
 
-      toast.success(`Invitation recorded for ${inviteEmail}!`);
+      toast.success(m.copy_invitation_recorded_for({ email: inviteEmail }));
       setInviteEmail("");
       setIsDialogOpen(false);
     } catch (error) {
-      toast.error(getFriendlyErrorMessage(error, "Failed to send invitation"));
+      toast.error(getFriendlyErrorMessage(error, m.copy_failed_to_send_invitation()));
     }
   }, [chatTitle, convexChatId, inviteEmail, inviteRole, inviteToSession]);
 
@@ -183,8 +184,10 @@ export function CollaborationButton({
         className={className}
       >
         <Users {...sx("h-4 w-4 mr-2")} />
-        <span {...sx("hidden sm:inline")}>{isStarting ? "Starting..." : "Collaborate"}</span>
-        <span {...sx("sm:hidden")}>{isStarting ? "..." : "Collab"}</span>
+        <span {...sx("hidden sm:inline")}>
+          {isStarting ? m.copy_starting() : m.copy_collaborate()}
+        </span>
+        <span {...sx("sm:hidden")}>{isStarting ? "..." : m.copy_collab()}</span>
       </Button>
     );
   }
@@ -194,7 +197,7 @@ export function CollaborationButton({
     return (
       <Button disabled size="sm" variant="outline" className={className}>
         <Users {...sx("h-4 w-4 mr-2")} />
-        <span {...sx("hidden sm:inline")}>Loading...</span>
+        <span {...sx("hidden sm:inline")}>{m.copy_loading()}</span>
         <span {...sx("sm:hidden")}>...</span>
       </Button>
     );
@@ -229,7 +232,7 @@ export function CollaborationButton({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
             <div {...sx("px-2 py-1.5")}>
-              <p {...sx("text-sm font-medium")}>Collaboration Active</p>
+              <p {...sx("text-sm font-medium")}>{m.copy_collaboration_active()}</p>
               <p {...sx("text-xs text-muted-foreground")}>
                 {session.participantCount} participants
               </p>
@@ -242,12 +245,12 @@ export function CollaborationButton({
                   {isRealtimeConnected ? (
                     <>
                       <Wifi {...sx("h-3 w-3 text-green-500")} />
-                      <span>Connected</span>
+                      <span>{m.copy_connected()}</span>
                     </>
                   ) : (
                     <>
                       <WifiOff {...sx("h-3 w-3 text-orange-500")} />
-                      <span>Reconnecting...</span>
+                      <span>{m.copy_reconnecting()}</span>
                     </>
                   )}
                 </div>
@@ -255,12 +258,10 @@ export function CollaborationButton({
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
-              <UserPlus {...sx("h-4 w-4 mr-2")} />
-              Invite Users
+              <UserPlus {...sx("h-4 w-4 mr-2")} /> {m.copy_invite_users()}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={copyCollaborationLink}>
-              <Copy {...sx("h-4 w-4 mr-2")} />
-              Copy Link
+              <Copy {...sx("h-4 w-4 mr-2")} /> {m.copy_copy_link()}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             {/* Owner-only: End session for everyone */}
@@ -271,7 +272,7 @@ export function CollaborationButton({
                 className="text-destructive"
               >
                 <X {...sx("h-4 w-4 mr-2")} />
-                {isEnding ? "Ending..." : "End Session for All"}
+                {isEnding ? m.copy_ending() : m.copy_end_session_for_all()}
               </DropdownMenuItem>
             )}
             {/* Individual leave option */}
@@ -281,7 +282,7 @@ export function CollaborationButton({
               className={effectiveUserRole === "owner" ? "" : "text-destructive"}
             >
               <LogOut {...sx("h-4 w-4 mr-2")} />
-              {isLeaving ? "Leaving..." : "Leave Session"}
+              {isLeaving ? m.copy_leaving() : m.copy_leave_session()}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -290,18 +291,19 @@ export function CollaborationButton({
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Invite to Collaboration</DialogTitle>
+              <DialogTitle>{m.copy_invite_to_collaboration()}</DialogTitle>
               <DialogDescription>
-                Invite others to collaborate on &ldquo;{chatTitle}&rdquo;
+                {m.copy_invite_others_to_collaborate_on_ldquo()}
+                {chatTitle}&rdquo;
               </DialogDescription>
             </DialogHeader>
             <div {...sx("space-y-4")}>
               <div {...sx("space-y-2")}>
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{m.copy_email_address()}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="colleague@example.com"
+                  placeholder={m.copy_colleague_example_com()}
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   onKeyDown={(e) => {
@@ -313,7 +315,7 @@ export function CollaborationButton({
                 />
               </div>
               <div {...sx("space-y-2")}>
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role">{m.copy_role()}</Label>
                 <Select
                   items={collaborationRoleItems}
                   value={inviteRole}
@@ -330,8 +332,10 @@ export function CollaborationButton({
                         <div {...sx("flex items-center gap-2")}>
                           <Edit {...sx("h-4 w-4")} />
                           <div>
-                            <p {...sx("font-medium")}>Collaborator</p>
-                            <p {...sx("text-xs text-muted-foreground")}>Can edit and add content</p>
+                            <p {...sx("font-medium")}>{m.copy_collaborator()}</p>
+                            <p {...sx("text-xs text-muted-foreground")}>
+                              {m.copy_can_edit_and_add_content()}
+                            </p>
                           </div>
                         </div>
                       </SelectItem>
@@ -339,8 +343,10 @@ export function CollaborationButton({
                         <div {...sx("flex items-center gap-2")}>
                           <Eye {...sx("h-4 w-4")} />
                           <div>
-                            <p {...sx("font-medium")}>Viewer</p>
-                            <p {...sx("text-xs text-muted-foreground")}>Can view but not edit</p>
+                            <p {...sx("font-medium")}>{m.copy_viewer()}</p>
+                            <p {...sx("text-xs text-muted-foreground")}>
+                              {m.copy_can_view_but_not_edit()}
+                            </p>
                           </div>
                         </div>
                       </SelectItem>
@@ -350,12 +356,10 @@ export function CollaborationButton({
               </div>
               <div {...sx("flex justify-between gap-3")}>
                 <Button variant="outline" onClick={copyCollaborationLink} className="flex-1">
-                  <Share2 {...sx("h-4 w-4 mr-2")} />
-                  Copy Link
+                  <Share2 {...sx("h-4 w-4 mr-2")} /> {m.copy_copy_link()}
                 </Button>
                 <Button onClick={sendInvitation} className="flex-1">
-                  <UserPlus {...sx("h-4 w-4 mr-2")} />
-                  Send Invite
+                  <UserPlus {...sx("h-4 w-4 mr-2")} /> {m.copy_send_invite()}
                 </Button>
               </div>
             </div>
@@ -375,8 +379,10 @@ export function CollaborationButton({
       className={className}
     >
       <Users {...sx("h-4 w-4 mr-2")} />
-      <span {...sx("hidden sm:inline")}>{isStarting ? "Starting..." : "Collaborate"}</span>
-      <span {...sx("sm:hidden")}>{isStarting ? "..." : "Collab"}</span>
+      <span {...sx("hidden sm:inline")}>
+        {isStarting ? m.copy_starting() : m.copy_collaborate()}
+      </span>
+      <span {...sx("sm:hidden")}>{isStarting ? "..." : m.copy_collab()}</span>
     </Button>
   );
 }

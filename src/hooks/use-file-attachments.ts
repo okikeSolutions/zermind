@@ -11,6 +11,7 @@ import {
   getModelCapabilities,
   modelSupportsAttachments,
 } from "@/lib/utils/model-utils";
+import * as m from "@/paraglide/messages.js";
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -38,16 +39,18 @@ export function useFileAttachments({ model, chatId }: UseFileAttachmentsOptions)
   const validateFile = useCallback(
     (file: File): string | null => {
       if (!supportsAttachments) {
-        return "This model does not support file attachments";
+        return m.copy_this_model_does_not_support_file_attachments();
       }
 
       if (!allowedMimeTypes.includes(file.type)) {
-        return `File type ${file.type} is not supported`;
+        return m.copy_file_type_is_not_supported({ type: file.type });
       }
 
       const maxSize = getMaxFileSize(model, file.type);
       if (file.size > maxSize) {
-        return `File is too large. Maximum size is ${Math.round(maxSize / (1024 * 1024))}MB`;
+        return m.copy_file_is_too_large_maximum_size({
+          size: `${Math.round(maxSize / (1024 * 1024))} MB`,
+        });
       }
 
       return null;
@@ -123,7 +126,7 @@ export function useFileAttachments({ model, chatId }: UseFileAttachmentsOptions)
         });
 
         if (!result.ok) {
-          throw new Error(`Failed to upload ${file.name}`);
+          throw new Error(m.copy_failed_to_upload_file({ name: file.name }));
         }
 
         const { storageId } = (await result.json()) as { storageId: Id<"_storage"> };
@@ -142,7 +145,7 @@ export function useFileAttachments({ model, chatId }: UseFileAttachmentsOptions)
       clearFiles();
       return uploadedAttachments;
     } catch (error) {
-      const nextError = new Error(getFriendlyErrorMessage(error, "Failed to upload files"));
+      const nextError = new Error(getFriendlyErrorMessage(error, m.copy_failed_to_upload_files()));
       setUploadError(nextError);
       console.error("Failed to upload files:", nextError);
       throw nextError;

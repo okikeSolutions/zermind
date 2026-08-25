@@ -18,17 +18,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const signUpSchema = z
   .object({
-    email: z.email().min(1, "Email is required"),
+    email: z.email().min(1, m.copy_email_is_required()),
     password: z
       .string()
-      .min(1, "Password is required")
-      .min(6, "Password must be at least 6 characters"),
-    repeatPassword: z.string().min(1, "Please confirm your password"),
+      .min(1, m.copy_password_is_required())
+      .min(6, m.copy_password_must_be_at_least_6_characters()),
+    repeatPassword: z.string().min(1, m.copy_please_confirm_your_password()),
   })
   .refine((data) => data.password === data.repeatPassword, {
-    message: "Passwords do not match",
+    message: m.copy_passwords_do_not_match(),
     path: ["repeatPassword"],
   });
 
@@ -63,7 +64,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
       router.push("/protected");
       router.refresh();
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : m.copy_an_error_occurred());
     } finally {
       setIsLoading(false);
     }
@@ -73,8 +74,8 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
     <div {...sx(cn("flex flex-col gap-6", className))} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <CardTitle className="text-2xl">{m.copy_sign_up()}</CardTitle>
+          <CardDescription>{m.copy_create_a_new_account()}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -84,9 +85,9 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{m.copy_email()}</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="m@example.com" {...field} />
+                      <Input type="email" placeholder={m.copy_m_example_com()} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -98,7 +99,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{m.copy_password()}</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -112,7 +113,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                 name="repeatPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Repeat Password</FormLabel>
+                    <FormLabel>{m.copy_repeat_password()}</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -123,14 +124,14 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
 
               {error && <p {...sx("text-sm text-red-500")}>{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating an account..." : "Sign up"}
+                {isLoading ? m.copy_creating_an_account() : m.copy_sign_up()}
               </Button>
             </form>
           </Form>
           <div {...sx("mt-4 text-center text-sm")}>
-            Already have an account?{" "}
+            {m.copy_already_have_an_account()}{" "}
             <Link href="/auth/login" {...sx("underline underline-offset-4")}>
-              Login
+              {m.copy_login()}
             </Link>
           </div>
         </CardContent>

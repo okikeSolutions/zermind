@@ -3,6 +3,7 @@ import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { type Message } from "@/lib/schemas/chat";
+import * as m from "@/paraglide/messages.js";
 
 interface UseBranchingChatOptions {
   chatId: string;
@@ -63,7 +64,7 @@ export function useBranchingChat({
         setInput("");
       } catch (unknownError) {
         const nextError =
-          unknownError instanceof Error ? unknownError : new Error("Failed to send message");
+          unknownError instanceof Error ? unknownError : new Error(m.copy_failed_to_send_message());
         console.error("Failed to send branching message:", nextError);
         setError(nextError);
         onError?.(nextError);

@@ -2,6 +2,7 @@ import { MousePointer2 } from "lucide-react";
 import { CollaborativeUser } from "@/hooks/use-realtime-collaboration";
 import { cn } from "@/lib/utils";
 import { sx } from "@/styles/sx";
+import * as m from "@/paraglide/messages.js";
 
 interface RealtimeCursorsProps {
   users: CollaborativeUser[];
@@ -82,8 +83,8 @@ export function CollaborationPresence({ users }: { users: CollaborativeUser[] })
       </div>
       <div {...sx("text-sm text-muted-foreground")}>
         {users.length === 1
-          ? `${users[0].name} is collaborating`
-          : `${users.length} people collaborating`}
+          ? m.copy_user_is_collaborating({ name: users[0].name })
+          : m.copy_people_collaborating({ count: users.length })}
       </div>
     </div>
   );

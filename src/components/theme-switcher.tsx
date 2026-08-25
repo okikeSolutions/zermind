@@ -11,6 +11,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const ThemeSwitcher = () => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -29,7 +30,14 @@ const ThemeSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button variant="ghost" size="sm" aria-label="Change color theme" title="Theme" />}
+        render={
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label={m.copy_change_color_theme()}
+            title={m.copy_theme()}
+          />
+        }
       >
         {theme === "light" ? (
           <Sun key="light" size={ICON_SIZE} {...sx("text-muted-foreground")} />
@@ -42,13 +50,14 @@ const ThemeSwitcher = () => {
       <DropdownMenuContent className="w-content" align="start">
         <DropdownMenuRadioGroup value={theme} onValueChange={(e) => setTheme(e)}>
           <DropdownMenuRadioItem className="flex gap-2" value="light">
-            <Sun size={ICON_SIZE} {...sx("text-muted-foreground")} /> <span>Light</span>
+            <Sun size={ICON_SIZE} {...sx("text-muted-foreground")} /> <span>{m.copy_light()}</span>
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem className="flex gap-2" value="dark">
-            <Moon size={ICON_SIZE} {...sx("text-muted-foreground")} /> <span>Dark</span>
+            <Moon size={ICON_SIZE} {...sx("text-muted-foreground")} /> <span>{m.copy_dark()}</span>
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem className="flex gap-2" value="system">
-            <Laptop size={ICON_SIZE} {...sx("text-muted-foreground")} /> <span>System</span>
+            <Laptop size={ICON_SIZE} {...sx("text-muted-foreground")} />{" "}
+            <span>{m.copy_system()}</span>
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

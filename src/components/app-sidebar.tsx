@@ -37,6 +37,7 @@ import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { authClient } from "@/lib/auth-client";
 import { ThemeSwitcher } from "./theme-switcher";
+import { LocaleSwitcher } from "./locale-switcher";
 import { FeedbackDialog } from "./feedback-dialog";
 import { useUserChats, useCreateChat, useDeleteChat } from "@/hooks/use-chats-query";
 import { useChatModeStore } from "@/lib/store/chat-mode-store";
@@ -46,19 +47,20 @@ import { toast } from "sonner";
 import { getFriendlyErrorMessage } from "@/lib/rate-limit-error";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const navigationItems = [
   {
-    title: "Home",
+    title: m.copy_home(),
     url: "/protected",
     icon: Home,
   },
   {
-    title: "Usage",
+    title: m.copy_usage(),
     url: "/protected/usage",
     icon: BarChart3,
   },
   {
-    title: "Settings",
+    title: m.copy_settings(),
     url: "/protected/settings",
     icon: Settings,
   },
@@ -90,14 +92,14 @@ export function AppSidebar() {
 
     try {
       const newChat = await createChatMutation.mutateAsync({
-        title: "New Chat",
+        title: m.copy_new_chat(),
       });
 
       // Navigate to the new chat
       router.push(`/protected/chat/${newChat.id}`);
     } catch (error) {
       console.error("Error creating new chat:", error);
-      toast.error(getFriendlyErrorMessage(error, "Failed to create chat"));
+      toast.error(getFriendlyErrorMessage(error, m.copy_failed_to_create_chat()));
     }
   };
 
@@ -114,7 +116,7 @@ export function AppSidebar() {
       }
     } catch (error) {
       console.error("Error deleting chat:", error);
-      toast.error(getFriendlyErrorMessage(error, "Failed to delete chat"));
+      toast.error(getFriendlyErrorMessage(error, m.copy_failed_to_delete_chat()));
     }
   };
 
@@ -122,16 +124,16 @@ export function AppSidebar() {
     const now = new Date();
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays === 0) return m.copy_today();
+    if (diffDays === 1) return m.copy_yesterday();
+    if (diffDays < 7) return m.copy_days_ago({ count: diffDays });
     return date.toLocaleDateString();
   };
 
   const getChatDisplayInfo = (chat: (typeof chatSessions)[0]) => {
-    const rawTitle = chat.title || "New Chat";
+    const rawTitle = chat.title || m.copy_new_chat();
     const title = rawTitle.length > 15 ? rawTitle.substring(0, 15) + "..." : rawTitle;
-    const lastMessage = chat.messages[0]?.content || "No messages yet";
+    const lastMessage = chat.messages[0]?.content || m.copy_no_messages_yet();
     const truncatedMessage =
       lastMessage.length > 20 ? lastMessage.substring(0, 20) + "..." : lastMessage;
 
@@ -151,7 +153,7 @@ export function AppSidebar() {
               className="hover:bg-transparent"
             >
               <span {...sx("font-bold text-lg bg-primary bg-clip-text text-transparent")}>
-                Zermind
+                {m.copy_zermind()}
               </span>
             </Button>
           </div>
@@ -164,7 +166,7 @@ export function AppSidebar() {
             disabled={!user?.id || createChatMutation.isPending}
           >
             <MessageSquarePlus {...sx("h-4 w-4")} />
-            <span {...sx("text-sm")}>New Chat</span>
+            <span {...sx("text-sm")}>{m.copy_new_chat()}</span>
           </Button>
         </div>
       </SidebarHeader>
@@ -173,7 +175,9 @@ export function AppSidebar() {
         <ScrollArea className="flex-1">
           {/* Navigation */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs sm:text-sm">Navigation</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-xs sm:text-sm">
+              {m.copy_navigation()}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {navigationItems.map((item) => (
@@ -190,7 +194,9 @@ export function AppSidebar() {
 
           {/* Chat Sessions */}
           <SidebarGroup>
-            <SidebarGroupLabel className="text-xs sm:text-sm">Recent Chats</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-xs sm:text-sm">
+              {m.copy_recent_chats()}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {isLoading ? (
@@ -208,7 +214,7 @@ export function AppSidebar() {
                   ))
                 ) : chatSessions.length === 0 ? (
                   <div {...sx("p-3 sm:p-4 text-center text-xs sm:text-sm text-muted-foreground")}>
-                    No chats yet. Create your first chat!
+                    {m.copy_no_chats_yet_create_your_first_chat()}
                   </div>
                 ) : (
                   chatSessions.map((chat) => {
@@ -239,8 +245,7 @@ export function AppSidebar() {
                               className="text-destructive focus:text-destructive text-sm"
                               disabled={deleteChatMutation.isPending}
                             >
-                              <Trash2 {...sx("h-4 w-4 mr-2")} />
-                              Delete Chat
+                              <Trash2 {...sx("h-4 w-4 mr-2")} /> {m.copy_delete_chat()}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -264,13 +269,11 @@ export function AppSidebar() {
                 <div {...sx("flex items-center gap-2 text-sm font-medium")}>
                   {isMindMode ? (
                     <>
-                      <Brain {...sx("h-4 w-4 text-purple-500")} />
-                      Mind
+                      <Brain {...sx("h-4 w-4 text-purple-500")} /> {m.copy_mind()}
                     </>
                   ) : (
                     <>
-                      <MessageSquare {...sx("h-4 w-4 text-blue-500")} />
-                      Chat
+                      <MessageSquare {...sx("h-4 w-4 text-blue-500")} /> {m.copy_chat()}
                     </>
                   )}
                 </div>
@@ -288,27 +291,25 @@ export function AppSidebar() {
                 <CardTitle className="flex items-center gap-2 text-sm">
                   {isMindMode ? (
                     <>
-                      <Brain {...sx("h-4 w-4 text-purple-500")} />
-                      Mind Mode
+                      <Brain {...sx("h-4 w-4 text-purple-500")} /> {m.copy_mind_mode()}
                     </>
                   ) : (
                     <>
-                      <MessageSquare {...sx("h-4 w-4 text-blue-500")} />
-                      Chat Mode
+                      <MessageSquare {...sx("h-4 w-4 text-blue-500")} /> {m.copy_chat_mode()}
                     </>
                   )}
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed">
                   {isMindMode
-                    ? "Interactive mind maps with branching dialogues"
-                    : "Traditional linear chat interface"}
+                    ? m.copy_interactive_mind_maps_with_branching_dialogues()
+                    : m.copy_traditional_linear_chat_interface()}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0 px-4 pb-4">
                 <div {...sx("flex items-center justify-between")}>
                   <div {...sx("flex items-center gap-1.5 text-xs text-muted-foreground")}>
                     <MessageSquare {...sx("h-3 w-3")} />
-                    <span>Chat</span>
+                    <span>{m.copy_chat()}</span>
                   </div>
                   <Switch
                     checked={isMindMode}
@@ -318,7 +319,7 @@ export function AppSidebar() {
 
                   <div {...sx("flex items-center gap-1.5 text-xs text-muted-foreground")}>
                     <Brain {...sx("h-3 w-3")} />
-                    <span>Mind</span>
+                    <span>{m.copy_mind()}</span>
                   </div>
                 </div>
                 {isMindMode && (
@@ -329,7 +330,7 @@ export function AppSidebar() {
                       )}
                     >
                       <GitBranch {...sx("h-3 w-3")} />
-                      <span>Branch with multiple AI models</span>
+                      <span>{m.copy_branch_with_multiple_ai_models()}</span>
                     </div>
                   </div>
                 )}
@@ -346,20 +347,21 @@ export function AppSidebar() {
               <FeedbackDialog>
                 <Button variant="outline" className="w-full h-9 sm:h-10 px-2 sm:px-3" size="sm">
                   <MessageSquare {...sx("h-4 w-4 flex-shrink-0")} />
-                  <span {...sx("text-sm ml-1.5 sm:ml-2 truncate")}>Feedback</span>
+                  <span {...sx("text-sm ml-1.5 sm:ml-2 truncate")}>{m.copy_feedback()}</span>
                 </Button>
               </FeedbackDialog>
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <div {...sx("mb-2")}>
+            <div {...sx("mb-2 flex items-center justify-between gap-2")}>
+              <LocaleSwitcher />
               <ThemeSwitcher />
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={logout} className="w-full h-9 sm:h-10">
               <LogOut {...sx("h-4 w-4")} />
-              <span {...sx("text-sm")}>Logout</span>
+              <span {...sx("text-sm")}>{m.copy_logout()}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

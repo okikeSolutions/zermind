@@ -13,11 +13,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { sx } from "@/styles/sx";
 
+import * as m from "@/paraglide/messages.js";
 const messageSchema = z.object({
   message: z
     .string()
-    .min(1, "Message cannot be empty")
-    .max(4000, "Message is too long (max 4000 characters)")
+    .min(1, m.copy_message_cannot_be_empty())
+    .max(4000, m.copy_message_is_too_long_max_4000_characters())
     .trim(),
 });
 
@@ -89,7 +90,7 @@ export function ResumeMessageInput({
             ></div>
             <div {...sx("w-2 h-2 bg-current rounded-full animate-bounce")}></div>
             <span {...sx("text-sm text-muted-foreground ml-2")}>
-              Loading conversation context...
+              {m.copy_loading_conversation_context()}
             </span>
           </div>
         </CardContent>
@@ -116,7 +117,7 @@ export function ResumeMessageInput({
               onClick={onClose}
               className="min-h-[36px] sm:min-h-auto"
             >
-              Close
+              {m.copy_close()}
             </Button>
           </div>
         </CardContent>
@@ -134,9 +135,9 @@ export function ResumeMessageInput({
               "flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0",
             )}
           >
-            <h4 {...sx("text-sm font-medium")}>Resuming from:</h4>
+            <h4 {...sx("text-sm font-medium")}>{m.copy_resuming_from()}</h4>
             <Badge variant="outline" className="text-xs w-fit">
-              {context.length} message{context.length !== 1 ? "s" : ""} in context
+              {context.length} message{context.length !== 1 ? "s" : ""} {m.copy_in_context()}
             </Badge>
           </div>
 
@@ -157,7 +158,7 @@ export function ResumeMessageInput({
                 ))}
                 {context.length > 2 && (
                   <div {...sx("text-center text-xs text-muted-foreground/70 pt-1")}>
-                    ... and {context.length - 2} more message
+                    ... and {context.length - 2} {m.copy_more_message()}{" "}
                     {context.length - 2 !== 1 ? "s" : ""}
                   </div>
                 )}
@@ -230,7 +231,7 @@ export function ResumeMessageInput({
               onClick={onClose}
               className="min-h-[36px] sm:min-h-auto w-full sm:w-auto"
             >
-              Cancel
+              {m.copy_cancel()}
             </Button>
           </div>
 
@@ -246,7 +247,7 @@ export function ResumeMessageInput({
                   <FormItem className="flex-1">
                     <FormControl>
                       <Input
-                        placeholder="Continue the conversation..."
+                        placeholder={m.copy_continue_the_conversation()}
                         disabled={isLoading}
                         className="min-h-[44px] sm:min-h-auto text-base sm:text-sm"
                         {...field}
@@ -287,7 +288,7 @@ export function ResumeMessageInput({
           </Form>
 
           <p {...sx("text-xs text-muted-foreground text-center leading-relaxed px-2")}>
-            Your message will branch from the selected node • Press Enter to send
+            {m.copy_your_message_will_branch_from_the_selected_node_press_enter_to_s()}
           </p>
         </div>
       </CardContent>

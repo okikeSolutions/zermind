@@ -3,11 +3,12 @@ import { ForgotPasswordForm } from "@/components/auth/forms/forgot-password-form
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { seo } from "@/lib/seo";
 
+import * as m from "@/paraglide/messages.js";
 export const Route = createFileRoute("/auth/forgot-password")({
   head: () =>
     seo({
-      title: "Reset your password | Zermind",
-      description: "Request a password reset for your Zermind account.",
+      title: m.copy_reset_your_password_zermind(),
+      description: m.copy_request_a_password_reset_for_your_zermind_account(),
       path: "/auth/forgot-password",
       noIndex: true,
     }),
