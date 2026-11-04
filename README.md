@@ -59,7 +59,7 @@ Zermind is now built on a Convex-native backend:
 | Frontend        | TanStack Start SPA + React 19   | Typed routes, app shell, and server functions        |
 | Backend         | Convex                          | Database, functions, actions, realtime subscriptions |
 | Auth            | Convex Better Auth              | Email/password and OAuth auth                        |
-| AI runtime      | AI SDK v6 + Convex Agent        | Persistent AI threads/messages and streaming         |
+| AI runtime      | AI SDK v7 + Convex Agent        | Persistent AI threads/messages and streaming         |
 | Model providers | OpenRouter + direct providers   | Fallback and BYOK provider access                    |
 | Mind map UI     | `@xyflow/react`                 | Interactive conversation graph                       |
 | Collaboration   | Convex Presence + Convex tables | Online presence, cursors, sessions, invites          |

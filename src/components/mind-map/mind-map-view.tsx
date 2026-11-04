@@ -13,6 +13,7 @@ import {
   Panel,
   BackgroundVariant,
   NodeChange,
+  type OnNodeDrag,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
@@ -344,8 +345,8 @@ export function MindMapView({
   }, []);
 
   // Handle node drag stop to save position
-  const onNodeDragStop = useCallback(
-    (event: React.MouseEvent, node: Node) => {
+  const onNodeDragStop = useCallback<OnNodeDrag<Node<ConversationNodeData>>>(
+    (_event, node) => {
       if (onNodePositionChange) {
         onNodePositionChange(node.id, node.position.x, node.position.y);
       }

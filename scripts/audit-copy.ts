@@ -1,4 +1,4 @@
-import ts from "typescript";
+import ts from "@typescript/typescript6";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative } from "node:path";
 
