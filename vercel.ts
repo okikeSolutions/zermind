@@ -1,5 +1,8 @@
 export const config = {
-  buildCommand: "npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'bun run build'",
+  buildCommand:
+    process.env.VERCEL_ENV === "preview"
+      ? "bun run typecheck && bun run build"
+      : "npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'bun run build'",
   installCommand: "bun install",
   rewrites: [
     {
