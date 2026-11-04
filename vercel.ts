@@ -1,7 +1,6 @@
-import type { VercelConfig } from "@vercel/config/v1";
-
-export const config: VercelConfig = {
-  buildCommand: "npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'bun run build'",
+export const config = {
+  buildCommand:
+    "if [ \"$VERCEL_ENV\" = preview ]; then bun run typecheck && bun run build; else npx convex deploy --cmd-url-env-var-name VITE_CONVEX_URL --cmd 'bun run build'; fi",
   installCommand: "bun install",
   rewrites: [
     {
